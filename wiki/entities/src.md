@@ -1,7 +1,7 @@
 ---
 type: overview
 title: Src
-last_updated: 2026-07-10T18:30:00Z
+last_updated: 2026-07-10T22:25:00Z
 tags: [src]
 related:
   [
@@ -10,6 +10,7 @@ related:
     concepts/card-pipeline.md,
     concepts/london-mulligan.md,
     concepts/monte-carlo-simulation.md,
+    concepts/github-repo-hygiene.md,
     entities/run.md,
     entities/card.md,
     entities/deck.md,
@@ -24,20 +25,22 @@ code_refs: [src/index.ts, src/run.ts]
 
 TypeScript port of the Rust landlord engine. Primary entry: [`run()`](run.md) matching the mtgoncurve.com Input/Output contract.
 
+Board-aware land ETB (Check/Fast/Slow/Turn), auto DFC face-detect, worker parallelization, and adaptive trial counts are implemented in this package.
+
 ## Layout
 
-| Module                        | Role                             |
-| ----------------------------- | -------------------------------- |
-| [`card/`](card.md)            | ManaCost, Card, CardKind         |
-| [`collection`](collection.md) | Sorted card library + DFC faces  |
-| [`deck`](deck.md)             | Arena decklist parse + modifiers |
-| [`bipartite`](bipartite.md)   | Mana payment matching            |
-| [`hand`](hand.md)             | Auto-tap (TapLand delay)         |
-| [`mulligan`](mulligan.md)     | London + Never                   |
-| [`simulation`](simulation.md) | Monte Carlo loop                 |
-| [`run`](run.md)               | Public façade                    |
-| [`data`](data.md)             | Load `all_cards.json.gz`         |
-| [`scryfall`](scryfall.md)     | Land classifier + SPECIAL_LANDS  |
+| Module                        | Role                                       |
+| ----------------------------- | ------------------------------------------ |
+| [`card/`](card.md)            | ManaCost, Card, CardKind, land type bits   |
+| [`collection`](collection.md) | Sorted card library + DFC faces            |
+| [`deck`](deck.md)             | Arena decklist parse + modifiers           |
+| [`bipartite`](bipartite.md)   | Mana payment matching                      |
+| [`hand`](hand.md)             | Board-aware auto-tap                       |
+| [`mulligan`](mulligan.md)     | London + Never                             |
+| [`simulation`](simulation.md) | Monte Carlo loop (+ parallel / early-stop) |
+| [`run`](run.md)               | Public façade                              |
+| [`data`](data.md)             | Load `all_cards.json.gz`                   |
+| [`scryfall`](scryfall.md)     | Land classifier + SPECIAL_LANDS            |
 
 ## See also
 
@@ -47,6 +50,7 @@ TypeScript port of the Rust landlord engine. Primary entry: [`run()`](run.md) ma
 - [Card pipeline](../concepts/card-pipeline.md)
 - [London mulligan](../concepts/london-mulligan.md)
 - [Monte Carlo simulation](../concepts/monte-carlo-simulation.md)
+- [GitHub repo hygiene](../concepts/github-repo-hygiene.md)
 - [Run](run.md)
 - [Card](card.md)
 - [Deck](deck.md)

@@ -98,6 +98,26 @@ function stripInlineModifiersFromName(name: string): string {
   return name.trim();
 }
 
+function applyLandFaceFromCard(card: Card, landFace: Card): void {
+  card.manaCost = { ...landFace.manaCost };
+  card.allManaCosts = landFace.allManaCosts.map((c) => ({ ...c }));
+  card.manaCostString = landFace.manaCostString;
+  card.turn = landFace.turn;
+  card.kind = CardKind.ForcedLand;
+  card.basicLandTypes = landFace.basicLandTypes ?? 0;
+  card.checkTypes = landFace.checkTypes ?? 0;
+}
+
+function applyLandFace(card: Card, leftCardName: string, line: string): void {
+  const landFace = ALL_CARDS.otherFacesByName(leftCardName).find((c) => isLand(c));
+  if (!landFace) {
+    throw new DeckcodeError(
+      `M=auto specified but no land face found for "${leftCardName}" at line ${line}`,
+    );
+  }
+  applyLandFaceFromCard(card, landFace);
+}
+
 const INLINE_M = /\sM\s*=\s*(auto|(?:\{[WUBRGC\d]+\})+)/i;
 const INLINE_T = /\sT\s*=\s*(\d+)/i;
 const INLINE_X = /\sX\s*=\s*(\d+)/i;
@@ -169,16 +189,7 @@ export function deckFromList(list: string): Deck {
     const mValStr = caps.groups.M ?? inlineModifier(trimmed, 'M');
     if (mValStr !== undefined) {
       if (mValStr.toLowerCase() === 'auto') {
-        const landFace = ALL_CARDS.otherFacesByName(leftCardName).find((c) => isLand(c));
-        if (!landFace) {
-          throw new DeckcodeError(
-            `M=auto specified but no land face found for "${leftCardName}" at line ${line}`,
-          );
-        }
-        card.manaCost = { ...landFace.manaCost };
-        card.allManaCosts = landFace.allManaCosts.map((c) => ({ ...c }));
-        card.turn = landFace.turn;
-        card.kind = CardKind.ForcedLand;
+        applyLandFace(card, leftCardName, line);
       } else {
         const allManaCosts = manaCostsFromStr(mValStr);
         if (allManaCosts.length === 0) {
@@ -188,7 +199,13 @@ export function deckFromList(list: string): Deck {
         card.allManaCosts = allManaCosts.map((c) => ({ ...c }));
         card.turn = manaCostCmc(card.manaCost);
         card.kind = CardKind.ForcedLand;
+        card.basicLandTypes = 0;
+        card.checkTypes = 0;
       }
+    } else if (!isLand(card)) {
+      // Auto face-detect: spell//land DFCs become mana sources without M=auto
+      const landFace = ALL_CARDS.otherFacesByName(leftCardName).find((c) => isLand(c));
+      if (landFace) applyLandFaceFromCard(card, landFace);
     }
 
     const turnValStr = caps.groups.T ?? inlineModifier(trimmed, 'T');

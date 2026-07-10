@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed GitHub repository from `landord-ts` to `landlord-ts`
+
 ## [0.1.0] - 2026-07-10
 
 ### Added
@@ -20,5 +24,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dual ESM/CJS build with TypeScript declarations
 - Vitest suite (unit, auto-tap, deck, integration / Karsten-style smoke)
 
-[Unreleased]: https://github.com/lggarrison/landord-ts/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/lggarrison/landord-ts/releases/tag/v0.1.0
+[Unreleased]: https://github.com/lggarrison/landlord-ts/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/lggarrison/landlord-ts/releases/tag/v0.1.0

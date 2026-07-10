@@ -1,4 +1,4 @@
-# Wiki Schema — landord-ts
+# Wiki Schema — landlord-ts
 
 This document defines the conventions your LLM agent must follow when creating and maintaining wiki pages.
 

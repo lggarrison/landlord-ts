@@ -18,6 +18,7 @@ import {
   newObservations,
   observationsForCardByTurn,
   simulationFromConfig,
+  simulationFromConfigAdaptive,
   type Observations,
 } from './simulation.js';
 
@@ -30,6 +31,15 @@ export type RunInput = {
   acceptable_hand_list: string[][];
   /** Optional RNG seed for reproducible runs. */
   seed?: number;
+  /** Optional starting hand size (default 7). */
+  starting_hand_size?: number;
+  /**
+   * Optional early-stop half-width on aggregate p_mana_given_cmc.
+   * When set, `runs` is treated as a maximum.
+   */
+  epsilon?: number;
+  /** Shard trials across worker threads (default: auto when runs >= 2000). */
+  parallel?: boolean;
 };
 
 export type MtgOnCurveCard = {
@@ -61,6 +71,18 @@ export type RunOutput = {
   tap_land_counts: ManaColorCount;
   check_land_counts: ManaColorCount;
   shock_land_counts: ManaColorCount;
+  fast_land_counts: ManaColorCount;
+  slow_land_counts: ManaColorCount;
+  battle_land_counts: ManaColorCount;
+  turn_land_counts: ManaColorCount;
+  surveil_land_counts: ManaColorCount;
+  bounce_land_counts: ManaColorCount;
+  triome_land_counts: ManaColorCount;
+  cycling_land_counts: ManaColorCount;
+  pain_land_counts: ManaColorCount;
+  fetch_land_counts: ManaColorCount;
+  canopy_land_counts: ManaColorCount;
+  pathway_land_counts: ManaColorCount;
   other_land_counts: ManaColorCount;
   non_land_counts: ManaColorCount;
 };
@@ -90,6 +112,18 @@ function emptyOutput(): RunOutput {
     tap_land_counts: newManaColorCount(),
     check_land_counts: newManaColorCount(),
     shock_land_counts: newManaColorCount(),
+    fast_land_counts: newManaColorCount(),
+    slow_land_counts: newManaColorCount(),
+    battle_land_counts: newManaColorCount(),
+    turn_land_counts: newManaColorCount(),
+    surveil_land_counts: newManaColorCount(),
+    bounce_land_counts: newManaColorCount(),
+    triome_land_counts: newManaColorCount(),
+    cycling_land_counts: newManaColorCount(),
+    pain_land_counts: newManaColorCount(),
+    fetch_land_counts: newManaColorCount(),
+    canopy_land_counts: newManaColorCount(),
+    pathway_land_counts: newManaColorCount(),
     other_land_counts: newManaColorCount(),
     non_land_counts: newManaColorCount(),
   };
@@ -112,11 +146,14 @@ export function run(input: RunInput): RunOutput {
   }
 
   const highestTurn = deckIter(deck).reduce((max, c) => Math.max(max, c.card.turn), 0);
+  const startingHandSize = input.starting_hand_size ?? 7;
 
   const london = londonNever();
+  london.startingHandSize = startingHandSize;
   london.mulliganDownTo = input.mulligan_down_to;
   london.mulliganOnLands = new Set(input.mulligan_on_lands);
 
+  const acceptableHashes: number[][] = [];
   for (let i = 0; i < input.acceptable_hand_list.length; i++) {
     const acceptableHand = input.acceptable_hand_list[i]!;
     const keepCards = new Set<number>();
@@ -129,17 +166,33 @@ export function run(input: RunInput): RunOutput {
     }
     if (keepCards.size > 0) {
       london.acceptableHandList.push(keepCards);
+      acceptableHashes.push([...keepCards]);
     }
   }
 
-  const sim = simulationFromConfig({
+  const simConfig = {
     runCount: input.runs,
     drawCount: highestTurn,
     mulligan: asLondonMulligan(london),
     deck,
     onThePlay: input.on_the_play,
     seed: input.seed,
-  });
+    epsilon: input.epsilon,
+    parallel: input.parallel,
+    startingHandSize,
+    mulliganDownTo: input.mulligan_down_to,
+    mulliganOnLands: input.mulligan_on_lands,
+    acceptableHandList: acceptableHashes,
+  };
+
+  const nonLandCards = deckIter(deck)
+    .filter((c) => !isLand(c.card))
+    .map((c) => c.card);
+
+  const sim =
+    input.epsilon !== undefined
+      ? simulationFromConfigAdaptive(simConfig, nonLandCards)
+      : simulationFromConfig(simConfig);
 
   const outputs = emptyOutput();
   outputs.accumulated_opening_hand_size = sim.accumulatedOpeningHandSize;
@@ -201,7 +254,44 @@ export function run(input: RunInput): RunOutput {
         case CardKind.ShockLand:
           countManaColor(outputs.shock_land_counts, card.manaCost);
           break;
+        case CardKind.FastLand:
+          countManaColor(outputs.fast_land_counts, card.manaCost);
+          break;
+        case CardKind.SlowLand:
+          countManaColor(outputs.slow_land_counts, card.manaCost);
+          break;
+        case CardKind.BattleLand:
+          countManaColor(outputs.battle_land_counts, card.manaCost);
+          break;
+        case CardKind.TurnLand:
+          countManaColor(outputs.turn_land_counts, card.manaCost);
+          break;
+        case CardKind.SurveilLand:
+          countManaColor(outputs.surveil_land_counts, card.manaCost);
+          break;
+        case CardKind.BounceLand:
+          countManaColor(outputs.bounce_land_counts, card.manaCost);
+          break;
+        case CardKind.TriomeLand:
+          countManaColor(outputs.triome_land_counts, card.manaCost);
+          break;
+        case CardKind.CyclingLand:
+          countManaColor(outputs.cycling_land_counts, card.manaCost);
+          break;
+        case CardKind.PainLand:
+          countManaColor(outputs.pain_land_counts, card.manaCost);
+          break;
+        case CardKind.FetchLand:
+          countManaColor(outputs.fetch_land_counts, card.manaCost);
+          break;
+        case CardKind.CanopyLand:
+          countManaColor(outputs.canopy_land_counts, card.manaCost);
+          break;
+        case CardKind.PathwayLand:
+          countManaColor(outputs.pathway_land_counts, card.manaCost);
+          break;
         case CardKind.OtherLand:
+        case CardKind.ForcedLand:
           countManaColor(outputs.other_land_counts, card.manaCost);
           break;
         default:

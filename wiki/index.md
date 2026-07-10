@@ -14,17 +14,18 @@
 
 | Title                  | Scope tag | Status | Updated              |
 | ---------------------- | --------- | ------ | -------------------- |
-| [Src](entities/src.md) | src       | active | 2026-07-10T18:30:00Z |
+| [Src](entities/src.md) | src       | active | 2026-07-10T22:25:00Z |
 
 ## Concepts
 
 | Title                                                        | Tags             | Status | Updated              |
 | ------------------------------------------------------------ | ---------------- | ------ | -------------------- |
-| [Auto-tap](concepts/auto-tap.md)                             | simulation, mana | active | 2026-07-10T18:30:00Z |
-| [Card pipeline](concepts/card-pipeline.md)                   | data, scryfall   | active | 2026-07-10T18:30:00Z |
+| [Auto-tap](concepts/auto-tap.md)                             | simulation, mana | active | 2026-07-10T22:15:00Z |
+| [Card pipeline](concepts/card-pipeline.md)                   | data, scryfall   | active | 2026-07-10T19:45:00Z |
+| [GitHub repo hygiene](concepts/github-repo-hygiene.md)       | github, process  | active | 2026-07-10T22:25:00Z |
 | [London mulligan](concepts/london-mulligan.md)               | mulligan         | active | 2026-07-10T18:30:00Z |
-| [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation       | active | 2026-07-10T18:30:00Z |
-| [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api              | active | 2026-07-10T18:30:00Z |
+| [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation       | active | 2026-07-10T19:45:00Z |
+| [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api              | active | 2026-07-10T20:05:00Z |
 
 ## Sources
 

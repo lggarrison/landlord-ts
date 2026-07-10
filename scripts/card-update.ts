@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scryfallCardsToCards, type ScryfallCard } from '../src/scryfall.js';
 
-const USER_AGENT = 'landord-ts/0.1.0 (https://github.com/lggarrison/landord-ts)';
+const USER_AGENT = 'landlord-ts/0.1.0 (https://github.com/lggarrison/landlord-ts)';
 const ACCEPT = 'application/json;q=0.9,*/*;q=0.8';
 
 type BulkEntry = {

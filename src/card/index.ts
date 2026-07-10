@@ -14,6 +14,14 @@ export {
 export type { Card, SetCode } from './types.js';
 
 export {
+  BasicLandType,
+  basicLandTypesFromTypeLine,
+  basicLandTypeCount,
+  checkTypesFromOracleText,
+  normalizeOracleForEtb,
+} from './land-types.js';
+
+export {
   emptyManaCost,
   manaCostFromRgbuwc,
   manaCostCmc,

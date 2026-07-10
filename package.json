@@ -15,11 +15,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lggarrison/landord-ts.git"
+    "url": "git+https://github.com/lggarrison/landlord-ts.git"
   },
-  "homepage": "https://github.com/lggarrison/landord-ts#readme",
+  "homepage": "https://github.com/lggarrison/landlord-ts#readme",
   "bugs": {
-    "url": "https://github.com/lggarrison/landord-ts/issues"
+    "url": "https://github.com/lggarrison/landlord-ts/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -52,6 +52,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "card-update": "tsx scripts/card-update.ts",
+    "mine-etb": "tsx scripts/mine-etb.ts",
     "release:check": "npm-run-all format:check lint test build wiki:lint wiki:check",
     "prepare": "node .husky/install.mjs",
     "prepublishOnly": "npm run release:check",
