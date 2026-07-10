@@ -1,9 +1,16 @@
 ---
 type: concept
 title: Auto-tap
-last_updated: 2026-07-10T22:15:00Z
+last_updated: 2026-07-10T22:55:00Z
 tags: [simulation, mana]
-related: [entities/hand.md, entities/bipartite.md]
+related:
+  [
+    concepts/land-kinds.md,
+    entities/hand.md,
+    entities/bipartite.md,
+    sources/magic-comprehensive-rules-20260619.md,
+  ]
+sources: [sources/magic-comprehensive-rules-20260619.md]
 status: active
 summary: Paying spell costs with lands via bipartite matching; board-aware ETB for Tap/Check/Fast/Slow/Battle/Turn.
 code_refs: [src/hand.ts, src/bipartite.ts]
@@ -13,7 +20,17 @@ code_refs: [src/hand.ts, src/bipartite.ts]
 
 Lands drawn by the goal turn become columns; mana pips become rows. A spell is paid if matching size equals pip count. Hybrid costs try each expansion until one pays.
 
-Lands are scheduled with an earliest play turn (opening lands `1..n` in hand order; drawn lands use the calendar draw turn), then compressed to one land per turn. **Basics / Other / Forced / Shock / Pain / Fetch / Canopy / Pathway** stay available whenever drawn by the goal turn (Karsten “sources in hand”). Conditional lands gate on `availableTurn <= goalTurn`:
+Land kind taxonomy (ETB vs always-available) lives in [Land kinds](land-kinds.md).
+
+## Play schedule
+
+1. **Earliest turn** — opening lands get `1..n` in hand order; drawn lands use the calendar draw turn (`drawIdx+2` on the play, `drawIdx+1` on the draw).
+2. **One land per turn** — `playTurn = max(earliest, lastPlayTurn + 1)`.
+3. **Board walk** — FIFO over that schedule; accumulate `basicLandTypes` and Basic-supertype count for Check / Battle gates.
+
+## Availability
+
+**Basics / Other / Forced / Shock / Pain / Fetch / Canopy / Pathway** stay available whenever drawn by the goal turn (Karsten “sources in hand”). Conditional lands gate on `availableTurn <= goalTurn`:
 
 | Kind                                          | Untapped when                                |
 | --------------------------------------------- | -------------------------------------------- |
@@ -28,5 +45,7 @@ Shock lands always pay 2 life (always untapped). Basic land types on every land 
 
 ## See also
 
+- [Land kinds](land-kinds.md)
 - [Hand](../entities/hand.md)
 - [Bipartite](../entities/bipartite.md)
+- [Magic Comprehensive Rules (2026-06-19)](../sources/magic-comprehensive-rules-20260619.md)
