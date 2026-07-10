@@ -1,6 +1,6 @@
 ---
 type: source
-title: "TS port feasibility plan"
+title: 'TS port feasibility plan'
 last_updated: 2026-07-10T18:00:00Z
 tags: [design, port]
 related: [entities/src.md, concepts/mtgoncurve-api.md]

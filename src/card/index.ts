@@ -10,8 +10,8 @@ export {
   hashCardName,
   parseRarity,
   parseSetCode,
-} from "./types.js";
-export type { Card, SetCode } from "./types.js";
+} from './types.js';
+export type { Card, SetCode } from './types.js';
 
 export {
   emptyManaCost,
@@ -21,8 +21,8 @@ export {
   manaCostsFromStr,
   manaColorFromStr,
   ManaColor,
-} from "./mana-cost.js";
-export type { ManaCost } from "./mana-cost.js";
+} from './mana-cost.js';
+export type { ManaCost } from './mana-cost.js';
 
-export { newManaColorCount, countManaColor } from "./mana-color-count.js";
-export type { ManaColorCount } from "./mana-color-count.js";
+export { newManaColorCount, countManaColor } from './mana-color-count.js';
+export type { ManaColorCount } from './mana-color-count.js';

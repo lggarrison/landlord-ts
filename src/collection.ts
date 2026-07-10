@@ -1,4 +1,4 @@
-import type { Card } from "./card/index.js";
+import type { Card } from './card/index.js';
 
 export type Collection = {
   cards: Card[];
@@ -28,10 +28,8 @@ export function cardFromName(collection: Collection, name: string): Card | undef
 
 export function otherFacesByName(collection: Collection, name: string): Card[] {
   const card = cardFromName(collection, name);
-  if (!card || card.oracleId === "") return [];
-  return collection.cards.filter(
-    (c) => c.oracleId === card.oracleId && c.name !== card.name,
-  );
+  if (!card || card.oracleId === '') return [];
+  return collection.cards.filter((c) => c.oracleId === card.oracleId && c.name !== card.name);
 }
 
 /** Convenience object API matching Rust Collection methods. */

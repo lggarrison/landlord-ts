@@ -1,7 +1,6 @@
 import {
   CardKind,
   GameFormat,
-  Rarity,
   cloneCard,
   countManaColor,
   isLand,
@@ -12,8 +11,8 @@ import {
   type Card,
   type ManaColorCount,
   type SetCode,
-} from "./card/index.js";
-import { ALL_CARDS } from "./data.js";
+} from './card/index.js';
+import { ALL_CARDS } from './data.js';
 
 export type DeckCard = {
   card: Card;
@@ -31,7 +30,7 @@ export type Deck = {
 export class DeckcodeError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "DeckcodeError";
+    this.name = 'DeckcodeError';
   }
 }
 
@@ -92,7 +91,7 @@ export function deckIter(deck: Deck): DeckCard[] {
 }
 
 function stripInlineModifiersFromName(name: string): string {
-  for (const sep of [" M=", " m=", " T=", " t=", " X=", " x="]) {
+  for (const sep of [' M=', ' m=', ' T=', ' t=', ' X=', ' x=']) {
     const idx = name.lastIndexOf(sep);
     if (idx !== -1) return name.slice(0, idx).trim();
   }
@@ -103,13 +102,13 @@ const INLINE_M = /\sM\s*=\s*(auto|(?:\{[WUBRGC\d]+\})+)/i;
 const INLINE_T = /\sT\s*=\s*(\d+)/i;
 const INLINE_X = /\sX\s*=\s*(\d+)/i;
 
-function inlineModifier(line: string, letter: "M" | "T" | "X"): string | undefined {
-  const re = letter === "M" ? INLINE_M : letter === "T" ? INLINE_T : INLINE_X;
+function inlineModifier(line: string, letter: 'M' | 'T' | 'X'): string | undefined {
+  const re = letter === 'M' ? INLINE_M : letter === 'T' ? INLINE_T : INLINE_X;
   return line.match(re)?.[1];
 }
 
 const ARENA_LINE_REGEX =
-  /^\s*(?<amount>\d+)\s+(?<name>[^\(#\n\r]+)(?:\s*\((?<set>\w+)\)\s+(?<setnum>\d+))?\s*#?(?:\s*[Xx]\s*=\s*(?<X>\d+))?(?:\s*[Tt]\s*=\s*(?<T>\d+))?(?:\s*[Mm]\s*=\s*(?<M>auto|(?:\{[WUBRGC\d]+\})+))?/;
+  /^\s*(?<amount>\d+)\s+(?<name>[^#(\n\r]+)(?:\s*\((?<set>\w+)\)\s+(?<setnum>\d+))?\s*#?(?:\s*[Xx]\s*=\s*(?<X>\d+))?(?:\s*[Tt]\s*=\s*(?<T>\d+))?(?:\s*[Mm]\s*=\s*(?<M>auto|(?:\{[WUBRGC\d]+\})+))?/;
 
 export function deckFromList(list: string): Deck {
   const builder: DeckBuilder = new Map();
@@ -119,16 +118,16 @@ export function deckFromList(list: string): Deck {
     const trimmed = line.trim();
     const trimmedLower = trimmed.toLowerCase();
 
-    if (trimmedLower === "deck") {
+    if (trimmedLower === 'deck') {
       lookingForDeckLine = false;
       continue;
     }
-    if (trimmedLower === "commander" || trimmedLower === "companion") {
+    if (trimmedLower === 'commander' || trimmedLower === 'companion') {
       lookingForDeckLine = true;
       continue;
     }
-    if (trimmedLower === "sideboard" || trimmedLower === "maybeboard") break;
-    if (trimmed.startsWith("#")) continue;
+    if (trimmedLower === 'sideboard' || trimmedLower === 'maybeboard') break;
+    if (trimmed.startsWith('#')) continue;
     if (lookingForDeckLine) continue;
     if (trimmed.length === 0) break;
 
@@ -143,8 +142,8 @@ export function deckFromList(list: string): Deck {
     }
 
     const name = stripInlineModifiersFromName(caps.groups.name!.trim());
-    const set: SetCode = caps.groups.set ? parseSetCode(caps.groups.set) : "";
-    const leftCardName = name.split("//")[0]?.trim();
+    const set: SetCode = caps.groups.set ? parseSetCode(caps.groups.set) : '';
+    const leftCardName = name.split('//')[0]?.trim();
     if (!leftCardName) {
       throw new DeckcodeError(`Cannot parse card name from deck list line: ${line}`);
     }
@@ -155,8 +154,8 @@ export function deckFromList(list: string): Deck {
     }
     const card = cloneCard(found);
 
-    const xValStr = caps.groups.X ?? inlineModifier(trimmed, "X");
-    if (xValStr !== undefined && card.manaCostString.includes("X")) {
+    const xValStr = caps.groups.X ?? inlineModifier(trimmed, 'X');
+    if (xValStr !== undefined && card.manaCostString.includes('X')) {
       const xVal = Number.parseInt(xValStr, 10);
       if (!Number.isFinite(xVal)) {
         throw new DeckcodeError(`Cannot parse X= value from deck list line: ${line}`);
@@ -167,9 +166,9 @@ export function deckFromList(list: string): Deck {
       card.turn = manaCostCmc(card.manaCost);
     }
 
-    const mValStr = caps.groups.M ?? inlineModifier(trimmed, "M");
+    const mValStr = caps.groups.M ?? inlineModifier(trimmed, 'M');
     if (mValStr !== undefined) {
-      if (mValStr.toLowerCase() === "auto") {
+      if (mValStr.toLowerCase() === 'auto') {
         const landFace = ALL_CARDS.otherFacesByName(leftCardName).find((c) => isLand(c));
         if (!landFace) {
           throw new DeckcodeError(
@@ -192,7 +191,7 @@ export function deckFromList(list: string): Deck {
       }
     }
 
-    const turnValStr = caps.groups.T ?? inlineModifier(trimmed, "T");
+    const turnValStr = caps.groups.T ?? inlineModifier(trimmed, 'T');
     if (turnValStr !== undefined) {
       const turnVal = Number.parseInt(turnValStr, 10);
       if (!Number.isFinite(turnVal)) {

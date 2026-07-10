@@ -1,6 +1,6 @@
-import type { Card } from "../card/index.js";
-import { handFromOpeningAndDraws, type Hand } from "../hand.js";
-import { partialShuffle, type Mulligan, type Rng } from "./types.js";
+import type { Card } from '../card/index.js';
+import { handFromOpeningAndDraws, type Hand } from '../hand.js';
+import { partialShuffle, type Mulligan, type Rng } from './types.js';
 
 export const STARTING_HAND_SIZE = 7;
 

@@ -42,6 +42,8 @@ npm run wiki:lint
 
 ## Checklist
 
+- [ ] `npm run lint` passes
+- [ ] `npm run format:check` passes
 - [ ] `npm test` passes
 - [ ] `npm run build` succeeds
 - [ ] If `wiki/` changed: `npm run wiki:build` produces no diff and `npm run wiki:lint` passes

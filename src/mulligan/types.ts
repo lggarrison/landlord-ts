@@ -1,5 +1,5 @@
-import type { Card } from "../card/index.js";
-import type { Hand } from "../hand.js";
+import type { Card } from '../card/index.js';
+import type { Hand } from '../hand.js';
 
 export type Rng = {
   /** Uniform integer in `[min, max)`. */

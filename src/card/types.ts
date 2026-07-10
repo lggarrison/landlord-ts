@@ -1,37 +1,37 @@
-import type { ManaCost } from "./mana-cost.js";
-import { emptyManaCost, manaCostCmc } from "./mana-cost.js";
+import type { ManaCost } from './mana-cost.js';
+import { emptyManaCost, manaCostCmc } from './mana-cost.js';
 
 /** Internal card type — port of CardKind in lib/src/card/card.rs */
 export enum CardKind {
-  BasicLand = "BasicLand",
-  TapLand = "TapLand",
-  CheckLand = "CheckLand",
-  ShockLand = "ShockLand",
-  OtherLand = "OtherLand",
-  ForcedLand = "ForcedLand",
-  Creature = "Creature",
-  Spell = "Spell",
-  Enchantment = "Enchantment",
-  Instant = "Instant",
-  Planeswalker = "Planeswalker",
-  Sorcery = "Sorcery",
-  Artifact = "Artifact",
-  Unknown = "Unknown",
+  BasicLand = 'BasicLand',
+  TapLand = 'TapLand',
+  CheckLand = 'CheckLand',
+  ShockLand = 'ShockLand',
+  OtherLand = 'OtherLand',
+  ForcedLand = 'ForcedLand',
+  Creature = 'Creature',
+  Spell = 'Spell',
+  Enchantment = 'Enchantment',
+  Instant = 'Instant',
+  Planeswalker = 'Planeswalker',
+  Sorcery = 'Sorcery',
+  Artifact = 'Artifact',
+  Unknown = 'Unknown',
 }
 
 export enum Rarity {
-  Common = "common",
-  Uncommon = "uncommon",
-  Rare = "rare",
-  Mythic = "mythic",
-  Special = "special",
-  Bonus = "bonus",
-  Other = "other",
+  Common = 'common',
+  Uncommon = 'uncommon',
+  Rare = 'rare',
+  Mythic = 'mythic',
+  Special = 'special',
+  Bonus = 'bonus',
+  Other = 'other',
 }
 
 export enum GameFormat {
-  Standard = "standard",
-  Other = "other",
+  Standard = 'standard',
+  Other = 'other',
 }
 
 /** Set code stored as a string (Rust uses a large enum). */
@@ -56,10 +56,10 @@ export type Card = {
 
 export function emptyCard(): Card {
   return {
-    name: "",
-    oracleId: "",
-    manaCostString: "",
-    imageUri: "",
+    name: '',
+    oracleId: '',
+    manaCostString: '',
+    imageUri: '',
     kind: CardKind.Unknown,
     hash: 0,
     turn: 0,
@@ -67,7 +67,7 @@ export function emptyCard(): Card {
     allManaCosts: [],
     arenaId: 0,
     rarity: Rarity.Common,
-    set: "",
+    set: '',
     isFace: false,
   };
 }
@@ -115,17 +115,17 @@ export function hashCardName(name: string): number {
 
 export function parseRarity(raw: string): Rarity {
   switch (raw.toLowerCase()) {
-    case "common":
+    case 'common':
       return Rarity.Common;
-    case "uncommon":
+    case 'uncommon':
       return Rarity.Uncommon;
-    case "rare":
+    case 'rare':
       return Rarity.Rare;
-    case "mythic":
+    case 'mythic':
       return Rarity.Mythic;
-    case "special":
+    case 'special':
       return Rarity.Special;
-    case "bonus":
+    case 'bonus':
       return Rarity.Bonus;
     default:
       return Rarity.Other;

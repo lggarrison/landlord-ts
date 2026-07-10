@@ -14,8 +14,13 @@ code_refs: [src/run.ts]
 
 ```ts
 run({
-  code, runs, on_the_play, mulligan_down_to, mulligan_on_lands, acceptable_hand_list
-})
+  code,
+  runs,
+  on_the_play,
+  mulligan_down_to,
+  mulligan_on_lands,
+  acceptable_hand_list,
+});
 ```
 
 Returns `card_observations`, `land_counts`, deck stats, and per-land-type `ManaColorCount` fields.

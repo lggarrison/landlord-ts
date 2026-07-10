@@ -4,6 +4,26 @@
   "description": "Monte Carlo MTG on-curve simulator (TypeScript port of landlord)",
   "license": "MIT",
   "type": "module",
+  "author": "Lacy Garrison",
+  "keywords": [
+    "mtg",
+    "magic-the-gathering",
+    "mana",
+    "mulligan",
+    "simulation",
+    "mtgoncurve"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lggarrison/landord-ts.git"
+  },
+  "homepage": "https://github.com/lggarrison/landord-ts#readme",
+  "bugs": {
+    "url": "https://github.com/lggarrison/landord-ts/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -19,13 +39,22 @@
   },
   "files": [
     "dist",
-    "data"
+    "data",
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "card-update": "tsx scripts/card-update.ts",
+    "release:check": "npm-run-all format:check lint test build wiki:lint wiki:check",
+    "prepare": "node .husky/install.mjs",
+    "prepublishOnly": "npm run release:check",
     "wiki:help": "llm-wiki-manager help",
     "wiki:lint": "llm-wiki-manager lint",
     "wiki:build": "llm-wiki-manager build",
@@ -33,19 +62,40 @@
     "wiki:sync": "llm-wiki-manager sync",
     "wiki:log": "llm-wiki-manager log",
     "wiki:doctor": "llm-wiki-manager doctor",
-    "wiki:setup:husky": "llm-wiki-manager setup-husky",
-    "prepare": "husky"
+    "wiki:setup:husky": "llm-wiki-manager setup-husky"
+  },
+  "lint-staged": {
+    "*.{ts,js,mjs,cjs}": [
+      "eslint --fix --no-warn-ignored",
+      "prettier --write"
+    ],
+    "wiki/**/*.md": [
+      "npm run wiki:build",
+      "npm run wiki:lint",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "fflate": "^0.8.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
     "@types/node": "^22.15.0",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "globals": "^16.2.0",
     "husky": "^9.1.7",
+    "lint-staged": "^16.1.0",
     "llm-wiki-manager": "^1.0.3",
+    "npm-run-all2": "^8.0.4",
+    "prettier": "^3.5.3",
     "tsup": "^8.5.0",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0",
+    "typescript-eslint": "^8.33.0",
     "vitest": "^3.2.0"
   }
 }

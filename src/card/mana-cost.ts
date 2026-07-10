@@ -80,15 +80,15 @@ function calculateSignature(
 
 export function manaColorFromStr(color: string): ManaColor {
   switch (color.charAt(0)) {
-    case "B":
+    case 'B':
       return ManaColor.Black;
-    case "U":
+    case 'U':
       return ManaColor.Blue;
-    case "G":
+    case 'G':
       return ManaColor.Green;
-    case "R":
+    case 'R':
       return ManaColor.Red;
-    case "W":
+    case 'W':
       return ManaColor.White;
     default:
       return ManaColor.Colorless;
@@ -176,25 +176,23 @@ function manaCostsFromStrRecur(
   }
 }
 
-function manaCostSymbolsFromStr(
-  manaCostStr: string,
-): Array<[ManaCost, ManaCost | null]> {
-  let sigil = "";
+function manaCostSymbolsFromStr(manaCostStr: string): Array<[ManaCost, ManaCost | null]> {
+  let sigil = '';
   const symbolStack: Array<[ManaCost, ManaCost | null]> = [];
   let shouldPushRight = false;
   let idx = 0;
 
   for (const ch of manaCostStr) {
     switch (ch) {
-      case "{": {
-        sigil = "";
+      case '{': {
+        sigil = '';
         symbolStack.push([emptyManaCost(), null]);
         idx = symbolStack.length - 1;
         shouldPushRight = false;
         break;
       }
-      case "/":
-      case "\\": {
+      case '/':
+      case '\\': {
         const color = manaColorFromStr(sigil);
         const count = Number.parseInt(sigil, 10);
         const n = Number.isFinite(count) ? count : 1;
@@ -202,10 +200,10 @@ function manaCostSymbolsFromStr(
         applyColor(cost, color, n);
         symbolStack[idx]![0] = cost;
         shouldPushRight = true;
-        sigil = "";
+        sigil = '';
         break;
       }
-      case "}": {
+      case '}': {
         const color = manaColorFromStr(sigil);
         const count = Number.parseInt(sigil, 10);
         const n = Number.isFinite(count) ? count : 1;
@@ -216,7 +214,7 @@ function manaCostSymbolsFromStr(
         } else {
           symbolStack[idx]![0] = cost;
         }
-        sigil = "";
+        sigil = '';
         break;
       }
       default:

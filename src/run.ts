@@ -10,16 +10,16 @@ import {
   type Card,
   type ManaColorCount,
   type ManaCost,
-} from "./card/index.js";
-import { ALL_CARDS } from "./data.js";
-import { deckFromList, deckIsEmpty, deckIter, DeckcodeError } from "./deck.js";
-import { asLondonMulligan, londonNever } from "./mulligan/index.js";
+} from './card/index.js';
+import { ALL_CARDS } from './data.js';
+import { deckFromList, deckIsEmpty, deckIter, DeckcodeError } from './deck.js';
+import { asLondonMulligan, londonNever } from './mulligan/index.js';
 import {
   newObservations,
   observationsForCardByTurn,
   simulationFromConfig,
   type Observations,
-} from "./simulation.js";
+} from './simulation.js';
 
 export type RunInput = {
   code: string;
@@ -108,13 +108,10 @@ export function run(input: RunInput): RunOutput {
     throw new Error(`Bad deckcode: ${msg}`);
   }
   if (deckIsEmpty(deck)) {
-    throw new Error("Empty deckcode");
+    throw new Error('Empty deckcode');
   }
 
-  const highestTurn = deckIter(deck).reduce(
-    (max, c) => Math.max(max, c.card.turn),
-    0,
-  );
+  const highestTurn = deckIter(deck).reduce((max, c) => Math.max(max, c.card.turn), 0);
 
   const london = londonNever();
   london.mulliganDownTo = input.mulligan_down_to;
@@ -146,8 +143,7 @@ export function run(input: RunInput): RunOutput {
 
   const outputs = emptyOutput();
   outputs.accumulated_opening_hand_size = sim.accumulatedOpeningHandSize;
-  outputs.accumulated_opening_hand_land_count =
-    sim.accumulatedOpeningHandLandCount;
+  outputs.accumulated_opening_hand_land_count = sim.accumulatedOpeningHandLandCount;
 
   outputs.card_observations = deckIter(deck)
     .filter((c) => !isLand(c.card))
@@ -174,9 +170,7 @@ export function run(input: RunInput): RunOutput {
       observations: newObservations(),
     }));
   outputs.land_counts.sort((a, b) => a.card.name.localeCompare(b.card.name));
-  outputs.land_counts.sort((a, b) =>
-    String(a.card.kind).localeCompare(String(b.card.kind)),
-  );
+  outputs.land_counts.sort((a, b) => String(a.card.kind).localeCompare(String(b.card.kind)));
 
   const deckLen = deck.cardCount;
   outputs.deck_size = deckLen;
@@ -185,10 +179,8 @@ export function run(input: RunInput): RunOutput {
   outputs.deck_average_cmc =
     nonLandCount === 0
       ? 0
-      : nonLandEntries.reduce(
-          (sum, c) => sum + c.count * manaCostCmc(c.card.manaCost),
-          0,
-        ) / nonLandCount;
+      : nonLandEntries.reduce((sum, c) => sum + c.count * manaCostCmc(c.card.manaCost), 0) /
+        nonLandCount;
 
   for (const cc of deckIter(deck)) {
     for (let i = 0; i < cc.count; i++) {
