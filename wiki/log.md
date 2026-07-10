@@ -16,3 +16,9 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-10T20:04:33Z] maintenance | BattleLand + nickname land cycle kinds
 
 ## [2026-07-10T22:21:07Z] maintenance | Document GitHub repo hygiene (feature PRs to develop)
+
+## [2026-07-10T22:48:35Z] maintenance | Document land kinds taxonomy and auto-tap play strategy
+
+## [2026-07-10T22:51:28Z] ingest | Magic Comprehensive Rules 2026-06-19
+
+## [2026-07-10T23:19:00Z] maintenance | Address PR #9 review: CardKind names, CR provenance stub (no full text)

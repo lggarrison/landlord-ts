@@ -1,12 +1,13 @@
 ---
 type: overview
 title: Src
-last_updated: 2026-07-10T22:25:00Z
+last_updated: 2026-07-10T22:50:00Z
 tags: [src]
 related:
   [
     concepts/mtgoncurve-api.md,
     concepts/auto-tap.md,
+    concepts/land-kinds.md,
     concepts/card-pipeline.md,
     concepts/london-mulligan.md,
     concepts/monte-carlo-simulation.md,
@@ -25,7 +26,7 @@ code_refs: [src/index.ts, src/run.ts]
 
 TypeScript port of the Rust landlord engine. Primary entry: [`run()`](run.md) matching the mtgoncurve.com Input/Output contract.
 
-Board-aware land ETB (Check/Fast/Slow/Turn), auto DFC face-detect, worker parallelization, and adaptive trial counts are implemented in this package.
+Board-aware land ETB (Check/Fast/Slow/Battle/Turn + nickname cycles), auto DFC face-detect, worker parallelization, and adaptive trial counts are implemented in this package. See [Land kinds](../concepts/land-kinds.md).
 
 ## Layout
 
@@ -47,6 +48,7 @@ Board-aware land ETB (Check/Fast/Slow/Turn), auto DFC face-detect, worker parall
 - [TS port feasibility plan](../sources/ts-port-feasibility.md)
 - [mtgoncurve API](../concepts/mtgoncurve-api.md)
 - [Auto-tap](../concepts/auto-tap.md)
+- [Land kinds](../concepts/land-kinds.md)
 - [Card pipeline](../concepts/card-pipeline.md)
 - [London mulligan](../concepts/london-mulligan.md)
 - [Monte Carlo simulation](../concepts/monte-carlo-simulation.md)
