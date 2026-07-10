@@ -7,7 +7,7 @@ Day-to-day work happens on **`develop`**; releases are cut from **`main`**. Rele
 |        | Link                                               |
 | ------ | -------------------------------------------------- |
 | npm    | https://www.npmjs.com/package/@lggarrison/landlord |
-| GitHub | https://github.com/lggarrison/landord-ts           |
+| GitHub | https://github.com/lggarrison/landlord-ts          |
 
 ### Cutting a release
 
@@ -48,7 +48,7 @@ CI handles npm publish, the GitHub Release, and syncing `main` into `develop`.
 2. Create the empty package (or publish once) with public access — `publishConfig.access` is already `"public"` in `package.json`.
 3. Configure **Trusted Publishing** for `@lggarrison/landlord`:
    - npm → package → **Trusted Publisher**
-   - GitHub repository: `lggarrison/landord-ts`
+   - GitHub repository: `lggarrison/landlord-ts`
    - Workflow: `release.yml`
    - Environment: (leave empty unless you use one)
 4. No long-lived `NPM_TOKEN` is required when OIDC Trusted Publishing is configured. The release job uses `id-token: write`.

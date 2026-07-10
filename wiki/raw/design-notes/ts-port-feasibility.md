@@ -1,6 +1,6 @@
 # Pure TypeScript landlord npm package
 
-Source design note for the landord-ts port.
+Source design note for the landlord-ts port.
 
 ## Decision
 

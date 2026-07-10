@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for filing a bug! Please do not use this form for security issues — see the [security policy](https://github.com/lggarrison/landord-ts/security/policy).
+        Thanks for filing a bug! Please do not use this form for security issues — see the [security policy](https://github.com/lggarrison/landlord-ts/security/policy).
   - type: textarea
     id: what-happened
     attributes:

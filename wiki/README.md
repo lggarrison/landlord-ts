@@ -1,4 +1,4 @@
-# landord-ts Wiki
+# landlord-ts Wiki
 
 Human entry point for browsing this vault in [Obsidian](https://obsidian.md/) or any markdown viewer.
 

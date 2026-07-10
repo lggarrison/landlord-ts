@@ -1,4 +1,4 @@
-# Wiki Log — landord-ts
+# Wiki Log — landlord-ts
 
 Append-only chronological record of wiki operations.
 Managed by `llm-wiki-manager log`.

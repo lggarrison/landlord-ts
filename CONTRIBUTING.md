@@ -1,4 +1,4 @@
-# Contributing to landord-ts / `@lggarrison/landlord`
+# Contributing to landlord-ts / `@lggarrison/landlord`
 
 Thanks for your interest in contributing! This project is a TypeScript library (ESM + CJS) that ports the Rust landlord Monte Carlo simulator. The notes below cover local setup, the branch model, and the checks your change needs to pass.
 
@@ -10,8 +10,8 @@ Thanks for your interest in contributing! This project is a TypeScript library (
 ## Setup
 
 ```bash
-git clone https://github.com/lggarrison/landord-ts.git
-cd landord-ts
+git clone https://github.com/lggarrison/landlord-ts.git
+cd landlord-ts
 nvm use   # or: fnm use
 npm install
 ```

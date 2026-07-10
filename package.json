@@ -15,11 +15,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lggarrison/landord-ts.git"
+    "url": "git+https://github.com/lggarrison/landlord-ts.git"
   },
-  "homepage": "https://github.com/lggarrison/landord-ts#readme",
+  "homepage": "https://github.com/lggarrison/landlord-ts#readme",
   "bugs": {
-    "url": "https://github.com/lggarrison/landord-ts/issues"
+    "url": "https://github.com/lggarrison/landlord-ts/issues"
   },
   "publishConfig": {
     "access": "public"
