@@ -32,6 +32,7 @@ jobs:
           title: 'chore: refresh Scryfall card database'
           body: |
             Automated weekly refresh of `data/all_cards.json.gz` from Scryfall oracle bulk data.
+          base: develop
           branch: chore/card-update
           delete-branch: true
           add-paths: |

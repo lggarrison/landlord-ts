@@ -1,7 +1,7 @@
 ---
 type: overview
 title: Src
-last_updated: 2026-07-10T19:45:00Z
+last_updated: 2026-07-10T22:25:00Z
 tags: [src]
 related:
   [
@@ -10,6 +10,7 @@ related:
     concepts/card-pipeline.md,
     concepts/london-mulligan.md,
     concepts/monte-carlo-simulation.md,
+    concepts/github-repo-hygiene.md,
     entities/run.md,
     entities/card.md,
     entities/deck.md,
@@ -49,6 +50,7 @@ Board-aware land ETB (Check/Fast/Slow/Turn), auto DFC face-detect, worker parall
 - [Card pipeline](../concepts/card-pipeline.md)
 - [London mulligan](../concepts/london-mulligan.md)
 - [Monte Carlo simulation](../concepts/monte-carlo-simulation.md)
+- [GitHub repo hygiene](../concepts/github-repo-hygiene.md)
 - [Run](run.md)
 - [Card](card.md)
 - [Deck](deck.md)

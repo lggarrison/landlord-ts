@@ -20,11 +20,11 @@ npm install
 
 ## Branch model
 
-- `develop` is the default integration branch and the target for all feature pull requests.
-- `main` is the release branch. Releases are cut from `main`; it is not a target for feature PRs.
+- `develop` is the default integration branch and the target for **all** feature, fix, and chore pull requests.
+- `main` is the release branch only. Do **not** open feature PRs into `main`.
 - After each release, `main` is merged back into `develop` (automated by the release workflow; see [RELEASING.md](RELEASING.md)).
 
-Branch off `develop`, and open your pull request against `develop`.
+Branch off `develop`, and open your pull request against `develop`. Longer notes live in the wiki: [GitHub repo hygiene](wiki/concepts/github-repo-hygiene.md).
 
 ### Branch protection (maintainers)
 
