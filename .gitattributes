@@ -1,1 +1,18 @@
 * text eol=lf
+
+# Binary assets must not go through text/eol filters (*.gz especially —
+# CRLF mangling corrupts gzip payloads and breaks card DB load).
+*.gz binary
+*.gz -text -eol
+*.png binary
+*.png -text -eol
+*.jpg binary
+*.jpg -text -eol
+*.jpeg binary
+*.jpeg -text -eol
+*.webp binary
+*.webp -text -eol
+*.woff binary
+*.woff -text -eol
+*.woff2 binary
+*.woff2 -text -eol
