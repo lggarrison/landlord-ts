@@ -10,6 +10,9 @@ export {
   hashCardName,
   isLand,
   isLandKind,
+  BasicLandType,
+  basicLandTypesFromTypeLine,
+  checkTypesFromOracleText,
 } from './card/index.js';
 export type { Card, ManaCost, ManaColorCount } from './card/index.js';
 
@@ -22,6 +25,7 @@ export {
   scryfallCardToCard,
   scryfallCardsToCards,
   SPECIAL_LANDS,
+  etbClauseFromOracle,
 } from './scryfall.js';
 export type { ScryfallCard } from './scryfall.js';
 
@@ -31,6 +35,7 @@ export {
   pManaGivenCmc,
   pMana,
   pPlay,
+  wilsonHalfWidth,
 } from './simulation.js';
 export type { Observations, Simulation } from './simulation.js';
 
@@ -39,6 +44,7 @@ export {
   autoTapByTurn,
   playCmcAutoTap,
   drawCmcAutoTap,
+  availableTurnForLand,
   PlayOrder,
 } from './hand.js';
 

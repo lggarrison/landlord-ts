@@ -52,6 +52,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "card-update": "tsx scripts/card-update.ts",
+    "mine-etb": "tsx scripts/mine-etb.ts",
     "release:check": "npm-run-all format:check lint test build wiki:lint wiki:check",
     "prepare": "node .husky/install.mjs",
     "prepublishOnly": "npm run release:check",

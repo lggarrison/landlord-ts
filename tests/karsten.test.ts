@@ -109,10 +109,11 @@ describe('Karsten tables (seeded, reduced runs)', () => {
   it('Hydroid Krasis X=23 always pays with enough lands', () => {
     const n = 1000;
     const output = run({
+      // ForcedLand filler (not TapLand) so board-aware ETB delay cannot strand the 25th source
       code: `1 Hydroid Krasis X=23
 12 Island
 12 Forest
-1 Memorial to Folly`,
+1 Wastes M={C}`,
       runs: n,
       on_the_play: false,
       mulligan_down_to: 7,

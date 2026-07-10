@@ -5,12 +5,16 @@
  */
 import {
   CardKind,
+  basicLandTypeCount,
+  basicLandTypesFromTypeLine,
+  checkTypesFromOracleText,
   emptyManaCost,
   hashCardName,
   manaCostCmc,
   manaCostFromRgbuwc,
   manaCostsFromStr,
   ManaColor,
+  normalizeOracleForEtb,
   parseRarity,
   type Card,
   type ManaCost,
@@ -109,19 +113,67 @@ export const SPECIAL_LANDS: ReadonlyMap<string, ManaCost> = new Map([
 ]);
 
 /**
- * CheckLand and ShockLand matched before TapLand because their oracle
- * text also contains the generic "enters tapped" substring.
+ * Classify land ETB / nickname cycle from oracle text.
+ * Order matters: conditional ETB matchers before bare TapLand; specialty untapped before Other.
  */
-export function landKindFromOracleText(oracleText: string, typeLine: string): CardKind {
-  const isShock = oracleText.includes('you may pay 2 life. If you don');
-  const isCheck = oracleText.includes('enters tapped unless you control a');
-  const isTap = oracleText.includes('enters tapped');
+export function landKindFromOracleText(oracleText: string, typeLine: string, name = ''): CardKind {
+  const text = normalizeOracleForEtb(oracleText);
+  const isShock = text.includes('you may pay 2 life') && text.includes('enters tapped');
+  const isCheck = text.includes('enters tapped unless you control a');
+  const isFast = text.includes('two or fewer other lands');
+  const isSlow = text.includes('two or more other lands');
+  const isBattle = text.includes('two or more basic lands');
+  const isTurn = text.includes('first, second, or third turn');
+  const isBounce = text.includes('enters tapped') && text.includes('return a land you control');
+  const isSurveil = text.includes('enters tapped') && text.includes('surveil');
+  const isTriome = text.includes('enters tapped') && basicLandTypeCount(typeLine) >= 3;
+  const isCycling = text.includes('enters tapped') && text.includes('cycling');
+  const isTap = text.includes('enters tapped');
+  const isFetch =
+    text.includes('search your library') &&
+    (text.includes('sacrifice') || text.includes('sac ')) &&
+    (text.includes('basic land') ||
+      text.includes('plains') ||
+      text.includes('island') ||
+      text.includes('swamp') ||
+      text.includes('mountain') ||
+      text.includes('forest'));
+  const isCanopy =
+    text.includes('draw a card') &&
+    (text.includes('sacrifice this land') || text.includes('sacrifice ~'));
+  const isPain =
+    text.includes('deals 1 damage to you') && !text.includes('enters tapped') && !isCanopy;
+  const isPathway = name.toLowerCase().includes('pathway');
   const isBasic = typeLine.includes('Basic Land');
+
   if (isShock) return CardKind.ShockLand;
   if (isCheck) return CardKind.CheckLand;
+  if (isFast) return CardKind.FastLand;
+  if (isSlow) return CardKind.SlowLand;
+  if (isBattle) return CardKind.BattleLand;
+  if (isTurn) return CardKind.TurnLand;
+  if (isBounce) return CardKind.BounceLand;
+  if (isSurveil) return CardKind.SurveilLand;
+  if (isTriome) return CardKind.TriomeLand;
+  if (isCycling) return CardKind.CyclingLand;
   if (isTap) return CardKind.TapLand;
+  if (isFetch) return CardKind.FetchLand;
+  if (isCanopy) return CardKind.CanopyLand;
+  if (isPain) return CardKind.PainLand;
+  if (isPathway) return CardKind.PathwayLand;
   if (isBasic) return CardKind.BasicLand;
   return CardKind.OtherLand;
+}
+
+/** Extract the ETB clause after "enters tapped" for mining / diagnostics. */
+export function etbClauseFromOracle(oracleText: string): string | null {
+  const text = normalizeOracleForEtb(oracleText);
+  const idx = text.indexOf('enters tapped');
+  if (idx === -1) return null;
+  let clause = text.slice(idx);
+  const end = clause.search(/[.\n]/);
+  if (end !== -1) clause = clause.slice(0, end + 1);
+  return clause.trim();
 }
 
 function colorLetter(color: ManaColor): string {
@@ -175,6 +227,8 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
   let kind: CardKind;
   let manaCost: ManaCost;
   let allManaCosts: ManaCost[];
+  let basicLandTypes = 0;
+  let checkTypes = 0;
 
   if (isLand) {
     const special = SPECIAL_LANDS.get(name);
@@ -188,8 +242,10 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
         isColor01(colorIdentity, oracleText, ManaColor.White),
         isColor01(colorIdentity, oracleText, ManaColor.Colorless),
       );
-    kind = landKindFromOracleText(oracleText, typeLine);
+    kind = landKindFromOracleText(oracleText, typeLine, name);
     allManaCosts = [manaCost];
+    basicLandTypes = basicLandTypesFromTypeLine(typeLine);
+    checkTypes = kind === CardKind.CheckLand ? checkTypesFromOracleText(oracleText) : 0;
   } else {
     kind = CardKind.Unknown;
     allManaCosts = manaCostsFromStr(manaCostStr);
@@ -214,6 +270,8 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
     rarity: parseRarity(raw.rarity ?? ''),
     set,
     isFace: raw.object === 'card_face',
+    basicLandTypes,
+    checkTypes,
   };
 }
 

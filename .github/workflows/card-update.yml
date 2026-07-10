@@ -1,0 +1,38 @@
+name: Card data update
+
+on:
+  schedule:
+    # Mondays 15:00 UTC
+    - cron: '0 15 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run card-update
+
+      - name: Create pull request if data changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'chore: refresh Scryfall card database'
+          title: 'chore: refresh Scryfall card database'
+          body: |
+            Automated weekly refresh of `data/all_cards.json.gz` from Scryfall oracle bulk data.
+          branch: chore/card-update
+          delete-branch: true
+          add-paths: |
+            data/all_cards.json.gz
