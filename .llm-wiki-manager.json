@@ -2,7 +2,5 @@
   "version": "1.0.3",
   "projectName": "landord-ts",
   "wikiDir": "wiki",
-  "focusDirs": [
-    "src"
-  ]
+  "focusDirs": ["src"]
 }

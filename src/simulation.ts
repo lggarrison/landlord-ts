@@ -1,6 +1,6 @@
-import { isLandKind, type Card } from "./card/index.js";
-import type { Deck } from "./deck.js";
-import { deckFlatten } from "./deck.js";
+import { isLandKind, type Card } from './card/index.js';
+import type { Deck } from './deck.js';
+import { deckFlatten } from './deck.js';
 import {
   autoTapWithScratch,
   countInOpeningWithDraws,
@@ -11,9 +11,9 @@ import {
   type AutoTapResult,
   type Hand,
   type SimCard,
-} from "./hand.js";
-import type { Mulligan, Rng } from "./mulligan/types.js";
-import { createEntropyRng, createMulberry32 } from "./mulligan/types.js";
+} from './hand.js';
+import type { Mulligan, Rng } from './mulligan/types.js';
+import { createEntropyRng, createMulberry32 } from './mulligan/types.js';
 
 export type SimulationConfig = {
   runCount: number;
@@ -57,23 +57,16 @@ export function pPlay(obs: Observations): number {
 }
 
 export function simulationFromConfig(config: SimulationConfig): Simulation {
-  if (config.runCount <= 0) throw new Error("runCount must be > 0");
-  const rng: Rng =
-    config.seed !== undefined
-      ? createMulberry32(config.seed)
-      : createEntropyRng();
+  if (config.runCount <= 0) throw new Error('runCount must be > 0');
+  const rng: Rng = config.seed !== undefined ? createMulberry32(config.seed) : createEntropyRng();
   const deck = deckFlatten(config.deck);
   const hands: Hand[] = [];
   for (let i = 0; i < config.runCount; i++) {
     hands.push(handFromMulligan(config.mulligan, rng, deck, config.drawCount));
   }
-  const accumulatedOpeningHandSize = hands.reduce(
-    (sum, hand) => sum + handOpening(hand).length,
-    0,
-  );
+  const accumulatedOpeningHandSize = hands.reduce((sum, hand) => sum + handOpening(hand).length, 0);
   const accumulatedOpeningHandLandCount = hands.reduce(
-    (sum, hand) =>
-      sum + countInOpeningWithDraws(hand, 0, (c) => isLandKind(c.kind)),
+    (sum, hand) => sum + countInOpeningWithDraws(hand, 0, (c) => isLandKind(c.kind)),
     0,
   );
   return {
@@ -88,11 +81,7 @@ export function observationsForCard(sim: Simulation, card: Card): Observations {
   return observationsForCardByTurn(sim, card, card.turn);
 }
 
-export function observationsForCardByTurn(
-  sim: Simulation,
-  card: Card,
-  turn: number,
-): Observations {
+export function observationsForCardByTurn(sim: Simulation, card: Card, turn: number): Observations {
   const observations = newObservations();
   observations.totalRuns = sim.hands.length;
   const scratch = newScratch(30, 10);

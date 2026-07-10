@@ -1,26 +1,20 @@
-import { gunzipSync } from "fflate";
-import { readFileSync, existsSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-import type { Card } from "./card/index.js";
-import {
-  asCollectionApi,
-  collectionFromCards,
-  type CollectionApi,
-} from "./collection.js";
+import { gunzipSync } from 'fflate';
+import { readFileSync, existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { Card } from './card/index.js';
+import { asCollectionApi, collectionFromCards, type CollectionApi } from './collection.js';
 
 function resolveDataPath(): string {
   const here = dirname(fileURLToPath(import.meta.url));
   const candidates = [
-    join(here, "../data/all_cards.json.gz"),
-    join(process.cwd(), "data/all_cards.json.gz"),
+    join(here, '../data/all_cards.json.gz'),
+    join(process.cwd(), 'data/all_cards.json.gz'),
   ];
   for (const p of candidates) {
     if (existsSync(p)) return p;
   }
-  throw new Error(
-    "Cannot find data/all_cards.json.gz — run `npm run card-update` first",
-  );
+  throw new Error('Cannot find data/all_cards.json.gz — run `npm run card-update` first');
 }
 
 export function loadCardsFromGzipBytes(bytes: Uint8Array): CollectionApi {
@@ -58,6 +52,6 @@ export const ALL_CARDS: CollectionApi = new Proxy({} as CollectionApi, {
   get(_target, prop, receiver) {
     const real = getAllCards();
     const value = Reflect.get(real, prop, receiver);
-    return typeof value === "function" ? value.bind(real) : value;
+    return typeof value === 'function' ? value.bind(real) : value;
   },
 });

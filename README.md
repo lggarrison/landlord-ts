@@ -15,7 +15,7 @@ npm install @lggarrison/landlord
 ## Usage
 
 ```ts
-import { run } from "@lggarrison/landlord";
+import { run } from '@lggarrison/landlord';
 
 const output = run({
   code: `
@@ -38,10 +38,13 @@ Input/Output field names match the mtgoncurve.com contract (`snake_case`).
 
 ```bash
 npm install
-npm run card-update   # fetch Scryfall JSONL → data/all_cards.json.gz
+npm run card-update   # fetch Scryfall bulk data → data/all_cards.json.gz
 npm test
 npm run build
+npm run release:check
 ```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the branch model, hooks, and PR checklist. Maintainers: [RELEASING.md](./RELEASING.md).
 
 ### Branching
 
@@ -57,6 +60,10 @@ npm run wiki:help
 npm run wiki:lint
 ```
 
+## Card data
+
+Shipped card data in `data/all_cards.json.gz` is derived from [Scryfall](https://scryfall.com/docs/api) bulk oracle data. This project is not affiliated with Scryfall. Regenerate with `npm run card-update`.
+
 ## License
 
-MIT
+[MIT](./LICENSE) — see also [SECURITY.md](./SECURITY.md) and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).

@@ -32,8 +32,7 @@ function recursiveFindMatch(
     if (edges[i]! !== 0 && !seen[n]) {
       seen[n] = true;
       const prior = matches[n]!;
-      const available =
-        prior < 0 || recursiveFindMatch(edges, nCount, prior, seen, matches);
+      const available = prior < 0 || recursiveFindMatch(edges, nCount, prior, seen, matches);
       if (available) {
         matches[n] = m;
         return true;

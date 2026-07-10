@@ -1,6 +1,6 @@
-import { isLand, isLandKind, type Card } from "../card/index.js";
-import { handFromOpeningAndDraws, type Hand } from "../hand.js";
-import { partialShuffle, type Mulligan, type Rng } from "./types.js";
+import { isLand, isLandKind, type Card } from '../card/index.js';
+import { handFromOpeningAndDraws, type Hand } from '../hand.js';
+import { partialShuffle, type Mulligan, type Rng } from './types.js';
 
 export const STARTING_HAND_SIZE = 7;
 
@@ -41,10 +41,7 @@ export function londonSimulateHand(
   const startingHandSize = Math.min(self.startingHandSize, deckSize);
   const mulliganDownTo = Math.min(self.mulliganDownTo, startingHandSize);
   const maxMulliganRounds = startingHandSize - mulliganDownTo + 1;
-  const cardsToDraw = Math.min(
-    startingHandSize + draws + maxMulliganRounds,
-    deckSize,
-  );
+  const cardsToDraw = Math.min(startingHandSize + draws + maxMulliganRounds, deckSize);
 
   const indexRange = Array.from({ length: deckSize }, (_, i) => i);
   const mustKeepCardIndices: number[] = [];
@@ -80,8 +77,7 @@ export function londonSimulateHand(
 
     const disregardFoundAcceptableHand = self.acceptableHandList.length === 0;
     const keep =
-      isLastRound ||
-      (sufficientLandCount && (disregardFoundAcceptableHand || foundAcceptableHand));
+      isLastRound || (sufficientLandCount && (disregardFoundAcceptableHand || foundAcceptableHand));
 
     if (!keep) continue;
 
@@ -90,8 +86,7 @@ export function londonSimulateHand(
     for (let i = 0; i < startingHand.length; i++) {
       const card = startingHand[i]!;
       if (!isLandKind(card.kind)) continue;
-      const needMoreLands =
-        self.mulliganOnLands.has(landsSaved) && landsSaved < openingHandSize;
+      const needMoreLands = self.mulliganOnLands.has(landsSaved) && landsSaved < openingHandSize;
       if (needMoreLands) {
         mustKeepCardIndices.push(i);
         landsSaved += 1;
@@ -133,7 +128,7 @@ export function londonSimulateHand(
     );
   }
 
-  throw new Error("unreachable: london mulligan failed to keep a hand");
+  throw new Error('unreachable: london mulligan failed to keep a hand');
 }
 
 export function asLondonMulligan(london: London): Mulligan {

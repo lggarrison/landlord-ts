@@ -1,0 +1,8 @@
+dist
+node_modules
+coverage
+wiki/index.md
+.husky/_
+*.tgz
+data
+package-lock.json

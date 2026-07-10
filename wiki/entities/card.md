@@ -6,7 +6,8 @@ tags: [src, card]
 related: [entities/src.md, entities/collection.md]
 status: active
 summary: Card, CardKind, ManaCost, and ManaColorCount types.
-code_refs: [src/card/index.ts, src/card/types.ts, src/card/mana-cost.ts, src/card/mana-color-count.ts]
+code_refs:
+  [src/card/index.ts, src/card/types.ts, src/card/mana-cost.ts, src/card/mana-color-count.ts]
 ---
 
 # Card

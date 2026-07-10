@@ -12,13 +12,13 @@ summary: Hub for immutable ingested artifacts under raw/.
 
 Immutable ingested artifacts live here. **Never edit** files after ingestion.
 
-| Folder | Use |
-| --- | --- |
-| [articles/](articles/) | Long-form articles, blog posts, external docs |
-| [prs/](prs/) | Pull request exports, review threads |
-| [tickets/](tickets/) | Issue tracker dumps |
-| [design-notes/](design-notes/) | Informal design notes |
-| [transcripts/](transcripts/) | Meeting / chat transcripts |
-| [assets/](assets/) | Images and diagrams (Obsidian attachments) |
+| Folder                         | Use                                           |
+| ------------------------------ | --------------------------------------------- |
+| [articles/](articles/)         | Long-form articles, blog posts, external docs |
+| [prs/](prs/)                   | Pull request exports, review threads          |
+| [tickets/](tickets/)           | Issue tracker dumps                           |
+| [design-notes/](design-notes/) | Informal design notes                         |
+| [transcripts/](transcripts/)   | Meeting / chat transcripts                    |
+| [assets/](assets/)             | Images and diagrams (Obsidian attachments)    |
 
 After adding a raw file, create a matching summary in `sources/` and log an ingest operation.

@@ -1,4 +1,4 @@
-import type { ManaCost } from "./mana-cost.js";
+import type { ManaCost } from './mana-cost.js';
 
 export type ManaColorCount = {
   total: number;
@@ -52,34 +52,34 @@ export function countManaColor(mcc: ManaColorCount, card: ManaCost): void {
   mcc.c += card.c;
   const key = `${card.r},${card.g},${card.b},${card.u},${card.w}`;
   switch (key) {
-    case "1,1,0,0,0":
+    case '1,1,0,0,0':
       mcc.rg += 1;
       break;
-    case "1,0,1,0,0":
+    case '1,0,1,0,0':
       mcc.br += 1;
       break;
-    case "1,0,0,1,0":
+    case '1,0,0,1,0':
       mcc.ur += 1;
       break;
-    case "1,0,0,0,1":
+    case '1,0,0,0,1':
       mcc.rw += 1;
       break;
-    case "0,1,1,0,0":
+    case '0,1,1,0,0':
       mcc.bg += 1;
       break;
-    case "0,1,0,1,0":
+    case '0,1,0,1,0':
       mcc.gu += 1;
       break;
-    case "0,1,0,0,1":
+    case '0,1,0,0,1':
       mcc.gw += 1;
       break;
-    case "0,0,1,1,0":
+    case '0,0,1,1,0':
       mcc.ub += 1;
       break;
-    case "0,0,1,0,1":
+    case '0,0,1,0,1':
       mcc.wb += 1;
       break;
-    case "0,0,0,1,1":
+    case '0,0,0,1,1':
       mcc.wu += 1;
       break;
   }

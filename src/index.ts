@@ -1,5 +1,5 @@
-export { run } from "./run.js";
-export type { RunInput, RunOutput, CardObservation, MtgOnCurveCard } from "./run.js";
+export { run } from './run.js';
+export type { RunInput, RunOutput, CardObservation, MtgOnCurveCard } from './run.js';
 
 export {
   CardKind,
@@ -10,27 +10,29 @@ export {
   hashCardName,
   isLand,
   isLandKind,
-} from "./card/index.js";
-export type { Card, ManaCost, ManaColorCount } from "./card/index.js";
+} from './card/index.js';
+export type { Card, ManaCost, ManaColorCount } from './card/index.js';
 
-export { deckFromList, decklist, deckFromCards, deckFlatten } from "./deck.js";
-export type { Deck, DeckCard } from "./deck.js";
+export { deckFromList, decklist, deckFromCards, deckFlatten } from './deck.js';
+export type { Deck, DeckCard } from './deck.js';
 
-export { ALL_CARDS, getAllCards, setAllCards, loadCardsFromGzipBytes } from "./data.js";
+export { ALL_CARDS, getAllCards, setAllCards, loadCardsFromGzipBytes } from './data.js';
 export {
   landKindFromOracleText,
   scryfallCardToCard,
   scryfallCardsToCards,
   SPECIAL_LANDS,
-} from "./scryfall.js";
-export type { ScryfallCard } from "./scryfall.js";
+} from './scryfall.js';
+export type { ScryfallCard } from './scryfall.js';
 
 export {
   simulationFromConfig,
   observationsForCard,
   pManaGivenCmc,
-} from "./simulation.js";
-export type { Observations, Simulation } from "./simulation.js";
+  pMana,
+  pPlay,
+} from './simulation.js';
+export type { Observations, Simulation } from './simulation.js';
 
 export {
   handFromOpeningAndDraws,
@@ -38,11 +40,11 @@ export {
   playCmcAutoTap,
   drawCmcAutoTap,
   PlayOrder,
-} from "./hand.js";
+} from './hand.js';
 
 export {
   londonNever,
   asLondonMulligan,
   asNeverMulligan,
   createMulberry32,
-} from "./mulligan/index.js";
+} from './mulligan/index.js';

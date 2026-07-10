@@ -1,15 +1,9 @@
 /**
  * Simulation hands and auto-tap — port of hand.rs + TapLand delay from feat/enters-tapped-lands.
  */
-import { maximumBipartiteMatching } from "./bipartite.js";
-import {
-  CardKind,
-  isLandKind,
-  emptyManaCost,
-  type Card,
-  type ManaCost,
-} from "./card/index.js";
-import type { Mulligan, Rng } from "./mulligan/types.js";
+import { maximumBipartiteMatching } from './bipartite.js';
+import { CardKind, isLandKind, emptyManaCost, type Card, type ManaCost } from './card/index.js';
+import type { Mulligan, Rng } from './mulligan/types.js';
 
 export type SimCard = {
   hash: number;
@@ -26,8 +20,8 @@ export function simCardFromCard(card: Card): SimCard {
 }
 
 export enum PlayOrder {
-  First = "First",
-  Second = "Second",
+  First = 'First',
+  Second = 'Second',
 }
 
 export type AutoTapResult = {
@@ -68,10 +62,7 @@ export type Hand = {
   mulliganCount: number;
 };
 
-export function handFromOpeningAndDraws(
-  opening: readonly Card[],
-  draws: readonly Card[],
-): Hand {
+export function handFromOpeningAndDraws(opening: readonly Card[], draws: readonly Card[]): Hand {
   const cards: SimCard[] = [];
   for (const card of opening) cards.push(simCardFromCard(card));
   for (const card of draws) cards.push(simCardFromCard(card));
@@ -99,10 +90,7 @@ export function handOpening(hand: Hand): SimCard[] {
 }
 
 export function handDraws(hand: Hand, drawCount: number): SimCard[] {
-  return hand.cards.slice(
-    hand.openingHandSize,
-    hand.openingHandSize + drawCount,
-  );
+  return hand.cards.slice(hand.openingHandSize, hand.openingHandSize + drawCount);
 }
 
 export function handOpeningWithDraws(hand: Hand, drawCount: number): SimCard[] {
@@ -174,8 +162,7 @@ export function autoTapWithScratch(
   for (let drawIdx = 0; drawIdx < drawn.length; drawIdx++) {
     const card = drawn[drawIdx]!;
     if (card.kind === CardKind.TapLand) {
-      const playTurn =
-        playOrder === PlayOrder.First ? drawIdx + 2 : drawIdx + 1;
+      const playTurn = playOrder === PlayOrder.First ? drawIdx + 2 : drawIdx + 1;
       if (taplandTapsOnTurn(playTurn) <= turn) {
         scratch.lands.push(card);
       }
