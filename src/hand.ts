@@ -205,7 +205,40 @@ export function availableTurnForLand(
 }
 
 /**
- * Board-aware auto-tap: FIFO play order among lands in hand; conditional ETB delay.
+ * Assign play turns: earliest legal turn from opening index / draw turn,
+ * then one land per turn (max(earliest, lastPlay + 1)).
+ */
+export function scheduleLandPlays(
+  openingHand: readonly SimCard[],
+  drawn: readonly SimCard[],
+  playOrder: PlayOrder,
+): { card: SimCard; playTurn: number }[] {
+  const candidates: { card: SimCard; earliest: number }[] = [];
+  let openingLandIdx = 0;
+  for (const card of openingHand) {
+    if (!isLandKind(card.kind)) continue;
+    openingLandIdx += 1;
+    candidates.push({ card, earliest: openingLandIdx });
+  }
+  for (let drawIdx = 0; drawIdx < drawn.length; drawIdx++) {
+    const card = drawn[drawIdx]!;
+    if (!isLandKind(card.kind)) continue;
+    const earliest = playOrder === PlayOrder.First ? drawIdx + 2 : drawIdx + 1;
+    candidates.push({ card, earliest });
+  }
+
+  const scheduled: { card: SimCard; playTurn: number }[] = [];
+  let lastPlayTurn = 0;
+  for (const { card, earliest } of candidates) {
+    const playTurn = Math.max(earliest, lastPlayTurn + 1);
+    scheduled.push({ card, playTurn });
+    lastPlayTurn = playTurn;
+  }
+  return scheduled;
+}
+
+/**
+ * Board-aware auto-tap: calendar play turns + conditional ETB delay.
  * Basics/Other/Forced/Shock/Pain/Fetch/Canopy/Pathway remain available whenever drawn.
  */
 export function autoTapWithScratch(
@@ -228,20 +261,13 @@ export function autoTapWithScratch(
     if (card.hash === goal.hash) inDrawHand = true;
   }
 
-  const landsInHand: SimCard[] = [];
-  for (const card of openingHand) {
-    if (isLandKind(card.kind)) landsInHand.push(card);
-  }
-  for (const card of drawn) {
-    if (isLandKind(card.kind)) landsInHand.push(card);
-  }
+  const scheduled = scheduleLandPlays(openingHand, drawn, playOrder);
 
   scratch.lands.length = 0;
   let boardTypes = 0;
   let basicsOnBoard = 0;
-  for (let i = 0; i < landsInHand.length; i++) {
-    const card = landsInHand[i]!;
-    const playTurn = i + 1;
+  for (let i = 0; i < scheduled.length; i++) {
+    const { card, playTurn } = scheduled[i]!;
     const otherLands = i;
 
     if (isAlwaysAvailableKind(card.kind)) {

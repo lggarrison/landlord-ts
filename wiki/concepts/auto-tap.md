@@ -1,7 +1,7 @@
 ---
 type: concept
 title: Auto-tap
-last_updated: 2026-07-10T20:05:00Z
+last_updated: 2026-07-10T22:15:00Z
 tags: [simulation, mana]
 related: [entities/hand.md, entities/bipartite.md]
 status: active
@@ -13,7 +13,7 @@ code_refs: [src/hand.ts, src/bipartite.ts]
 
 Lands drawn by the goal turn become columns; mana pips become rows. A spell is paid if matching size equals pip count. Hybrid costs try each expansion until one pays.
 
-Lands in hand are ordered FIFO (opening, then draws) and assigned play turns `1..n` for board state. **Basics / Other / Forced / Shock / Pain / Fetch / Canopy / Pathway** stay available whenever drawn by the goal turn (Karsten “sources in hand”). Conditional lands gate on `availableTurn <= goalTurn`:
+Lands are scheduled with an earliest play turn (opening lands `1..n` in hand order; drawn lands use the calendar draw turn), then compressed to one land per turn. **Basics / Other / Forced / Shock / Pain / Fetch / Canopy / Pathway** stay available whenever drawn by the goal turn (Karsten “sources in hand”). Conditional lands gate on `availableTurn <= goalTurn`:
 
 | Kind                                          | Untapped when                                |
 | --------------------------------------------- | -------------------------------------------- |

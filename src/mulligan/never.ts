@@ -27,7 +27,7 @@ export function neverSimulateHand(
   return handFromOpeningAndDraws(
     shuffledDeck.slice(0, startingHandSize),
     shuffledDeck.slice(startingHandSize),
-    self.startingHandSize,
+    startingHandSize,
   );
 }
 

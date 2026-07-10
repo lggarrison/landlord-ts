@@ -72,6 +72,7 @@ describe('deck M=auto and auto face-detect', () => {
       oracleId: 'oracle-1',
       kind: CardKind.OtherLand,
       manaCost: manaCostFromRgbuwc(0, 0, 1, 0, 0, 0),
+      manaCostString: '{B}',
       turn: 1,
     });
     setAllCards(asCollectionApi(collectionFromCards([spell, land])));
@@ -79,6 +80,7 @@ describe('deck M=auto and auto face-detect', () => {
     expect(deck.cards).toHaveLength(1);
     expect(deck.cards[0]!.card.kind).toBe(CardKind.ForcedLand);
     expect(deck.cards[0]!.card.manaCost.b).toBe(1);
+    expect(deck.cards[0]!.card.manaCostString).toBe('{B}');
     expect(isLand(deck.cards[0]!.card)).toBe(true);
   });
 
@@ -95,12 +97,14 @@ describe('deck M=auto and auto face-detect', () => {
       oracleId: 'oracle-1',
       kind: CardKind.OtherLand,
       manaCost: manaCostFromRgbuwc(0, 0, 1, 0, 0, 0),
+      manaCostString: '{B}',
       turn: 1,
     });
     setAllCards(asCollectionApi(collectionFromCards([spell, land])));
     const deck = deckFromList('1 Bala Ged Recovery');
     expect(deck.cards[0]!.card.kind).toBe(CardKind.ForcedLand);
     expect(deck.cards[0]!.card.manaCost.b).toBe(1);
+    expect(deck.cards[0]!.card.manaCostString).toBe('{B}');
   });
 });
 
@@ -387,5 +391,72 @@ describe('auto-tap board-aware lands', () => {
     expect(playCmcAutoTap(lateHand, red).paid).toBe(false);
     red.turn = 5;
     expect(playCmcAutoTap(lateHand, red).paid).toBe(true);
+  });
+
+  it('TapLand drawn on the play is not available the turn it is drawn', () => {
+    const filler = makeCard({
+      name: 'Opt',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+    });
+    const tap = makeCard({
+      name: 'Guildgate',
+      kind: CardKind.TapLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+    });
+    const spell = makeCard({
+      name: 'Negate',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 1, 0, 0)],
+      turn: 2,
+    });
+    // Opening has no lands; first draw (turn 2 OTP) is the TapLand → playTurn 2 → available T3
+    const hand = handFromOpeningAndDraws([filler, spell], [tap]);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(false);
+    spell.turn = 3;
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+  });
+
+  it('TurnLand drawn on turn 4 enters tapped', () => {
+    const fillers = [1, 2, 3].map((n) =>
+      makeCard({
+        name: `Spell${n}`,
+        kind: CardKind.Instant,
+        manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+      }),
+    );
+    const town = makeCard({
+      name: 'Starting Town',
+      kind: CardKind.TurnLand,
+      manaCost: manaCostFromRgbuwc(1, 0, 0, 0, 0, 0),
+    });
+    const spell = makeCard({
+      name: 'Bolt',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(1, 0, 0, 0, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(1, 0, 0, 0, 0, 0)],
+      turn: 4,
+    });
+    // OTP draws: T2, T3, T4 — town is third draw → playTurn 4 → tapped
+    const hand = handFromOpeningAndDraws(
+      [...fillers, spell],
+      [
+        makeCard({
+          name: 'D1',
+          kind: CardKind.Instant,
+          manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+        }),
+        makeCard({
+          name: 'D2',
+          kind: CardKind.Instant,
+          manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+        }),
+        town,
+      ],
+    );
+    expect(playCmcAutoTap(hand, spell).paid).toBe(false);
+    spell.turn = 5;
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
   });
 });

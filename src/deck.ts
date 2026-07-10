@@ -101,6 +101,7 @@ function stripInlineModifiersFromName(name: string): string {
 function applyLandFaceFromCard(card: Card, landFace: Card): void {
   card.manaCost = { ...landFace.manaCost };
   card.allManaCosts = landFace.allManaCosts.map((c) => ({ ...c }));
+  card.manaCostString = landFace.manaCostString;
   card.turn = landFace.turn;
   card.kind = CardKind.ForcedLand;
   card.basicLandTypes = landFace.basicLandTypes ?? 0;
