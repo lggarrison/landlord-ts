@@ -1,23 +1,23 @@
 ---
 type: source
 title: Magic Comprehensive Rules (2026-06-19)
-last_updated: 2026-07-10T22:55:00Z
+last_updated: 2026-07-10T23:20:00Z
 tags: [mtg, rules, lands, mana]
 related: [concepts/land-kinds.md, concepts/auto-tap.md, entities/card.md]
 status: active
-summary: Official MTG Comprehensive Rules effective 2026-06-19 — authority for land types, mana, and ETB wording landlord approximates.
+summary: Provenance for MTG Comprehensive Rules (2026-06-19) — upstream URL only; landlord-relevant CR section map.
 sources: [raw/articles/magic-comprehensive-rules-20260619.md]
 ---
 
 # Magic Comprehensive Rules (2026-06-19)
 
-Ingested from Wizards of the Coast:
+Official competitive rules for Magic: The Gathering (Wizards of the Coast copyright).
 
 - URL: https://media.wizards.com/2026/downloads/MagicCompRules%2020260619.txt
 - Effective: June 19, 2026
-- Raw artifact: `raw/articles/magic-comprehensive-rules-20260619.md` (immutable)
+- Raw artifact: `raw/articles/magic-comprehensive-rules-20260619.md` (provenance stub — **not** the full CR text)
 
-This is the competitive rules authority for Magic. landlord does **not** implement a rules engine; it approximates mana availability for on-curve Monte Carlo. Use this source when classifying lands or debating whether a sim shortcut matches CR intent.
+This MIT-licensed repo does not redistribute the verbatim Comprehensive Rules. Fetch the official download when you need the full document. landlord does **not** implement a rules engine; it approximates mana availability for on-curve Monte Carlo. Use this source when classifying lands or debating whether a sim shortcut matches CR intent.
 
 ## Sections most relevant to landlord
 

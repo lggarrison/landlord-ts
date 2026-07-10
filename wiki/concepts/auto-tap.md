@@ -1,7 +1,7 @@
 ---
 type: concept
 title: Auto-tap
-last_updated: 2026-07-10T22:55:00Z
+last_updated: 2026-07-10T23:20:00Z
 tags: [simulation, mana]
 related:
   [
@@ -30,16 +30,16 @@ Land kind taxonomy (ETB vs always-available) lives in [Land kinds](land-kinds.md
 
 ## Availability
 
-**Basics / Other / Forced / Shock / Pain / Fetch / Canopy / Pathway** stay available whenever drawn by the goal turn (Karsten “sources in hand”). Conditional lands gate on `availableTurn <= goalTurn`:
+**`BasicLand` / `OtherLand` / `ForcedLand` / `ShockLand` / `PainLand` / `FetchLand` / `CanopyLand` / `PathwayLand`** stay available whenever drawn by the goal turn (Karsten “sources in hand”). Conditional lands gate on `availableTurn <= goalTurn`:
 
-| Kind                                          | Untapped when                                |
-| --------------------------------------------- | -------------------------------------------- |
-| TapLand / Surveil / Bounce / Triome / Cycling | never on play turn (`playTurn + 1`)          |
-| CheckLand                                     | board already has a required basic land type |
-| FastLand                                      | `otherLands <= 2`                            |
-| SlowLand                                      | `otherLands >= 2` (any lands)                |
-| BattleLand                                    | `basicsOnBoard >= 2` (Basic-supertype only)  |
-| TurnLand                                      | `playTurn <= 3` (e.g. Starting Town)         |
+| Kind                                                                    | Untapped when                                |
+| ----------------------------------------------------------------------- | -------------------------------------------- |
+| `TapLand` / `SurveilLand` / `BounceLand` / `TriomeLand` / `CyclingLand` | never on play turn (`playTurn + 1`)          |
+| `CheckLand`                                                             | board already has a required basic land type |
+| `FastLand`                                                              | `otherLands <= 2`                            |
+| `SlowLand`                                                              | `otherLands >= 2` (any lands)                |
+| `BattleLand`                                                            | `basicsOnBoard >= 2` (Basic-supertype only)  |
+| `TurnLand`                                                              | `playTurn <= 3` (e.g. Starting Town)         |
 
 Shock lands always pay 2 life (always untapped). Basic land types on every land (from `type_line`) unlock Checks — including Shock duals. Battlelands require actual basics, not duals with basic types.
 
