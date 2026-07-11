@@ -6,13 +6,13 @@ import {
   BasicLandType,
   basicLandTypesFromTypeLine,
   checkTypesFromOracleText,
+  emptyCard,
 } from '../src/card/index.js';
 import { maximumBipartiteMatching } from '../src/bipartite.js';
 import { landKindFromOracleText, SPECIAL_LANDS, MULTI_MANA_LANDS } from '../src/scryfall.js';
 import { availableTurnForLand, type SimCard } from '../src/hand.js';
 import { wilsonHalfWidth } from '../src/simulation.js';
 import { emptyManaCost } from '../src/card/mana-cost.js';
-import { emptyCard } from '../src/card/index.js';
 
 describe('manaCostsFromStr', () => {
   it('parses empty string', () => {
