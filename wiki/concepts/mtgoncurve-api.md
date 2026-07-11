@@ -1,7 +1,7 @@
 ---
 type: concept
 title: mtgoncurve API
-last_updated: 2026-07-11T01:35:00Z
+last_updated: 2026-07-11T01:40:00Z
 tags: [api]
 related:
   [
@@ -34,10 +34,11 @@ const output = run({
   mulligan_down_to,
   mulligan_on_lands,
   acceptable_hand_list,
-  seed?,
-  starting_hand_size?,
-  epsilon?,
-  parallel?,
+  // Optional:
+  // seed,
+  // starting_hand_size,
+  // epsilon,
+  // parallel,
 });
 ```
 
@@ -50,9 +51,10 @@ import { runAsync } from '@lggarrison/landlord-ts';
 
 const output = await runAsync({
   ...runInput,
-  batch_size?, // default 500; ignored when epsilon is set
-  signal?, // AbortSignal — stops between batches
-  on_progress?: ({ completed, total }) => {
+  // Optional:
+  // batch_size: 500, // ignored when epsilon is set
+  // signal, // AbortSignal — stops between batches
+  on_progress: ({ completed, total }) => {
     /* e.g. write an SSE event */
   },
 });

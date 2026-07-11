@@ -288,10 +288,13 @@ export async function simulationFromConfigAsync(
   const total = config.runCount;
   const deck = deckFlatten(config.deck);
   const playOrder = config.onThePlay ? PlayOrder.First : PlayOrder.Second;
+  // Yield only when a host may need to flush progress or observe cancellation.
+  const shouldYield = onProgress !== undefined || signal !== undefined;
 
   const report = async (completed: number) => {
     throwIfAborted(signal);
     onProgress?.({ completed, total });
+    if (!shouldYield) return;
     await yieldMacrotask();
     throwIfAborted(signal);
   };

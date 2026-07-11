@@ -40,3 +40,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T01:23:15Z] maintenance | runAsync AbortSignal, epsilon batch parity, CHANGELOG Unreleased
 
 ## [2026-07-11T01:31:20Z] maintenance | Address Copilot review: epsilon cards required, SSE close-once, absolute README wiki links
+
+## [2026-07-11T01:37:33Z] maintenance | Skip async yield without progress/signal; fix wiki TS examples
