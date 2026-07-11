@@ -459,4 +459,53 @@ describe('auto-tap board-aware lands', () => {
     spell.turn = 5;
     expect(playCmcAutoTap(hand, spell).paid).toBe(true);
   });
+
+  it('Ancient Tomb manaPerTap=2 pays two generic pips from one land', () => {
+    const tomb = makeCard({
+      name: 'Ancient Tomb',
+      kind: CardKind.OtherLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+      manaPerTap: 2,
+    });
+    const spell = makeCard({
+      name: 'Two Generic',
+      kind: CardKind.Sorcery,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 2),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 0, 0, 2)],
+      manaCostString: '{2}',
+      turn: 1,
+    });
+    const hand = handFromOpeningAndDraws([tomb, spell], []);
+    const result = playCmcAutoTap(hand, spell);
+    expect(result.cmc).toBe(true);
+    expect(result.paid).toBe(true);
+  });
+
+  it('Lotus Field manaPerTap=3 pays three colored pips after TapLand ETB delay', () => {
+    const lotus = makeCard({
+      name: 'Lotus Field',
+      kind: CardKind.TapLand,
+      manaCost: manaCostFromRgbuwc(1, 1, 1, 1, 1, 0),
+      manaPerTap: 3,
+    });
+    const island = makeCard({
+      name: 'Island',
+      kind: CardKind.BasicLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island,
+    });
+    const spell = makeCard({
+      name: 'Three Green',
+      kind: CardKind.Sorcery,
+      manaCost: manaCostFromRgbuwc(0, 3, 0, 0, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(0, 3, 0, 0, 0, 0)],
+      manaCostString: '{G}{G}{G}',
+      turn: 2,
+    });
+    // Opening: lotus + island + spell. Lotus plays turn 1 (tapped), available turn 2.
+    const hand = handFromOpeningAndDraws([lotus, island, spell], []);
+    const result = playCmcAutoTap(hand, spell);
+    expect(result.cmc).toBe(true);
+    expect(result.paid).toBe(true);
+  });
 });

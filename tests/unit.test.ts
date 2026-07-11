@@ -6,9 +6,10 @@ import {
   BasicLandType,
   basicLandTypesFromTypeLine,
   checkTypesFromOracleText,
+  emptyCard,
 } from '../src/card/index.js';
 import { maximumBipartiteMatching } from '../src/bipartite.js';
-import { landKindFromOracleText } from '../src/scryfall.js';
+import { landKindFromOracleText, SPECIAL_LANDS, MULTI_MANA_LANDS } from '../src/scryfall.js';
 import { availableTurnForLand, type SimCard } from '../src/hand.js';
 import { wilsonHalfWidth } from '../src/simulation.js';
 import { emptyManaCost } from '../src/card/mana-cost.js';
@@ -196,6 +197,44 @@ describe('landKindFromOracleText', () => {
   });
 });
 
+describe('SPECIAL_LANDS chooser lands', () => {
+  it('models Cavern of Souls as rainbow', () => {
+    expect(SPECIAL_LANDS.get('Cavern of Souls')).toEqual(manaCostFromRgbuwc(1, 1, 1, 1, 1, 1));
+  });
+
+  it('models Secluded Courtyard as rainbow', () => {
+    expect(SPECIAL_LANDS.get('Secluded Courtyard')).toEqual(manaCostFromRgbuwc(1, 1, 1, 1, 1, 1));
+  });
+
+  it('models Unclaimed Territory as rainbow', () => {
+    expect(SPECIAL_LANDS.get('Unclaimed Territory')).toEqual(manaCostFromRgbuwc(1, 1, 1, 1, 1, 1));
+  });
+
+  it('models Ancient Ziggurat as rainbow without a colorless flag (no plain {C} ability)', () => {
+    expect(SPECIAL_LANDS.get('Ancient Ziggurat')).toEqual(manaCostFromRgbuwc(1, 1, 1, 1, 1, 0));
+  });
+
+  it('models Pillar of the Paruns as rainbow without a colorless flag (no plain {C} ability)', () => {
+    expect(SPECIAL_LANDS.get('Pillar of the Paruns')).toEqual(manaCostFromRgbuwc(1, 1, 1, 1, 1, 0));
+  });
+});
+
+describe('manaPerTap', () => {
+  it('defaults emptyCard manaPerTap to 1', () => {
+    expect(emptyCard().manaPerTap).toBe(1);
+  });
+
+  it('maps Ancient Tomb to 2 and Lotus Field to 3', () => {
+    expect(MULTI_MANA_LANDS.get('Ancient Tomb')).toBe(2);
+    expect(MULTI_MANA_LANDS.get('Lotus Field')).toBe(3);
+    expect(MULTI_MANA_LANDS.get('Island')).toBeUndefined();
+  });
+
+  it('models Lotus Field as rainbow without a colorless flag', () => {
+    expect(SPECIAL_LANDS.get('Lotus Field')).toEqual(manaCostFromRgbuwc(1, 1, 1, 1, 1, 0));
+  });
+});
+
 describe('basic land type parsing', () => {
   it('parses dual type lines', () => {
     expect(basicLandTypesFromTypeLine('Land — Island Mountain')).toBe(
@@ -218,6 +257,7 @@ describe('availableTurnForLand', () => {
       manaCost: emptyManaCost(),
       basicLandTypes,
       checkTypes,
+      manaPerTap: 1,
     };
   }
 

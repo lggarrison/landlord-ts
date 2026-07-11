@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Hand
-last_updated: 2026-07-10T22:50:00Z
-tags: [src, hand]
+last_updated: 2026-07-11T00:35:02Z
+tags: [hand, src]
 related: [concepts/auto-tap.md, concepts/land-kinds.md, entities/bipartite.md]
 status: active
 summary: Opening hand + draws; calendar land schedule and board-aware auto-tap.

@@ -220,6 +220,7 @@ export function simulationFromConfigAdaptive(
               kind: card.kind,
               basicLandTypes: card.basicLandTypes ?? 0,
               checkTypes: card.checkTypes ?? 0,
+              manaPerTap: card.manaPerTap ?? 1,
             };
             result = autoTapWithScratch(hand, goal, card.turn, playOrder, scratch);
             if (result.paid) break;
@@ -262,6 +263,7 @@ export function observationsForCardByTurn(sim: Simulation, card: Card, turn: num
         kind: card.kind,
         basicLandTypes: card.basicLandTypes ?? 0,
         checkTypes: card.checkTypes ?? 0,
+        manaPerTap: card.manaPerTap ?? 1,
       };
       result = autoTapWithScratch(hand, goal, turn, playOrder, scratch);
       if (result.paid) break;

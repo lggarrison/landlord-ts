@@ -110,6 +110,57 @@ export const SPECIAL_LANDS: ReadonlyMap<string, ManaCost> = new Map([
   ['Riverglide Pathway', manaCostFromRgbuwc(0, 0, 0, 1, 0, 0)],
   ['Lavaglide Pathway', manaCostFromRgbuwc(1, 0, 0, 0, 0, 0)],
   ['Kor Haven', manaCostFromRgbuwc(0, 0, 0, 0, 0, 1)],
+  // Chooser / tribal lands: "Add one mana of any color. Spend this mana only to cast
+  // [a spell of a chosen/specific type]..." — modeled as rainbow, assuming the player
+  // always chooses a type/restriction that matches the goal spell (same approximation as Command Tower).
+  ['Cavern of Souls', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Secluded Courtyard', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Unclaimed Territory', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Ancient Ziggurat', manaCostFromRgbuwc(1, 1, 1, 1, 1, 0)],
+  ['Pillar of the Paruns', manaCostFromRgbuwc(1, 1, 1, 1, 1, 0)],
+  ['Abundant Countryside', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Ally Encampment', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['A-Base Camp', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Avengers Tower', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Base Camp', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Brotherhood Headquarters', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Bucolic Ranch', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Castle Doom', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Corrupted Crossroads', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Echoing Cavern', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Eclipsed Realms', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Gallifrey Council Chamber', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Great Hall of the Biblioplex', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Haven of the Spirit Dragon', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Jasmine Dragon Tea Shop', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Maelstrom of the Spirit Dragon', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Mech Hangar', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Plaza of Heroes', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Power Depot', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Primal Beyond', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Sliver Hive', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['The Seedcore', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Turtle Lair', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Villainous Hideout', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Voldaren Estate', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['White Lotus Hideout', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Second City', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Secret Base', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Tarkir Omenpath', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Underdome', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  // Lotus Field: "Add three mana of any one color." Modeled as WUBRG + manaPerTap=3,
+  // which overestimates multicolor costs (matcher can spend the 3 units as different colors).
+  ['Lotus Field', manaCostFromRgbuwc(1, 1, 1, 1, 1, 0)],
+]);
+
+/**
+ * Lands with a fixed (board-state-independent) mana-per-tap greater than 1.
+ * Lotus Field pairs with the SPECIAL_LANDS rainbow override above; see that comment
+ * for the single-color-vs-multicolor overestimate.
+ */
+export const MULTI_MANA_LANDS: ReadonlyMap<string, number> = new Map([
+  ['Ancient Tomb', 2],
+  ['Lotus Field', 3],
 ]);
 
 /**
@@ -229,6 +280,7 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
   let allManaCosts: ManaCost[];
   let basicLandTypes = 0;
   let checkTypes = 0;
+  let manaPerTap = 1;
 
   if (isLand) {
     const special = SPECIAL_LANDS.get(name);
@@ -246,6 +298,7 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
     allManaCosts = [manaCost];
     basicLandTypes = basicLandTypesFromTypeLine(typeLine);
     checkTypes = kind === CardKind.CheckLand ? checkTypesFromOracleText(oracleText) : 0;
+    manaPerTap = MULTI_MANA_LANDS.get(name) ?? 1;
   } else {
     kind = CardKind.Unknown;
     allManaCosts = manaCostsFromStr(manaCostStr);
@@ -272,6 +325,7 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
     isFace: raw.object === 'card_face',
     basicLandTypes,
     checkTypes,
+    manaPerTap,
   };
 }
 

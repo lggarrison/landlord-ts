@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Simulation
-last_updated: 2026-07-10T19:45:00Z
-tags: [src, simulation]
+last_updated: 2026-07-11T00:35:02Z
+tags: [simulation, src]
 related: [concepts/monte-carlo-simulation.md, entities/hand.md, entities/run.md]
 status: active
 summary: Monte Carlo hand generation and per-card observations; optional parallel workers and early-stop.
