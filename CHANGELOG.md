@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-07-11
+## [1.0.0] - 2026-07-11
 
-First npm registry publish of `@lggarrison/landlord-ts` (an earlier git tag for `@lggarrison/landlord` never reached the registry).
+First stable npm registry publish of `@lggarrison/landlord-ts`.
 
 ### Added
 
@@ -32,8 +32,8 @@ First npm registry publish of `@lggarrison/landlord-ts` (an earlier git tag for 
 
 - Renamed npm package from `@lggarrison/landlord` to `@lggarrison/landlord-ts` (matches the GitHub repo)
 - Renamed GitHub repository from `landord-ts` to `landlord-ts`
-- **Breaking (pre-publish):** public `RunInput` / `RunOutput` / report fields use camelCase (not snake_case)
-- **Breaking (pre-publish):** `RunProgress` requires `phase`; update `onProgress` callbacks/typings accordingly
+- Public `RunInput` / `RunOutput` / report fields use camelCase
+- `RunProgress` requires `phase`
 
-[Unreleased]: https://github.com/lggarrison/landlord-ts/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/lggarrison/landlord-ts/releases/tag/v0.1.0
+[Unreleased]: https://github.com/lggarrison/landlord-ts/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/lggarrison/landlord-ts/releases/tag/v1.0.0
