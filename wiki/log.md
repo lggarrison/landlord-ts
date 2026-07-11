@@ -32,3 +32,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T00:32:47Z] maintenance | Clarify generic vs true {C} payment and Lotus Field single-color overestimate
 
 ## [2026-07-11T00:35:28Z] maintenance | Fix entity scope-tag order (slug first, then src)
+
+## [2026-07-11T00:39:30Z] maintenance | Document Lotus Field single-color-per-tap as roadmap feature improvement

@@ -24,9 +24,9 @@
 | [Card pipeline](concepts/card-pipeline.md)                   | data, scryfall            | active | 2026-07-10T22:50:00Z |
 | [GitHub repo hygiene](concepts/github-repo-hygiene.md)       | github, process           | active | 2026-07-10T22:25:00Z |
 | [Land kinds](concepts/land-kinds.md)                         | simulation, mana, lands   | active | 2026-07-11T00:12:37Z |
-| [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:32:26Z |
+| [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:39:08Z |
 | [London mulligan](concepts/london-mulligan.md)               | mulligan                  | active | 2026-07-10T18:30:00Z |
-| [Mana source roadmap](concepts/mana-source-roadmap.md)       | simulation, mana, roadmap | wip    | 2026-07-11T00:12:37Z |
+| [Mana source roadmap](concepts/mana-source-roadmap.md)       | simulation, mana, roadmap | wip    | 2026-07-11T00:39:08Z |
 | [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation                | active | 2026-07-10T19:45:00Z |
 | [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api                       | active | 2026-07-10T20:05:00Z |
 

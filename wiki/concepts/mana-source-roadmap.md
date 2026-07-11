@@ -1,12 +1,12 @@
 ---
 type: concept
 title: Mana source roadmap
-last_updated: 2026-07-11T00:12:37Z
-aliases: [mana rocks, Gaea's Cradle, Nykthos, future mana sources]
+last_updated: 2026-07-11T00:39:08Z
+aliases: [mana rocks, Gaea's Cradle, Nykthos, future mana sources, Lotus Field single color]
 tags: [simulation, mana, roadmap]
 related: [concepts/land-mana.md, concepts/auto-tap.md, concepts/land-kinds.md, entities/hand.md]
 status: wip
-summary: Future work — board-state-dependent lands (Cradle, Nykthos) and non-land mana sources (mana rocks, dorks) are not modeled yet.
+summary: Future work — Cradle/Nykthos, mana rocks/dorks, and Lotus Field single-color-per-tap enforcement.
 code_refs: [src/hand.ts, src/scryfall.ts, src/card/types.ts]
 ---
 
@@ -28,6 +28,23 @@ A real fix would need roughly:
 
 Until then these lands keep their current single-unit-of-CI-color modeling (Cradle ≈ one green source).
 
+## Lotus Field — single color per tap
+
+**Lotus Field** is already in `SPECIAL_LANDS` (rainbow) and `MULTI_MANA_LANDS` (`manaPerTap = 3`). Code comments on both entries call out the overestimate.
+
+| Reality                                    | Current model                                       |
+| ------------------------------------------ | --------------------------------------------------- |
+| `{T}: Add three mana of any **one** color` | Three bipartite columns, each with full WUBRG flags |
+
+That lets the matcher pay multicolor costs like `{R}{G}{U}` from one Lotus Field, which is illegal under the real rules.
+
+**Feature improvement:** enforce a single chosen color across all columns produced by one tap — e.g. when expanding `manaPerTap`, either:
+
+1. Try each monocolor expansion (all-R / all-G / …) the way hybrid costs already try expansions, or
+2. Tag multi-mana columns as “linked same-color” and constrain the bipartite match so those columns share one color.
+
+Until then the optimistic approximation stands (same family as Command Tower / chooser lands). Documented for maintainers in `src/scryfall.ts` next to the Lotus Field / `MULTI_MANA_LANDS` entries; behavior summary in [Land mana](land-mana.md).
+
 ## Mana rocks / non-land mana sources
 
 Examples: **Sol Ring**, **Mind Stone**, **Arcane Signet**, the Signet cycle, mana-dork creatures like **Birds of Paradise**.
@@ -47,7 +64,7 @@ That is a materially larger feature than land `manaPerTap` and is out of scope u
 
 ## See also
 
-- [Land mana](land-mana.md) — current color / `manaPerTap` model
+- [Land mana](land-mana.md) — current color / `manaPerTap` model (including Lotus Field caveat)
 - [Auto-tap](auto-tap.md) — land-only payment matching
 - [Land kinds](land-kinds.md)
 - [Hand](../entities/hand.md)

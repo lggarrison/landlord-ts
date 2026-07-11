@@ -1,7 +1,7 @@
 ---
 type: concept
 title: Land mana
-last_updated: 2026-07-11T00:32:26Z
+last_updated: 2026-07-11T00:39:08Z
 aliases: [colorless lands, any-color mana, SPECIAL_LANDS, chooser lands, manaPerTap]
 tags: [simulation, mana, lands]
 related:
@@ -71,7 +71,7 @@ Some lands produce a **fixed** amount of mana greater than one per tap. Those ar
 | Ancient Tomb | 2            | colorless (`c=1`)                                    |
 | Lotus Field  | 3            | rainbow via `SPECIAL_LANDS` (no plain `{C}` ability) |
 
-**Lotus Field caveat:** real oracle is “Add three mana of any **one** color.” The sim models it as WUBRG × 3 columns, so it can overestimate payability for multicolor costs (e.g. `{R}{G}{U}`). Same optimistic approximation family as Command Tower / chooser lands; enforcing a single chosen color per tap would need matcher changes beyond `manaPerTap`.
+**Lotus Field caveat:** real oracle is “Add three mana of any **one** color.” The sim models it as WUBRG × 3 columns, so it can overestimate payability for multicolor costs (e.g. `{R}{G}{U}`). Same optimistic approximation family as Command Tower / chooser lands. Enforcing a single chosen color per tap is a tracked future improvement — see [Mana source roadmap](mana-source-roadmap.md#lotus-field--single-color-per-tap) (and the maintainer comments on the Lotus Field `SPECIAL_LANDS` / `MULTI_MANA_LANDS` entries in `src/scryfall.ts`).
 
 `manaPerTap` is orthogonal to `CardKind` — Lotus Field is still a `TapLand` for ETB; Ancient Tomb is `OtherLand`. Board bookkeeping (`otherLands`, `basicsOnBoard`) still counts each physical land once; only the mana-column pool is multiplied.
 
