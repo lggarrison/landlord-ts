@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial public release of `@lggarrison/landlord`
+- Initial public release of `@lggarrison/landlord-ts`
 - Pure TypeScript Monte Carlo on-curve simulator (`run()` API matching mtgoncurve.com)
 - Arena decklist parsing with `X=`, `T=`, `M=`, and `M=auto` modifiers
 - TapLand-only enters-tapped delay in auto-tap; Check/Shock immediate

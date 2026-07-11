@@ -14,7 +14,7 @@
 
 | Title                  | Scope tag | Status | Updated              |
 | ---------------------- | --------- | ------ | -------------------- |
-| [Src](entities/src.md) | src       | active | 2026-07-10T22:50:00Z |
+| [Src](entities/src.md) | src       | active | 2026-07-11T01:20:00Z |
 
 ## Concepts
 
@@ -27,8 +27,9 @@
 | [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:39:08Z |
 | [London mulligan](concepts/london-mulligan.md)               | mulligan                  | active | 2026-07-10T18:30:00Z |
 | [Mana source roadmap](concepts/mana-source-roadmap.md)       | simulation, mana, roadmap | wip    | 2026-07-11T00:39:08Z |
-| [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation                | active | 2026-07-10T19:45:00Z |
-| [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api                       | active | 2026-07-10T20:05:00Z |
+| [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation                | active | 2026-07-11T01:20:00Z |
+| [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api                       | active | 2026-07-11T01:20:00Z |
+| [Streaming progress](concepts/streaming-progress.md)         | api, nextjs               | active | 2026-07-11T01:20:00Z |
 
 ## Sources
 

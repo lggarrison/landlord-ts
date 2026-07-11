@@ -10,7 +10,7 @@ summary: Summary of the pure-TypeScript landlord port decisions (no WASM, gzippe
 
 # TS port feasibility plan
 
-Ingested from the Cursor feasibility plan for porting Rust landlord to `@lggarrison/landlord`.
+Ingested from the Cursor feasibility plan for porting Rust landlord to `@lggarrison/landlord-ts`.
 
 ## Key decisions
 

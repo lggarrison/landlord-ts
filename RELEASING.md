@@ -1,13 +1,13 @@
-# Releasing `@lggarrison/landlord`
+# Releasing `@lggarrison/landlord-ts`
 
 Day-to-day work happens on **`develop`**; releases are cut from **`main`**. Releases are **automated** by [`.github/workflows/release.yml`](.github/workflows/release.yml): when you push a `vX.Y.Z` tag whose commit is on `main`, the workflow runs `release:check`, publishes to the **npm registry** (Trusted Publishing / OIDC), creates a **GitHub Release**, and merges `main` back into `develop`.
 
 ## Quick reference
 
-|        | Link                                               |
-| ------ | -------------------------------------------------- |
-| npm    | https://www.npmjs.com/package/@lggarrison/landlord |
-| GitHub | https://github.com/lggarrison/landlord-ts          |
+|        | Link                                                  |
+| ------ | ----------------------------------------------------- |
+| npm    | https://www.npmjs.com/package/@lggarrison/landlord-ts |
+| GitHub | https://github.com/lggarrison/landlord-ts             |
 
 ### Cutting a release
 
@@ -46,7 +46,7 @@ CI handles npm publish, the GitHub Release, and syncing `main` into `develop`.
 
 1. Ensure the **`@lggarrison`** organization exists on [npmjs.com](https://www.npmjs.com/) and you can publish scoped packages.
 2. Create the empty package (or publish once) with public access — `publishConfig.access` is already `"public"` in `package.json`.
-3. Configure **Trusted Publishing** for `@lggarrison/landlord`:
+3. Configure **Trusted Publishing** for `@lggarrison/landlord-ts`:
    - npm → package → **Trusted Publisher**
    - GitHub repository: `lggarrison/landlord-ts`
    - Workflow: `release.yml`
@@ -71,7 +71,7 @@ npm pack
 
 If a bad version ships:
 
-1. `npm deprecate @lggarrison/landlord@x.y.z "reason"`
+1. `npm deprecate @lggarrison/landlord-ts@x.y.z "reason"`
 2. Fix on `develop`, cut a new patch release through the normal path
 3. Do **not** unpublish except within npm’s allowed window and policy
 
