@@ -1,11 +1,11 @@
 ---
 type: concept
 title: Streaming progress
-last_updated: 2026-07-11T01:20:00Z
+last_updated: 2026-07-11T01:30:00Z
 tags: [api, nextjs]
 related: [concepts/mtgoncurve-api.md, entities/run.md, concepts/monte-carlo-simulation.md]
 status: active
-summary: Next.js SSE Pattern A using runAsync on_progress for live trial percent.
+summary: Next.js SSE Pattern A using runAsync on_progress and AbortSignal for live trial percent.
 code_refs: [src/run.ts, src/simulation.ts]
 ---
 
@@ -18,6 +18,8 @@ Use [`runAsync`](mtgoncurve-api.md) when a host needs live trial progress (e.g. 
 - Call from a **Node.js** runtime (`export const runtime = 'nodejs'`). Do not use the Edge runtime — parallel workers and card data assume Node.
 - `runAsync` always generates hands in **sequential batches** so each `on_progress` tick can flush to a stream.
 - Progress is `{ completed, total }` trial counts, not wall-clock time.
+- Pass `signal` (e.g. `req.signal`) so a disconnected client aborts between batches.
+- When `epsilon` is set, batch size matches sync adaptive (1000); `batch_size` only applies without `epsilon`.
 
 ## Next.js SSE (Pattern A)
 
@@ -50,10 +52,15 @@ export async function POST(req: NextRequest) {
           seed: body.seed,
           epsilon: body.epsilon,
           batch_size: body.batch_size ?? 500,
+          signal: req.signal,
           on_progress: (p) => send({ type: 'progress', ...p }),
         });
         send({ type: 'done', result });
       } catch (e) {
+        if (req.signal.aborted) {
+          controller.close();
+          return;
+        }
         send({ type: 'error', message: e instanceof Error ? e.message : String(e) });
       } finally {
         controller.close();

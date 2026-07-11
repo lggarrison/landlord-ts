@@ -209,11 +209,16 @@ export type SimulationProgress = {
 };
 
 export type SimulationAsyncOptions = {
-  /** Trials per progress tick (default 500). */
+  /**
+   * Trials per progress tick when `epsilon` is unset (default 500).
+   * Ignored when `epsilon` is set — batches use the same size as sync adaptive (1000).
+   */
   batchSize?: number;
   onProgress?: (progress: SimulationProgress) => void;
   /** Non-land cards for Wilson early-stop when `config.epsilon` is set. */
   cards?: readonly Card[];
+  /** When aborted, stops between batches (throws `AbortError`). */
+  signal?: AbortSignal;
 };
 
 const DEFAULT_ASYNC_BATCH = 500;
@@ -222,6 +227,10 @@ function yieldMacrotask(): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, 0);
   });
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  signal?.throwIfAborted();
 }
 
 function aggregateWilsonMet(
@@ -266,6 +275,7 @@ function aggregateWilsonMet(
  * Sequential batched hand generation with optional progress callbacks and event-loop yields.
  * Always single-threaded (`parallel` ignored) so hosts can flush SSE between batches.
  * Without `epsilon`, uses one continuous RNG stream (seeded runs match `simulationFromConfig` with parallel off).
+ * With `epsilon`, batch size matches sync adaptive (`EARLY_STOP_BATCH`) so seeded results match `run()`.
  */
 export async function simulationFromConfigAsync(
   config: SimulationConfig,
@@ -273,23 +283,28 @@ export async function simulationFromConfigAsync(
 ): Promise<Simulation> {
   if (config.runCount <= 0) throw new Error('runCount must be > 0');
 
-  const batchSize = Math.max(1, options.batchSize ?? DEFAULT_ASYNC_BATCH);
   const onProgress = options.onProgress;
+  const signal = options.signal;
   const total = config.runCount;
   const deck = deckFlatten(config.deck);
   const playOrder = config.onThePlay ? PlayOrder.First : PlayOrder.Second;
 
   const report = async (completed: number) => {
+    throwIfAborted(signal);
     onProgress?.({ completed, total });
     await yieldMacrotask();
+    throwIfAborted(signal);
   };
 
   if (config.epsilon !== undefined) {
+    // Match simulationFromConfigAdaptive batching for seeded parity.
+    const batchSize = EARLY_STOP_BATCH;
     const cards = options.cards ?? [];
     const hands: Hand[] = [];
     let seed = config.seed;
 
     while (hands.length < total) {
+      throwIfAborted(signal);
       const batch = Math.min(batchSize, total - hands.length);
       const batchConfig: SimulationConfig = {
         ...config,
@@ -315,10 +330,12 @@ export async function simulationFromConfigAsync(
     return { hands, ...stats, onThePlay: config.onThePlay };
   }
 
+  const batchSize = Math.max(1, options.batchSize ?? DEFAULT_ASYNC_BATCH);
   // Continuous RNG so seeded async batches match sequential simulationFromConfig.
   const rng: Rng = config.seed !== undefined ? createMulberry32(config.seed) : createEntropyRng();
   const hands: Hand[] = [];
   while (hands.length < total) {
+    throwIfAborted(signal);
     const n = Math.min(batchSize, total - hands.length);
     for (let i = 0; i < n; i++) {
       hands.push(handFromMulligan(config.mulligan, rng, deck, config.drawCount));

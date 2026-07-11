@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `runAsync` / `simulationFromConfigAsync` with optional `on_progress`, `batch_size`, and `AbortSignal` for streaming hosts (e.g. Next.js SSE)
+- Wiki docs for the mtgoncurve API contract and SSE streaming progress pattern
+
 ### Changed
 
+- Renamed npm package from `@lggarrison/landlord` to `@lggarrison/landlord-ts` (matches the GitHub repo)
 - Renamed GitHub repository from `landord-ts` to `landlord-ts`
 
 ## [0.1.0] - 2026-07-10

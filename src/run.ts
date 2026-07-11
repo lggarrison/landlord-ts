@@ -52,8 +52,13 @@ export type RunProgress = {
 
 export type RunAsyncInput = RunInput & {
   on_progress?: (progress: RunProgress) => void;
-  /** Trials per progress tick (default 500). Progress path is always sequential. */
+  /**
+   * Trials per progress tick when `epsilon` is unset (default 500).
+   * Ignored when `epsilon` is set (uses the same 1000-trial batches as sync adaptive).
+   */
   batch_size?: number;
+  /** When aborted, stops between batches (throws `AbortError`). */
+  signal?: AbortSignal;
 };
 
 export type MtgOnCurveCard = {
@@ -342,6 +347,7 @@ export async function runAsync(input: RunAsyncInput): Promise<RunOutput> {
     batchSize: input.batch_size,
     onProgress: input.on_progress,
     cards: nonLandCards,
+    signal: input.signal,
   });
   return simulationToOutput(deck, sim);
 }

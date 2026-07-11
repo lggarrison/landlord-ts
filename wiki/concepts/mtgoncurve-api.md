@@ -1,7 +1,7 @@
 ---
 type: concept
 title: mtgoncurve API
-last_updated: 2026-07-11T01:20:00Z
+last_updated: 2026-07-11T01:30:00Z
 tags: [api]
 related:
   [
@@ -50,17 +50,19 @@ import { runAsync } from '@lggarrison/landlord-ts';
 
 const output = await runAsync({
   ...runInput,
-  batch_size?, // default 500
+  batch_size?, // default 500; ignored when epsilon is set
+  signal?, // AbortSignal — stops between batches
   on_progress?: ({ completed, total }) => {
     /* e.g. write an SSE event */
   },
 });
 ```
 
-- `on_progress` — optional; called after each batch with `{ completed, total }`.
-- `batch_size` — trials per tick (default `500`).
+- `on_progress` — optional; called after each batch with `{ completed, total }`. Errors thrown here abort the run.
+- `batch_size` — trials per tick when `epsilon` is unset (default `500`). When `epsilon` is set, batches match sync adaptive (1000) so seeded results match `run()`.
+- `signal` — optional `AbortSignal`; aborted between batches with `AbortError`.
 - With `epsilon`, `total` is the max (`runs`); early-stop may finish with `completed < total`.
-- Seeded runs without `epsilon` match seeded `run({ ..., parallel: false })` (one continuous RNG stream).
+- Seeded runs match seeded `run({ ..., parallel: false })` (including `epsilon` early-stop).
 
 For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
 
@@ -83,10 +85,11 @@ For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
 
 `RunInput` plus:
 
-| Field          | Type                       | Notes             |
-| -------------- | -------------------------- | ----------------- |
-| `on_progress?` | `(p: RunProgress) => void` | Progress callback |
-| `batch_size?`  | `number`                   | Default 500       |
+| Field          | Type                       | Notes                                      |
+| -------------- | -------------------------- | ------------------------------------------ |
+| `on_progress?` | `(p: RunProgress) => void` | Progress callback                          |
+| `batch_size?`  | `number`                   | Default 500; ignored when `epsilon` is set |
+| `signal?`      | `AbortSignal`              | Cancel between batches                     |
 
 `RunProgress` is `{ completed: number; total: number }`.
 

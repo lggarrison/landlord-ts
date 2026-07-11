@@ -36,3 +36,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T00:39:30Z] maintenance | Document Lotus Field single-color-per-tap as roadmap feature improvement
 
 ## [2026-07-11T01:18:26Z] maintenance | Document runAsync + SSE streaming progress (wiki source of truth; README links)
+
+## [2026-07-11T01:23:15Z] maintenance | runAsync AbortSignal, epsilon batch parity, CHANGELOG Unreleased
