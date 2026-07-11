@@ -20,11 +20,11 @@
 
 | Title                                                        | Tags                      | Status | Updated              |
 | ------------------------------------------------------------ | ------------------------- | ------ | -------------------- |
-| [Auto-tap](concepts/auto-tap.md)                             | simulation, mana          | active | 2026-07-11T00:12:37Z |
+| [Auto-tap](concepts/auto-tap.md)                             | simulation, mana          | active | 2026-07-11T00:32:26Z |
 | [Card pipeline](concepts/card-pipeline.md)                   | data, scryfall            | active | 2026-07-10T22:50:00Z |
 | [GitHub repo hygiene](concepts/github-repo-hygiene.md)       | github, process           | active | 2026-07-10T22:25:00Z |
 | [Land kinds](concepts/land-kinds.md)                         | simulation, mana, lands   | active | 2026-07-11T00:12:37Z |
-| [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:12:37Z |
+| [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:32:26Z |
 | [London mulligan](concepts/london-mulligan.md)               | mulligan                  | active | 2026-07-10T18:30:00Z |
 | [Mana source roadmap](concepts/mana-source-roadmap.md)       | simulation, mana, roadmap | wip    | 2026-07-11T00:12:37Z |
 | [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation                | active | 2026-07-10T19:45:00Z |

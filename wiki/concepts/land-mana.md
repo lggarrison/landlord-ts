@@ -1,7 +1,7 @@
 ---
 type: concept
 title: Land mana
-last_updated: 2026-07-11T00:12:37Z
+last_updated: 2026-07-11T00:32:26Z
 aliases: [colorless lands, any-color mana, SPECIAL_LANDS, chooser lands, manaPerTap]
 tags: [simulation, mana, lands]
 related:
@@ -58,8 +58,8 @@ So:
 In auto-tap bipartite matching:
 
 - Colored spell pips require the matching land flag.
-- Generic / `{C}` spell pips accept **any** land column.
-- A land’s own `c` flag does **not** unlock colored pips — it marks a colorless-only source for stats and for lands with no WUBRG flags.
+- **Generic** spell pips (the `c` field on a spell’s `ManaCost`, from symbols like `{1}` / `{2}` / `{X}`) accept **any** land column. The matcher hard-codes edges to `1` for those rows — it does **not** model true colorless-only `{C}` requirements separately from generic mana.
+- A land’s own `c` flag does **not** unlock colored pips — it marks a colorless-only _source_ for stats and for lands with no WUBRG flags.
 - A land with `manaPerTap = N` is pushed into the column pool `N` times (same color flags each time).
 
 ## Multi-mana lands (`manaPerTap`)
@@ -70,6 +70,8 @@ Some lands produce a **fixed** amount of mana greater than one per tap. Those ar
 | ------------ | ------------ | ---------------------------------------------------- |
 | Ancient Tomb | 2            | colorless (`c=1`)                                    |
 | Lotus Field  | 3            | rainbow via `SPECIAL_LANDS` (no plain `{C}` ability) |
+
+**Lotus Field caveat:** real oracle is “Add three mana of any **one** color.” The sim models it as WUBRG × 3 columns, so it can overestimate payability for multicolor costs (e.g. `{R}{G}{U}`). Same optimistic approximation family as Command Tower / chooser lands; enforcing a single chosen color per tap would need matcher changes beyond `manaPerTap`.
 
 `manaPerTap` is orthogonal to `CardKind` — Lotus Field is still a `TapLand` for ETB; Ancient Tomb is `OtherLand`. Board bookkeeping (`otherLands`, `basicsOnBoard`) still counts each physical land once; only the mana-column pool is multiplied.
 

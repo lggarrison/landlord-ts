@@ -1,7 +1,7 @@
 ---
 type: concept
 title: Auto-tap
-last_updated: 2026-07-11T00:12:37Z
+last_updated: 2026-07-11T00:32:26Z
 tags: [simulation, mana]
 related:
   [
@@ -22,7 +22,7 @@ code_refs: [src/hand.ts, src/bipartite.ts]
 
 Lands drawn by the goal turn become columns; mana pips become rows. A spell is paid if matching size equals pip count. Hybrid costs try each expansion until one pays. A land with `manaPerTap > 1` (e.g. Ancient Tomb, Lotus Field) occupies that many columns — see [Land mana](land-mana.md).
 
-Land kind taxonomy (ETB vs always-available) lives in [Land kinds](land-kinds.md). How each land’s color capability flags are built (including colorless and chooser gaps): [Land mana](land-mana.md). Colored pips need a matching land flag; generic / `{C}` pips accept any land. Non-land mana sources are not in this pool yet — [Mana source roadmap](mana-source-roadmap.md).
+Land kind taxonomy (ETB vs always-available) lives in [Land kinds](land-kinds.md). How each land’s color capability flags are built (including colorless and chooser gaps): [Land mana](land-mana.md). Colored pips need a matching land flag; generic pips (spell `ManaCost.c`, from `{1}` / `{2}` / `{X}` — not true colorless-only `{C}`) accept any land. Non-land mana sources are not in this pool yet — [Mana source roadmap](mana-source-roadmap.md).
 
 ## Play schedule
 

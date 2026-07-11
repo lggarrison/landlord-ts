@@ -148,10 +148,16 @@ export const SPECIAL_LANDS: ReadonlyMap<string, ManaCost> = new Map([
   ['Secret Base', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
   ['Tarkir Omenpath', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
   ['Underdome', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  // Lotus Field: "Add three mana of any one color." Modeled as WUBRG + manaPerTap=3,
+  // which overestimates multicolor costs (matcher can spend the 3 units as different colors).
   ['Lotus Field', manaCostFromRgbuwc(1, 1, 1, 1, 1, 0)],
 ]);
 
-/** Lands with a fixed (board-state-independent) mana-per-tap greater than 1. */
+/**
+ * Lands with a fixed (board-state-independent) mana-per-tap greater than 1.
+ * Lotus Field pairs with the SPECIAL_LANDS rainbow override above; see that comment
+ * for the single-color-vs-multicolor overestimate.
+ */
 export const MULTI_MANA_LANDS: ReadonlyMap<string, number> = new Map([
   ['Ancient Tomb', 2],
   ['Lotus Field', 3],

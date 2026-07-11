@@ -28,3 +28,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-10T23:49:24Z] maintenance | Modeled 36 chooser/tribal lands (Cavern of Souls, Secluded Courtyard, Unclaimed Territory, etc.) as rainbow in SPECIAL_LANDS instead of colorless-only
 
 ## [2026-07-11T00:13:26Z] maintenance | Added manaPerTap for Ancient Tomb/Lotus Field; documented Cradle/Nykthos and mana rocks as future work
+
+## [2026-07-11T00:32:47Z] maintenance | Clarify generic vs true {C} payment and Lotus Field single-color overestimate
