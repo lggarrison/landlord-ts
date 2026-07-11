@@ -40,11 +40,39 @@ describe('run() façade', () => {
       seed: 42,
     });
     expect(output.deck_size).toBe(7);
-    expect(output.card_observations.length).toBeGreaterThan(0);
-    const elves = output.card_observations.find((o) => o.card.name === 'Llanowar Elves');
+    expect(output.total_simulations).toBe(200);
+    expect(output.cards.length).toBeGreaterThan(0);
+    const elves = output.cards.find((o) => o.name === 'Llanowar Elves');
     expect(elves).toBeTruthy();
-    expect(elves!.observations.totalRuns).toBe(200);
-    expect(pManaGivenCmc(elves!.observations)).toBeGreaterThan(0.9);
+    expect(elves!.total_simulations).toBe(200);
+    expect(elves!.p_mana_given_cmc).toBeGreaterThan(0.9);
+  });
+
+  it('includes per-card success/miss invariants', () => {
+    const runs = 200;
+    const output = run({
+      ...tinyGreen,
+      runs,
+      seed: 42,
+    });
+    expect(output.total_simulations).toBe(runs);
+    expect(output.deck_size).toBe(7);
+    expect(output.weakest_on_curve.length).toBe(output.cards.length);
+
+    for (const card of output.cards) {
+      expect(card.played_on_curve + card.not_played_on_curve).toBe(card.total_simulations);
+      expect(
+        card.not_enough_lands +
+          card.color_or_timing_fail +
+          card.mana_ok_undrawn +
+          card.played_on_curve,
+      ).toBe(card.total_simulations);
+    }
+
+    const elves = output.cards.find((c) => c.name === 'Llanowar Elves');
+    expect(elves).toBeTruthy();
+    expect(elves!.total_simulations).toBe(runs);
+    expect(elves!.p_cast_on_curve).toBe(elves!.played_on_curve / elves!.total_simulations);
   });
 
   it('rejects runCount <= 0', () => {
@@ -99,10 +127,10 @@ describe('runAsync() façade', () => {
       on_progress: (p) => ticks.push({ ...p }),
     });
     expect(asyncOut).toEqual(syncOut);
-    const elves = asyncOut.card_observations.find((o) => o.card.name === 'Llanowar Elves');
+    const elves = asyncOut.cards.find((o) => o.name === 'Llanowar Elves');
     expect(elves).toBeTruthy();
-    expect(elves!.observations.totalRuns).toBeLessThan(input.runs);
-    expect(ticks.at(-1)!.completed).toBe(elves!.observations.totalRuns);
+    expect(elves!.total_simulations).toBeLessThan(input.runs);
+    expect(ticks.at(-1)!.completed).toBe(elves!.total_simulations);
     expect(ticks.at(-1)!.completed).toBeLessThan(ticks.at(-1)!.total);
   });
 
@@ -123,8 +151,8 @@ describe('runAsync() façade', () => {
       expect(ticks[i]!.total).toBe(runs);
     }
     expect(ticks.at(-1)!.completed).toBe(runs);
-    const elves = output.card_observations.find((o) => o.card.name === 'Llanowar Elves');
-    expect(elves!.observations.totalRuns).toBe(runs);
+    const elves = output.cards.find((o) => o.name === 'Llanowar Elves');
+    expect(elves!.total_simulations).toBe(runs);
   });
 
   it('emits one progress tick per batch_size chunk', async () => {

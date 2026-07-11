@@ -25,7 +25,7 @@ flowchart LR
   decklist[Arena decklist] --> deck[Deck.parse]
   deck --> sim[Simulation]
   sim --> runApi["run()"]
-  runApi --> obs[card_observations]
+  runApi --> cards[cards and insights]
 ```
 
 Delete this section if a diagram does not add clarity.

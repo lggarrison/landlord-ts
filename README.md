@@ -15,7 +15,7 @@ npm install @lggarrison/landlord-ts
 ## Usage
 
 ```ts
-import { pManaGivenCmc, run } from '@lggarrison/landlord-ts';
+import { run } from '@lggarrison/landlord-ts';
 
 const runs = 10_000;
 const output = run({
@@ -33,35 +33,38 @@ const output = run({
 console.log({
   deck_size: output.deck_size,
   deck_average_cmc: output.deck_average_cmc,
+  total_simulations: output.total_simulations,
   // Often < 7: London mulligans put cards on the bottom
-  avg_opening_hand_size_after_mulligans: output.accumulated_opening_hand_size / runs,
-  avg_opening_lands_after_mulligans: output.accumulated_opening_hand_land_count / runs,
+  avg_opening_hand_size: output.avg_opening_hand_size,
+  avg_opening_land_count: output.avg_opening_land_count,
 });
 
-for (const row of output.card_observations) {
-  const { mana, cmc, play, inOpeningHand, totalRuns } = row.observations;
+for (const row of output.cards) {
   console.log({
-    name: row.card.name,
-    mana_cost: row.card.mana_cost_string,
-    copies: row.card_count,
-    p_on_curve: pManaGivenCmc(row.observations),
-    p_cast_on_curve: play / totalRuns,
-    p_in_opening_hand: inOpeningHand / totalRuns,
-    mana_hits: mana,
-    cmc_opportunities: cmc,
+    name: row.name,
+    mana_cost: row.mana_cost,
+    copies: row.copies,
+    played_on_curve: row.played_on_curve,
+    not_played_on_curve: row.not_played_on_curve,
+    total_simulations: row.total_simulations,
+    p_cast_on_curve: row.p_cast_on_curve,
+    p_mana_given_cmc: row.p_mana_given_cmc,
+    not_enough_lands: row.not_enough_lands,
+    color_or_timing_fail: row.color_or_timing_fail,
+    mana_ok_undrawn: row.mana_ok_undrawn,
   });
 }
 
 for (const land of output.land_counts) {
   console.log({
-    name: land.card.name,
-    kind: land.card.kind,
-    copies: land.card_count,
+    name: land.name,
+    kind: land.kind,
+    copies: land.copies,
   });
 }
 ```
 
-Input/Output field names match the mtgoncurve.com contract (`snake_case`).
+`RunInput` uses snake_case field names (mtgoncurve-inspired). `RunOutput` is a single flattened on-curve report (`cards`, ranked insights, land tallies).
 
 For the full `RunInput` / `RunOutput` contract, `runAsync` (progress callbacks), and Next.js SSE streaming, see the wiki:
 
