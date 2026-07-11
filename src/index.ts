@@ -1,14 +1,19 @@
-export { run, runAsync } from './run.js';
+export { run, runAsync, RunValidationError } from './run.js';
 export type {
   RunInput,
   RunAsyncInput,
   RunProgress,
+  RunProgressPhase,
   RunOutput,
   LandCount,
   CardObservationsReport,
   ColorConstrainedEntry,
   DrawDependentEntry,
   WeakestOnCurveEntry,
+  SimulateProgressEvent,
+  SimulateDoneEvent,
+  SimulateErrorEvent,
+  SimulateStreamEvent,
 } from './run.js';
 
 export { COLOR_CONSTRAINED_THRESHOLD, DRAW_DEPENDENT_THRESHOLD } from './run.js';
@@ -28,7 +33,7 @@ export {
 } from './card/index.js';
 export type { Card, ManaCost, ManaColorCount } from './card/index.js';
 
-export { deckFromList, decklist, deckFromCards, deckFlatten } from './deck.js';
+export { deckFromList, decklist, deckFromCards, deckFlatten, DeckcodeError } from './deck.js';
 export type { Deck, DeckCard } from './deck.js';
 
 export { ALL_CARDS, getAllCards, setAllCards, loadCardsFromGzipBytes } from './data.js';

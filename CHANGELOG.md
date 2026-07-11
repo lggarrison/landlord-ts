@@ -11,11 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `runAsync` / `simulationFromConfigAsync` with optional `on_progress`, `batch_size`, and `AbortSignal` for streaming hosts (e.g. Next.js SSE)
 - Wiki docs for the mtgoncurve API contract and SSE streaming progress pattern
+- `RunValidationError` and exported `DeckcodeError` for typed input validation (hosts can map to HTTP 400)
+- `RunProgress.phase` (`simulating` | `scoring`) so UIs can show scoring instead of stalling at 100%
+- Types-only `SimulateStreamEvent` union for Next.js SSE Pattern A
 
 ### Changed
 
 - Renamed npm package from `@lggarrison/landlord` to `@lggarrison/landlord-ts` (matches the GitHub repo)
 - Renamed GitHub repository from `landord-ts` to `landlord-ts`
+- **Breaking:** `RunProgress` now requires `phase`; update `on_progress` callbacks/typings accordingly
 
 ## [0.1.0] - 2026-07-10
 
