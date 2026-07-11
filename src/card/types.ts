@@ -68,6 +68,8 @@ export type Card = {
   basicLandTypes: number;
   /** Bitmask of basic types that unlock this check land; 0 if not a check. */
   checkTypes: number;
+  /** Mana units produced per tap (default 1); >1 for fixed-quantity lands like Ancient Tomb. */
+  manaPerTap: number;
 };
 
 export function emptyCard(): Card {
@@ -87,6 +89,7 @@ export function emptyCard(): Card {
     isFace: false,
     basicLandTypes: 0,
     checkTypes: 0,
+    manaPerTap: 1,
   };
 }
 
@@ -97,6 +100,7 @@ export function cloneCard(card: Card): Card {
     allManaCosts: card.allManaCosts.map((c) => ({ ...c })),
     basicLandTypes: card.basicLandTypes ?? 0,
     checkTypes: card.checkTypes ?? 0,
+    manaPerTap: card.manaPerTap ?? 1,
   };
 }
 

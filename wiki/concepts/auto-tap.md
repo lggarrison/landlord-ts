@@ -1,11 +1,13 @@
 ---
 type: concept
 title: Auto-tap
-last_updated: 2026-07-10T23:20:00Z
+last_updated: 2026-07-11T00:12:37Z
 tags: [simulation, mana]
 related:
   [
     concepts/land-kinds.md,
+    concepts/land-mana.md,
+    concepts/mana-source-roadmap.md,
     entities/hand.md,
     entities/bipartite.md,
     sources/magic-comprehensive-rules-20260619.md,
@@ -18,9 +20,9 @@ code_refs: [src/hand.ts, src/bipartite.ts]
 
 # Auto-tap
 
-Lands drawn by the goal turn become columns; mana pips become rows. A spell is paid if matching size equals pip count. Hybrid costs try each expansion until one pays.
+Lands drawn by the goal turn become columns; mana pips become rows. A spell is paid if matching size equals pip count. Hybrid costs try each expansion until one pays. A land with `manaPerTap > 1` (e.g. Ancient Tomb, Lotus Field) occupies that many columns — see [Land mana](land-mana.md).
 
-Land kind taxonomy (ETB vs always-available) lives in [Land kinds](land-kinds.md).
+Land kind taxonomy (ETB vs always-available) lives in [Land kinds](land-kinds.md). How each land’s color capability flags are built (including colorless and chooser gaps): [Land mana](land-mana.md). Colored pips need a matching land flag; generic / `{C}` pips accept any land. Non-land mana sources are not in this pool yet — [Mana source roadmap](mana-source-roadmap.md).
 
 ## Play schedule
 
@@ -46,6 +48,8 @@ Shock lands always pay 2 life (always untapped). Basic land types on every land 
 ## See also
 
 - [Land kinds](land-kinds.md)
+- [Land mana](land-mana.md)
+- [Mana source roadmap](mana-source-roadmap.md)
 - [Hand](../entities/hand.md)
 - [Bipartite](../entities/bipartite.md)
 - [Magic Comprehensive Rules (2026-06-19)](../sources/magic-comprehensive-rules-20260619.md)

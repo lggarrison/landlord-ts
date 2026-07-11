@@ -11,6 +11,7 @@ export type SimCard = {
   manaCost: ManaCost;
   basicLandTypes: number;
   checkTypes: number;
+  manaPerTap: number;
 };
 
 export function newSimCard(): SimCard {
@@ -20,6 +21,7 @@ export function newSimCard(): SimCard {
     manaCost: emptyManaCost(),
     basicLandTypes: 0,
     checkTypes: 0,
+    manaPerTap: 1,
   };
 }
 
@@ -30,6 +32,7 @@ export function simCardFromCard(card: Card): SimCard {
     manaCost: { ...card.manaCost },
     basicLandTypes: card.basicLandTypes ?? 0,
     checkTypes: card.checkTypes ?? 0,
+    manaPerTap: card.manaPerTap ?? 1,
   };
 }
 
@@ -168,6 +171,11 @@ function isConditionalEtbKind(kind: CardKind): boolean {
   );
 }
 
+function pushLandColumns(lands: SimCard[], card: SimCard): void {
+  const copies = card.manaPerTap ?? 1;
+  for (let k = 0; k < copies; k++) lands.push(card);
+}
+
 /**
  * Available turn for a land given board state when it is played.
  * Always-available kinds ignore play-turn gating for Karsten parity (sources in hand).
@@ -271,7 +279,7 @@ export function autoTapWithScratch(
     const otherLands = i;
 
     if (isAlwaysAvailableKind(card.kind)) {
-      scratch.lands.push(card);
+      pushLandColumns(scratch.lands, card);
     } else if (isConditionalEtbKind(card.kind)) {
       const availableTurn = availableTurnForLand(
         card,
@@ -280,9 +288,9 @@ export function autoTapWithScratch(
         boardTypes,
         basicsOnBoard,
       );
-      if (availableTurn <= turn) scratch.lands.push(card);
+      if (availableTurn <= turn) pushLandColumns(scratch.lands, card);
     } else {
-      scratch.lands.push(card);
+      pushLandColumns(scratch.lands, card);
     }
 
     boardTypes |= card.basicLandTypes;

@@ -1,9 +1,9 @@
 ---
 type: source
 title: Magic Comprehensive Rules (2026-06-19)
-last_updated: 2026-07-10T23:20:00Z
+last_updated: 2026-07-10T23:48:00Z
 tags: [mtg, rules, lands, mana]
-related: [concepts/land-kinds.md, concepts/auto-tap.md, entities/card.md]
+related: [concepts/land-kinds.md, concepts/land-mana.md, concepts/auto-tap.md, entities/card.md]
 status: active
 summary: Provenance for MTG Comprehensive Rules (2026-06-19) — upstream URL only; landlord-relevant CR section map.
 sources: [raw/articles/magic-comprehensive-rules-20260619.md]
@@ -35,10 +35,11 @@ Card-specific ETB (“enters tapped unless…”, “two or fewer other lands”
 
 ## Out of scope for the sim
 
-Stack, priority, responses to lands (lands are not spells — 305.1), fetching resolution, life payment choices beyond Shock’s always-pay model, and chooser lands (e.g. Cavern of Souls) are not fully simulated.
+Stack, priority, responses to lands (lands are not spells — 305.1), fetching resolution, and life payment choices beyond Shock’s always-pay model are not fully simulated. Chooser lands (e.g. Cavern of Souls) are approximated as rainbow mana sources rather than fully simulated (their restriction is per-spell, not per-land) — see [Land mana](../concepts/land-mana.md).
 
 ## See also
 
 - [Land kinds](../concepts/land-kinds.md)
+- [Land mana](../concepts/land-mana.md)
 - [Auto-tap](../concepts/auto-tap.md)
 - [Card](../entities/card.md)
