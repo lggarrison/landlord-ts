@@ -25,40 +25,40 @@ const input = {
 1 Forest
   `,
   runs,
-  on_the_play: true,
-  mulligan_down_to: 5,
-  mulligan_on_lands: [0, 1, 6, 7],
-  acceptable_hand_list: [],
+  onThePlay: true,
+  mulliganDownTo: 5,
+  mulliganOnLands: [0, 1, 6, 7],
+  acceptableHandList: [],
 };
 
 const output = run(input);
 
 console.log({
-  deck_size: output.deck_size,
-  deck_average_cmc: output.deck_average_cmc,
-  total_simulations: output.total_simulations,
+  deckSize: output.deckSize,
+  deckAverageCmc: output.deckAverageCmc,
+  totalSimulations: output.totalSimulations,
   // Often < 7: London mulligans put cards on the bottom
-  avg_opening_hand_size: output.avg_opening_hand_size,
-  avg_opening_land_count: output.avg_opening_land_count,
+  avgOpeningHandSize: output.avgOpeningHandSize,
+  avgOpeningLandCount: output.avgOpeningLandCount,
 });
 
 for (const row of output.cards) {
   console.log({
     name: row.name,
-    mana_cost: row.mana_cost,
+    manaCost: row.manaCost,
     copies: row.copies,
-    played_on_curve: row.played_on_curve,
-    not_played_on_curve: row.not_played_on_curve,
-    total_simulations: row.total_simulations,
-    p_cast_on_curve: row.p_cast_on_curve,
-    p_mana_given_cmc: row.p_mana_given_cmc,
-    not_enough_lands: row.not_enough_lands,
-    color_or_timing_fail: row.color_or_timing_fail,
-    mana_ok_undrawn: row.mana_ok_undrawn,
+    playedOnCurve: row.playedOnCurve,
+    notPlayedOnCurve: row.notPlayedOnCurve,
+    totalSimulations: row.totalSimulations,
+    pCastOnCurve: row.pCastOnCurve,
+    pManaGivenCmc: row.pManaGivenCmc,
+    notEnoughLands: row.notEnoughLands,
+    colorOrTimingFail: row.colorOrTimingFail,
+    manaOkUndrawn: row.manaOkUndrawn,
   });
 }
 
-for (const land of output.land_counts) {
+for (const land of output.landCounts) {
   console.log({
     name: land.name,
     kind: land.kind,
@@ -67,7 +67,7 @@ for (const land of output.land_counts) {
 }
 ```
 
-`RunInput` uses snake_case field names (mtgoncurve-inspired). `RunOutput` is a single flattened on-curve report (`cards`, ranked insights, land tallies).
+`RunInput` / `RunOutput` use camelCase field names. `RunOutput` is a single flattened on-curve report (`cards`, ranked insights, land tallies).
 
 For the full `RunInput` / `RunOutput` contract, `runAsync` (progress callbacks), and Next.js SSE streaming, see the wiki:
 

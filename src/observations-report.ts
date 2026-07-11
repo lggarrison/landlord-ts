@@ -5,65 +5,65 @@ import type { CardKind } from './card/index.js';
 import type { Observations } from './simulation.js';
 import { pManaGivenCmc, pPlay } from './simulation.js';
 
-/** Fraction of CMC opportunities that must fail color/timing to flag `color_constrained`. */
+/** Fraction of CMC opportunities that must fail color/timing to flag `colorConstrained`. */
 export const COLOR_CONSTRAINED_THRESHOLD = 0.15;
-/** Fraction of mana hits that must be undrawn to flag `draw_dependent`. */
+/** Fraction of mana hits that must be undrawn to flag `drawDependent`. */
 export const DRAW_DEPENDENT_THRESHOLD = 0.15;
 
 export type CardObservationsReport = {
   name: string;
-  mana_cost: string;
-  image_uri: string;
+  manaCost: string;
+  imageUri: string;
   kind: CardKind;
   turn: number;
   copies: number;
   cmc: number;
-  played_on_curve: number;
-  not_played_on_curve: number;
-  total_simulations: number;
-  p_cast_on_curve: number;
-  p_mana_given_cmc: number;
-  p_in_opening_hand: number;
-  not_enough_lands: number;
-  color_or_timing_fail: number;
-  mana_ok_undrawn: number;
+  playedOnCurve: number;
+  notPlayedOnCurve: number;
+  totalSimulations: number;
+  pCastOnCurve: number;
+  pManaGivenCmc: number;
+  pInOpeningHand: number;
+  notEnoughLands: number;
+  colorOrTimingFail: number;
+  manaOkUndrawn: number;
 };
 
 export type WeakestOnCurveEntry = {
   name: string;
-  p_cast_on_curve: number;
+  pCastOnCurve: number;
   turn: number;
 };
 
 export type ColorConstrainedEntry = {
   name: string;
-  color_or_timing_fail: number;
-  cmc_opportunities: number;
+  colorOrTimingFail: number;
+  cmcOpportunities: number;
 };
 
 export type DrawDependentEntry = {
   name: string;
-  mana_ok_undrawn: number;
-  mana_hits: number;
+  manaOkUndrawn: number;
+  manaHits: number;
 };
 
 /** Internal builder result; fields are flattened onto `RunOutput` by `run()`. */
 export type ObservationsReport = {
-  total_simulations: number;
-  avg_opening_hand_size: number;
-  avg_opening_land_count: number;
-  deck_size: number;
-  deck_average_cmc: number;
+  totalSimulations: number;
+  avgOpeningHandSize: number;
+  avgOpeningLandCount: number;
+  deckSize: number;
+  deckAverageCmc: number;
   cards: CardObservationsReport[];
-  weakest_on_curve: WeakestOnCurveEntry[];
-  color_constrained: ColorConstrainedEntry[];
-  draw_dependent: DrawDependentEntry[];
+  weakestOnCurve: WeakestOnCurveEntry[];
+  colorConstrained: ColorConstrainedEntry[];
+  drawDependent: DrawDependentEntry[];
 };
 
 export type CardReportInput = {
   name: string;
-  mana_cost: string;
-  image_uri: string;
+  manaCost: string;
+  imageUri: string;
   kind: CardKind;
   turn: number;
   copies: number;
@@ -73,24 +73,24 @@ export type CardReportInput = {
 
 export type BuildObservationsReportInput = {
   cards: readonly CardReportInput[];
-  total_simulations: number;
-  accumulated_opening_hand_size: number;
-  accumulated_opening_hand_land_count: number;
-  deck_size: number;
-  deck_average_cmc: number;
+  totalSimulations: number;
+  accumulatedOpeningHandSize: number;
+  accumulatedOpeningHandLandCount: number;
+  deckSize: number;
+  deckAverageCmc: number;
 };
 
 export function emptyObservationsReport(): ObservationsReport {
   return {
-    total_simulations: 0,
-    avg_opening_hand_size: 0,
-    avg_opening_land_count: 0,
-    deck_size: 0,
-    deck_average_cmc: 0,
+    totalSimulations: 0,
+    avgOpeningHandSize: 0,
+    avgOpeningLandCount: 0,
+    deckSize: 0,
+    deckAverageCmc: 0,
     cards: [],
-    weakest_on_curve: [],
-    color_constrained: [],
-    draw_dependent: [],
+    weakestOnCurve: [],
+    colorConstrained: [],
+    drawDependent: [],
   };
 }
 
@@ -100,21 +100,21 @@ function cardReportFromInput(input: CardReportInput): CardObservationsReport {
   const played = o.play;
   return {
     name: input.name,
-    mana_cost: input.mana_cost,
-    image_uri: input.image_uri,
+    manaCost: input.manaCost,
+    imageUri: input.imageUri,
     kind: input.kind,
     turn: input.turn,
     copies: input.copies,
     cmc: input.cmc,
-    played_on_curve: played,
-    not_played_on_curve: total - played,
-    total_simulations: total,
-    p_cast_on_curve: pPlay(o),
-    p_mana_given_cmc: pManaGivenCmc(o),
-    p_in_opening_hand: total === 0 ? 0 : o.inOpeningHand / total,
-    not_enough_lands: total - o.cmc,
-    color_or_timing_fail: o.cmc - o.mana,
-    mana_ok_undrawn: o.mana - o.play,
+    playedOnCurve: played,
+    notPlayedOnCurve: total - played,
+    totalSimulations: total,
+    pCastOnCurve: pPlay(o),
+    pManaGivenCmc: pManaGivenCmc(o),
+    pInOpeningHand: total === 0 ? 0 : o.inOpeningHand / total,
+    notEnoughLands: total - o.cmc,
+    colorOrTimingFail: o.cmc - o.mana,
+    manaOkUndrawn: o.mana - o.play,
   };
 }
 
@@ -123,52 +123,51 @@ function compareCardsByCmcThenName(a: CardObservationsReport, b: CardObservation
 }
 
 export function buildObservationsReport(input: BuildObservationsReportInput): ObservationsReport {
-  const total = input.total_simulations;
+  const total = input.totalSimulations;
   const cards = input.cards.map(cardReportFromInput);
   cards.sort(compareCardsByCmcThenName);
 
-  const weakest_on_curve: WeakestOnCurveEntry[] = cards
+  const weakestOnCurve: WeakestOnCurveEntry[] = cards
     .map((c) => ({
       name: c.name,
-      p_cast_on_curve: c.p_cast_on_curve,
+      pCastOnCurve: c.pCastOnCurve,
       turn: c.turn,
     }))
-    .sort((a, b) => a.p_cast_on_curve - b.p_cast_on_curve);
+    .sort((a, b) => a.pCastOnCurve - b.pCastOnCurve);
 
-  const color_constrained: ColorConstrainedEntry[] = [];
-  const draw_dependent: DrawDependentEntry[] = [];
+  const colorConstrained: ColorConstrainedEntry[] = [];
+  const drawDependent: DrawDependentEntry[] = [];
   for (const inputCard of input.cards) {
     const o = inputCard.observations;
     if (o.cmc > 0 && (o.cmc - o.mana) / o.cmc >= COLOR_CONSTRAINED_THRESHOLD) {
-      color_constrained.push({
+      colorConstrained.push({
         name: inputCard.name,
-        color_or_timing_fail: o.cmc - o.mana,
-        cmc_opportunities: o.cmc,
+        colorOrTimingFail: o.cmc - o.mana,
+        cmcOpportunities: o.cmc,
       });
     }
     if (o.mana > 0 && (o.mana - o.play) / o.mana >= DRAW_DEPENDENT_THRESHOLD) {
-      draw_dependent.push({
+      drawDependent.push({
         name: inputCard.name,
-        mana_ok_undrawn: o.mana - o.play,
-        mana_hits: o.mana,
+        manaOkUndrawn: o.mana - o.play,
+        manaHits: o.mana,
       });
     }
   }
-  color_constrained.sort(
-    (a, b) =>
-      b.color_or_timing_fail / b.cmc_opportunities - a.color_or_timing_fail / a.cmc_opportunities,
+  colorConstrained.sort(
+    (a, b) => b.colorOrTimingFail / b.cmcOpportunities - a.colorOrTimingFail / a.cmcOpportunities,
   );
-  draw_dependent.sort((a, b) => b.mana_ok_undrawn / b.mana_hits - a.mana_ok_undrawn / a.mana_hits);
+  drawDependent.sort((a, b) => b.manaOkUndrawn / b.manaHits - a.manaOkUndrawn / a.manaHits);
 
   return {
-    total_simulations: total,
-    avg_opening_hand_size: total === 0 ? 0 : input.accumulated_opening_hand_size / total,
-    avg_opening_land_count: total === 0 ? 0 : input.accumulated_opening_hand_land_count / total,
-    deck_size: input.deck_size,
-    deck_average_cmc: input.deck_average_cmc,
+    totalSimulations: total,
+    avgOpeningHandSize: total === 0 ? 0 : input.accumulatedOpeningHandSize / total,
+    avgOpeningLandCount: total === 0 ? 0 : input.accumulatedOpeningHandLandCount / total,
+    deckSize: input.deckSize,
+    deckAverageCmc: input.deckAverageCmc,
     cards,
-    weakest_on_curve,
-    color_constrained,
-    draw_dependent,
+    weakestOnCurve,
+    colorConstrained,
+    drawDependent,
   };
 }

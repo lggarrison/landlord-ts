@@ -17,7 +17,7 @@ code_refs: [src/simulation.ts, src/parallel.ts, src/simulation-worker.ts]
 
 # Simulation
 
-Runs N seeded (optional) hands, then aggregates `Observations` (`mana`, `cmc`, `play`, `p_mana_given_cmc`). Supports worker-thread sharding, Wilson early-stopping via `epsilon`, and `simulationFromConfigAsync` for progress-aware sequential batches.
+Runs N seeded (optional) hands, then aggregates `Observations` (`mana`, `cmc`, `play`; public rate is `pManaGivenCmc`). Supports worker-thread sharding, Wilson early-stopping via `epsilon`, and `simulationFromConfigAsync` for progress-aware sequential batches.
 
 ## See also
 

@@ -1,11 +1,11 @@
 ---
 type: concept
 title: Streaming progress
-last_updated: 2026-07-11T02:47:32Z
+last_updated: 2026-07-11T03:10:00Z
 tags: [api, nextjs]
 related: [concepts/mtgoncurve-api.md, entities/run.md, concepts/monte-carlo-simulation.md]
 status: active
-summary: Next.js SSE Pattern A using runAsync on_progress (with phase) and AbortSignal for live trial percent.
+summary: Next.js SSE Pattern A using runAsync onProgress (with phase) and AbortSignal for live trial percent.
 code_refs: [src/run.ts, src/simulation.ts, src/yield-macrotask.ts]
 ---
 
@@ -16,12 +16,12 @@ Use [`runAsync`](mtgoncurve-api.md) when a host needs live trial progress (e.g. 
 ## Constraints
 
 - Call from a **Node.js** runtime (`export const runtime = 'nodejs'`). Do not use the Edge runtime — parallel workers and card data assume Node.
-- `runAsync` always generates hands in **sequential batches** so each `on_progress` tick can flush to a stream.
+- `runAsync` always generates hands in **sequential batches** so each `onProgress` tick can flush to a stream.
 - Progress is `{ completed, total, phase }` trial counts, not wall-clock time. `phase` is `'simulating'` during hand batches and `'scoring'` once before report build (so the UI does not stall at 100% with no `done` yet).
-- Pass `signal` (e.g. `req.signal`) so a disconnected client aborts between batches and before report build (even without `on_progress`).
-- When `epsilon` is set, batch size matches sync adaptive (1000); `batch_size` only applies without `epsilon`.
+- Pass `signal` (e.g. `req.signal`) so a disconnected client aborts between batches and before report build (even without `onProgress`).
+- When `epsilon` is set, batch size matches sync adaptive (1000); `batchSize` only applies without `epsilon`.
 - Exported `SimulateStreamEvent` types match the SSE payloads below (types only — no Next.js dependency).
-- **Breaking:** `RunProgress` requires `phase` — update existing `on_progress` typings accordingly.
+- **Breaking:** `RunProgress` requires `phase` — update existing `onProgress` typings accordingly.
 
 ## Next.js SSE (Pattern A)
 
@@ -47,15 +47,15 @@ export async function POST(req: NextRequest) {
         const result = await runAsync({
           code: body.code,
           runs: body.runs ?? 10_000,
-          on_the_play: body.on_the_play ?? true,
-          mulligan_down_to: body.mulligan_down_to ?? 5,
-          mulligan_on_lands: body.mulligan_on_lands ?? [0, 1, 6, 7],
-          acceptable_hand_list: body.acceptable_hand_list ?? [],
+          onThePlay: body.onThePlay ?? true,
+          mulliganDownTo: body.mulliganDownTo ?? 5,
+          mulliganOnLands: body.mulliganOnLands ?? [0, 1, 6, 7],
+          acceptableHandList: body.acceptableHandList ?? [],
           seed: body.seed,
           epsilon: body.epsilon,
-          batch_size: body.batch_size ?? 500,
+          batchSize: body.batchSize ?? 500,
           signal: req.signal,
-          on_progress: (p) => send({ type: 'progress', ...p }),
+          onProgress: (p) => send({ type: 'progress', ...p }),
         });
         send({ type: 'done', result });
       } catch (e) {
