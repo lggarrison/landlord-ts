@@ -1,7 +1,8 @@
 ---
 type: concept
-title: mtgoncurve API
-last_updated: 2026-07-11T03:10:00Z
+title: landlord-ts API
+last_updated: 2026-07-11T03:54:00Z
+aliases: [mtgoncurve API]
 tags: [api]
 related:
   [
@@ -16,7 +17,7 @@ summary: CamelCase run() / runAsync() Input, flattened RunOutput, RunValidationE
 code_refs: [src/run.ts, src/index.ts, src/observations-report.ts, src/deck.ts]
 ---
 
-# mtgoncurve API
+# landlord-ts API
 
 Public façade for `@lggarrison/landlord-ts`. `RunInput` / `RunOutput` field names are camelCase. `RunOutput` is a single flattened on-curve report — not a dual raw-counter + report layout.
 

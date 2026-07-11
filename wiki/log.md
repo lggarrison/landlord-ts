@@ -54,3 +54,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T02:40:38Z] maintenance | Share yieldMacrotask; fix Pattern A RunValidationError use; changelog RunProgress.phase break
 
 ## [2026-07-11T02:47:53Z] maintenance | runAsync honors signal-only abort before report build
+
+## [2026-07-11T03:55:52Z] maintenance | Rename mtgoncurve-api concept to landlord-ts-api
