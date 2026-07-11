@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_CARDS, parseDecklist, run } from '../src/index.js';
+import { ALL_CARDS, DeckcodeError, parseDecklist, run, RunValidationError } from '../src/index.js';
 import { deckFromList } from '../src/deck.js';
 
 /** Verbatim MTG Arena export (includes blank line before Sideboard). */
@@ -221,6 +221,38 @@ describe('parseDecklist', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.error.message).toBe('Empty deckcode');
+  });
+});
+
+describe('run() with malformed decks', () => {
+  it('throws RunValidationError with unknownCardNames on cause (single)', () => {
+    try {
+      run({ ...runDefaults, code: malformedMtgArenaDeck });
+      expect.unreachable('expected run() to throw');
+    } catch (e) {
+      expect(e).toBeInstanceOf(RunValidationError);
+      expect((e as RunValidationError).message).toMatch(/Bad deckcode/);
+      expect((e as RunValidationError).cause).toBeInstanceOf(DeckcodeError);
+      const cause = (e as RunValidationError).cause as DeckcodeError;
+      expect(cause.unknownCardNames).toEqual(['My Weird Card That Does Not Exist']);
+      expect(cause.unknownCardName).toBe('My Weird Card That Does Not Exist');
+    }
+  });
+
+  it('throws RunValidationError with all unknownCardNames on cause (multiple)', () => {
+    try {
+      run({ ...runDefaults, code: multipleMalformedMtgArenaDeck });
+      expect.unreachable('expected run() to throw');
+    } catch (e) {
+      expect(e).toBeInstanceOf(RunValidationError);
+      expect((e as RunValidationError).message).toMatch(/Bad deckcode/);
+      expect((e as RunValidationError).cause).toBeInstanceOf(DeckcodeError);
+      const cause = (e as RunValidationError).cause as DeckcodeError;
+      expect(cause.unknownCardNames).toEqual([
+        'My Weird Card That Does Not Exist',
+        'My Other Weird Card That Does Not Exist',
+      ]);
+    }
   });
 });
 
