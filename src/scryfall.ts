@@ -112,7 +112,7 @@ export const SPECIAL_LANDS: ReadonlyMap<string, ManaCost> = new Map([
   ['Kor Haven', manaCostFromRgbuwc(0, 0, 0, 0, 0, 1)],
   // Chooser / tribal lands: "Add one mana of any color. Spend this mana only to cast
   // [a spell of a chosen/specific type]..." — modeled as rainbow, assuming the player
-  // always chooses the type/color they need (same approximation as Command Tower).
+  // always chooses a type/restriction that matches the goal spell (same approximation as Command Tower).
   ['Cavern of Souls', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
   ['Secluded Courtyard', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
   ['Unclaimed Territory', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
