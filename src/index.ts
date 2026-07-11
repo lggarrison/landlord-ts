@@ -1,5 +1,12 @@
-export { run } from './run.js';
-export type { RunInput, RunOutput, CardObservation, MtgOnCurveCard } from './run.js';
+export { run, runAsync } from './run.js';
+export type {
+  RunInput,
+  RunAsyncInput,
+  RunProgress,
+  RunOutput,
+  CardObservation,
+  MtgOnCurveCard,
+} from './run.js';
 
 export {
   CardKind,
@@ -31,13 +38,19 @@ export type { ScryfallCard } from './scryfall.js';
 
 export {
   simulationFromConfig,
+  simulationFromConfigAsync,
   observationsForCard,
   pManaGivenCmc,
   pMana,
   pPlay,
   wilsonHalfWidth,
 } from './simulation.js';
-export type { Observations, Simulation } from './simulation.js';
+export type {
+  Observations,
+  Simulation,
+  SimulationProgress,
+  SimulationAsyncOptions,
+} from './simulation.js';
 
 export {
   handFromOpeningAndDraws,

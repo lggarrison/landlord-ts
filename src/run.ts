@@ -12,14 +12,17 @@ import {
   type ManaCost,
 } from './card/index.js';
 import { ALL_CARDS } from './data.js';
-import { deckFromList, deckIsEmpty, deckIter, DeckcodeError } from './deck.js';
+import { deckFromList, deckIsEmpty, deckIter, DeckcodeError, type Deck } from './deck.js';
 import { asLondonMulligan, londonNever } from './mulligan/index.js';
 import {
   newObservations,
   observationsForCardByTurn,
   simulationFromConfig,
   simulationFromConfigAdaptive,
+  simulationFromConfigAsync,
   type Observations,
+  type Simulation,
+  type SimulationConfig,
 } from './simulation.js';
 
 export type RunInput = {
@@ -40,6 +43,22 @@ export type RunInput = {
   epsilon?: number;
   /** Shard trials across worker threads (default: auto when runs >= 2000). */
   parallel?: boolean;
+};
+
+export type RunProgress = {
+  completed: number;
+  total: number;
+};
+
+export type RunAsyncInput = RunInput & {
+  on_progress?: (progress: RunProgress) => void;
+  /**
+   * Trials per progress tick when `epsilon` is unset (default 500).
+   * Ignored when `epsilon` is set (uses the same 1000-trial batches as sync adaptive).
+   */
+  batch_size?: number;
+  /** When aborted, stops between batches (throws `AbortError`). */
+  signal?: AbortSignal;
 };
 
 export type MtgOnCurveCard = {
@@ -87,6 +106,12 @@ export type RunOutput = {
   non_land_counts: ManaColorCount;
 };
 
+type PreparedRun = {
+  deck: Deck;
+  simConfig: SimulationConfig;
+  nonLandCards: Card[];
+};
+
 function toMtgCard(card: Card): MtgOnCurveCard {
   return {
     name: card.name,
@@ -129,11 +154,7 @@ function emptyOutput(): RunOutput {
   };
 }
 
-/**
- * Run a Monte Carlo simulation for an Arena decklist.
- * Input/Output field names match the mtgoncurve.com contract (snake_case).
- */
-export function run(input: RunInput): RunOutput {
+function prepareRun(input: RunInput): PreparedRun {
   let deck;
   try {
     deck = deckFromList(input.code);
@@ -170,7 +191,7 @@ export function run(input: RunInput): RunOutput {
     }
   }
 
-  const simConfig = {
+  const simConfig: SimulationConfig = {
     runCount: input.runs,
     drawCount: highestTurn,
     mulligan: asLondonMulligan(london),
@@ -189,11 +210,10 @@ export function run(input: RunInput): RunOutput {
     .filter((c) => !isLand(c.card))
     .map((c) => c.card);
 
-  const sim =
-    input.epsilon !== undefined
-      ? simulationFromConfigAdaptive(simConfig, nonLandCards)
-      : simulationFromConfig(simConfig);
+  return { deck, simConfig, nonLandCards };
+}
 
+function simulationToOutput(deck: Deck, sim: Simulation): RunOutput {
   const outputs = emptyOutput();
   outputs.accumulated_opening_hand_size = sim.accumulatedOpeningHandSize;
   outputs.accumulated_opening_hand_land_count = sim.accumulatedOpeningHandLandCount;
@@ -302,4 +322,32 @@ export function run(input: RunInput): RunOutput {
   }
 
   return outputs;
+}
+
+/**
+ * Run a Monte Carlo simulation for an Arena decklist.
+ * Input/Output field names match the mtgoncurve.com contract (snake_case).
+ */
+export function run(input: RunInput): RunOutput {
+  const { deck, simConfig, nonLandCards } = prepareRun(input);
+  const sim =
+    input.epsilon !== undefined
+      ? simulationFromConfigAdaptive(simConfig, nonLandCards)
+      : simulationFromConfig(simConfig);
+  return simulationToOutput(deck, sim);
+}
+
+/**
+ * Async Monte Carlo run with optional progress callbacks for streaming hosts (e.g. SSE).
+ * Always sequential batches (`parallel` ignored) so the event loop can flush between ticks.
+ */
+export async function runAsync(input: RunAsyncInput): Promise<RunOutput> {
+  const { deck, simConfig, nonLandCards } = prepareRun(input);
+  const sim = await simulationFromConfigAsync(simConfig, {
+    batchSize: input.batch_size,
+    onProgress: input.on_progress,
+    cards: nonLandCards,
+    signal: input.signal,
+  });
+  return simulationToOutput(deck, sim);
 }

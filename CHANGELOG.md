@@ -7,15 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `runAsync` / `simulationFromConfigAsync` with optional `on_progress`, `batch_size`, and `AbortSignal` for streaming hosts (e.g. Next.js SSE)
+- Wiki docs for the mtgoncurve API contract and SSE streaming progress pattern
+
 ### Changed
 
+- Renamed npm package from `@lggarrison/landlord` to `@lggarrison/landlord-ts` (matches the GitHub repo)
 - Renamed GitHub repository from `landord-ts` to `landlord-ts`
 
 ## [0.1.0] - 2026-07-10
 
 ### Added
 
-- Initial public release of `@lggarrison/landlord`
+- Initial public release of `@lggarrison/landlord-ts`
 - Pure TypeScript Monte Carlo on-curve simulator (`run()` API matching mtgoncurve.com)
 - Arena decklist parsing with `X=`, `T=`, `M=`, and `M=auto` modifiers
 - TapLand-only enters-tapped delay in auto-tap; Check/Shock immediate

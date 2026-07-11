@@ -1,5 +1,5 @@
 {
-  "name": "@lggarrison/landlord",
+  "name": "@lggarrison/landlord-ts",
   "version": "0.1.0",
   "description": "Monte Carlo MTG on-curve simulator (TypeScript port of landlord)",
   "license": "MIT",

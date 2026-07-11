@@ -1,11 +1,12 @@
 ---
 type: overview
 title: Src
-last_updated: 2026-07-10T22:50:00Z
+last_updated: 2026-07-11T01:20:00Z
 tags: [src]
 related:
   [
     concepts/mtgoncurve-api.md,
+    concepts/streaming-progress.md,
     concepts/auto-tap.md,
     concepts/land-kinds.md,
     concepts/card-pipeline.md,
@@ -18,13 +19,13 @@ related:
   ]
 sources: [sources/ts-port-feasibility.md]
 status: active
-summary: Package overview for `@lggarrison/landlord` — Monte Carlo on-curve simulator under `src/`.
+summary: Package overview for `@lggarrison/landlord-ts` — Monte Carlo on-curve simulator under `src/`.
 code_refs: [src/index.ts, src/run.ts]
 ---
 
 # Src (`src/`)
 
-TypeScript port of the Rust landlord engine. Primary entry: [`run()`](run.md) matching the mtgoncurve.com Input/Output contract.
+TypeScript port of the Rust landlord engine. Primary entry: [`run()`](run.md) / [`runAsync()`](run.md) matching the mtgoncurve.com Input/Output contract. Streaming hosts: [Streaming progress](../concepts/streaming-progress.md).
 
 Board-aware land ETB (Check/Fast/Slow/Battle/Turn + nickname cycles), auto DFC face-detect, worker parallelization, and adaptive trial counts are implemented in this package. See [Land kinds](../concepts/land-kinds.md).
 
@@ -47,6 +48,7 @@ Board-aware land ETB (Check/Fast/Slow/Battle/Turn + nickname cycles), auto DFC f
 
 - [TS port feasibility plan](../sources/ts-port-feasibility.md)
 - [mtgoncurve API](../concepts/mtgoncurve-api.md)
+- [Streaming progress](../concepts/streaming-progress.md)
 - [Auto-tap](../concepts/auto-tap.md)
 - [Land kinds](../concepts/land-kinds.md)
 - [Card pipeline](../concepts/card-pipeline.md)
