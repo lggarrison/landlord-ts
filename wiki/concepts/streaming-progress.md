@@ -1,7 +1,7 @@
 ---
 type: concept
 title: Streaming progress
-last_updated: 2026-07-11T01:30:00Z
+last_updated: 2026-07-11T01:35:00Z
 tags: [api, nextjs]
 related: [concepts/mtgoncurve-api.md, entities/run.md, concepts/monte-carlo-simulation.md]
 status: active
@@ -57,11 +57,9 @@ export async function POST(req: NextRequest) {
         });
         send({ type: 'done', result });
       } catch (e) {
-        if (req.signal.aborted) {
-          controller.close();
-          return;
+        if (!req.signal.aborted) {
+          send({ type: 'error', message: e instanceof Error ? e.message : String(e) });
         }
-        send({ type: 'error', message: e instanceof Error ? e.message : String(e) });
       } finally {
         controller.close();
       }

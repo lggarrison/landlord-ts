@@ -1,7 +1,7 @@
 ---
 type: concept
 title: mtgoncurve API
-last_updated: 2026-07-11T01:30:00Z
+last_updated: 2026-07-11T01:35:00Z
 tags: [api]
 related:
   [
@@ -63,6 +63,7 @@ const output = await runAsync({
 - `signal` — optional `AbortSignal`; aborted between batches with `AbortError`.
 - With `epsilon`, `total` is the max (`runs`); early-stop may finish with `completed < total`.
 - Seeded runs match seeded `run({ ..., parallel: false })` (including `epsilon` early-stop).
+- Lower-level `simulationFromConfigAsync` requires `options.cards` when `epsilon` is set (throws otherwise). `runAsync` always supplies non-land cards.
 
 For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
 

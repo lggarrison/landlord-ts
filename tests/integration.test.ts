@@ -307,6 +307,20 @@ describe('simulationFromConfigAsync', () => {
     expect(ticks.at(-1)!.completed).toBe(asyncSim.hands.length);
   });
 
+  it('rejects when epsilon is set without cards', async () => {
+    await expect(
+      simulationFromConfigAsync({
+        runCount: 100,
+        drawCount: 1,
+        deck: baseDeck,
+        mulligan: asNeverMulligan(),
+        onThePlay: true,
+        seed: 9,
+        epsilon: 0.05,
+      }),
+    ).rejects.toThrow('cards is required when epsilon is set');
+  });
+
   it('rejects when signal is already aborted', async () => {
     const ac = new AbortController();
     ac.abort();

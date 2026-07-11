@@ -36,8 +36,8 @@ Input/Output field names match the mtgoncurve.com contract (`snake_case`).
 
 For the full `RunInput` / `RunOutput` contract, `runAsync` (progress callbacks), and Next.js SSE streaming, see the wiki:
 
-- [mtgoncurve API](./wiki/concepts/mtgoncurve-api.md)
-- [Streaming progress](./wiki/concepts/streaming-progress.md)
+- [mtgoncurve API](https://github.com/lggarrison/landlord-ts/blob/develop/wiki/concepts/mtgoncurve-api.md)
+- [Streaming progress](https://github.com/lggarrison/landlord-ts/blob/develop/wiki/concepts/streaming-progress.md)
 
 ## Development
 

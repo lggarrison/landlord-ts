@@ -215,7 +215,7 @@ export type SimulationAsyncOptions = {
    */
   batchSize?: number;
   onProgress?: (progress: SimulationProgress) => void;
-  /** Non-land cards for Wilson early-stop when `config.epsilon` is set. */
+  /** Required for Wilson early-stop when `config.epsilon` is set. */
   cards?: readonly Card[];
   /** When aborted, stops between batches (throws `AbortError`). */
   signal?: AbortSignal;
@@ -297,9 +297,12 @@ export async function simulationFromConfigAsync(
   };
 
   if (config.epsilon !== undefined) {
+    if (options.cards === undefined) {
+      throw new Error('cards is required when epsilon is set');
+    }
     // Match simulationFromConfigAdaptive batching for seeded parity.
     const batchSize = EARLY_STOP_BATCH;
-    const cards = options.cards ?? [];
+    const cards = options.cards;
     const hands: Hand[] = [];
     let seed = config.seed;
 
