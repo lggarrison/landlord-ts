@@ -1,7 +1,7 @@
 ---
 type: concept
 title: mtgoncurve API
-last_updated: 2026-07-11T02:34:10Z
+last_updated: 2026-07-11T02:40:13Z
 tags: [api]
 related:
   [
@@ -98,7 +98,7 @@ Invalid decklists / empty decks / unknown `acceptable_hand_list` names throw **`
 | `batch_size?`  | `number`                   | Default 500; ignored when `epsilon` is set |
 | `signal?`      | `AbortSignal`              | Cancel between batches                     |
 
-`RunProgress` is `{ completed: number; total: number; phase: 'simulating' | 'scoring' }`.
+`RunProgress` is `{ completed: number; total: number; phase: 'simulating' | 'scoring' }` (**breaking** vs earlier `{ completed, total }` — update host typings).
 
 ## `SimulateStreamEvent`
 

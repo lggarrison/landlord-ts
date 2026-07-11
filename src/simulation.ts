@@ -16,6 +16,7 @@ import {
 import type { Mulligan, Rng } from './mulligan/types.js';
 import { createEntropyRng, createMulberry32 } from './mulligan/types.js';
 import { generateHandsParallelSync } from './parallel.js';
+import { yieldMacrotask } from './yield-macrotask.js';
 
 export type SimulationConfig = {
   runCount: number;
@@ -222,12 +223,6 @@ export type SimulationAsyncOptions = {
 };
 
 const DEFAULT_ASYNC_BATCH = 500;
-
-function yieldMacrotask(): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, 0);
-  });
-}
 
 function throwIfAborted(signal?: AbortSignal): void {
   signal?.throwIfAborted();

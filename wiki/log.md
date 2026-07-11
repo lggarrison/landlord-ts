@@ -50,3 +50,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T02:21:08Z] maintenance | Export insight thresholds; keep ObservationsReport internal
 
 ## [2026-07-11T02:35:12Z] maintenance | Host ergonomics: RunValidationError, phased RunProgress, SimulateStreamEvent types
+
+## [2026-07-11T02:40:38Z] maintenance | Share yieldMacrotask; fix Pattern A RunValidationError use; changelog RunProgress.phase break

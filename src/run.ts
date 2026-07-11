@@ -30,6 +30,7 @@ import {
   type Simulation,
   type SimulationConfig,
 } from './simulation.js';
+import { yieldMacrotask } from './yield-macrotask.js';
 
 export type {
   CardObservationsReport,
@@ -392,12 +393,6 @@ export function run(input: RunInput): RunOutput {
       ? simulationFromConfigAdaptive(simConfig, nonLandCards)
       : simulationFromConfig(simConfig);
   return simulationToOutput(deck, sim);
-}
-
-function yieldMacrotask(): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, 0);
-  });
 }
 
 /**

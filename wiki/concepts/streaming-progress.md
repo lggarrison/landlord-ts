@@ -1,12 +1,12 @@
 ---
 type: concept
 title: Streaming progress
-last_updated: 2026-07-11T02:34:10Z
+last_updated: 2026-07-11T02:40:13Z
 tags: [api, nextjs]
 related: [concepts/mtgoncurve-api.md, entities/run.md, concepts/monte-carlo-simulation.md]
 status: active
 summary: Next.js SSE Pattern A using runAsync on_progress (with phase) and AbortSignal for live trial percent.
-code_refs: [src/run.ts, src/simulation.ts]
+code_refs: [src/run.ts, src/simulation.ts, src/yield-macrotask.ts]
 ---
 
 # Streaming progress
@@ -21,10 +21,11 @@ Use [`runAsync`](mtgoncurve-api.md) when a host needs live trial progress (e.g. 
 - Pass `signal` (e.g. `req.signal`) so a disconnected client aborts between batches.
 - When `epsilon` is set, batch size matches sync adaptive (1000); `batch_size` only applies without `epsilon`.
 - Exported `SimulateStreamEvent` types match the SSE payloads below (types only — no Next.js dependency).
+- **Breaking:** `RunProgress` requires `phase` — update existing `on_progress` typings accordingly.
 
 ## Next.js SSE (Pattern A)
 
-Route Handler opens a `ReadableStream`, runs `runAsync`, and writes SSE events:
+Route Handler opens a `ReadableStream`, runs `runAsync`, and writes SSE events. `RunValidationError` is mapped in the stream error path (use a separate validate step if you need HTTP 400 before any SSE bytes):
 
 ```ts
 // app/api/simulate/route.ts
@@ -58,9 +59,12 @@ export async function POST(req: NextRequest) {
         });
         send({ type: 'done', result });
       } catch (e) {
-        if (!req.signal.aborted) {
-          send({ type: 'error', message: e instanceof Error ? e.message : String(e) });
+        if (req.signal.aborted) return;
+        if (e instanceof RunValidationError) {
+          send({ type: 'error', message: e.message });
+          return;
         }
+        send({ type: 'error', message: e instanceof Error ? e.message : String(e) });
       } finally {
         controller.close();
       }
@@ -76,8 +80,6 @@ export async function POST(req: NextRequest) {
   });
 }
 ```
-
-Map `RunValidationError` to HTTP 400 when you prefer not to open the stream for bad decks.
 
 Client reader:
 

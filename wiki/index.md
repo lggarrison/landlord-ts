@@ -28,8 +28,8 @@
 | [London mulligan](concepts/london-mulligan.md)               | mulligan                  | active | 2026-07-10T18:30:00Z |
 | [Mana source roadmap](concepts/mana-source-roadmap.md)       | simulation, mana, roadmap | wip    | 2026-07-11T00:39:08Z |
 | [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation                | active | 2026-07-11T01:20:00Z |
-| [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api                       | active | 2026-07-11T02:34:10Z |
-| [Streaming progress](concepts/streaming-progress.md)         | api, nextjs               | active | 2026-07-11T02:34:10Z |
+| [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api                       | active | 2026-07-11T02:40:13Z |
+| [Streaming progress](concepts/streaming-progress.md)         | api, nextjs               | active | 2026-07-11T02:40:13Z |
 
 ## Sources
 
