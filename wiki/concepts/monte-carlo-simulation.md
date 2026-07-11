@@ -17,7 +17,7 @@ code_refs: [src/simulation.ts, src/parallel.ts, src/simulation-worker.ts]
 
 # Monte Carlo simulation
 
-Each run: mulligan → draws through max card turn → auto-tap per non-land. Key metric: `p_mana_given_cmc = mana / cmc`.
+Each run: mulligan → draws through max card turn → auto-tap per non-land. Key metric on `RunOutput`: `pManaGivenCmc` (`mana / cmc` from internal observations).
 
 Optional `epsilon` treats `runs` as a max and stops when the Wilson half-width of aggregate mana/CMC is tight. Optional `parallel` shards hand generation across `worker_threads` (auto when `runs >= 2000` and no seed; seeded runs stay single-threaded for reproducibility).
 

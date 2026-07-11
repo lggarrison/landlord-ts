@@ -28,7 +28,7 @@ export type SimulationConfig = {
   seed?: number;
   /**
    * When set, `runs` is a maximum; stop early when the Wilson half-width of the
-   * aggregate p_mana_given_cmc across observed CMC opportunities is below this.
+   * aggregate pManaGivenCmc across observed CMC opportunities is below this.
    */
   epsilon?: number;
   /** Shard Monte Carlo trials across worker threads (Node). Default: true when runCount >= 2000. */

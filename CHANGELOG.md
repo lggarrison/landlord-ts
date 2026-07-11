@@ -7,32 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-07-11
+
+First npm registry publish of `@lggarrison/landlord-ts` (an earlier git tag for `@lggarrison/landlord` never reached the registry).
+
 ### Added
 
-- `runAsync` / `simulationFromConfigAsync` with optional `on_progress`, `batch_size`, and `AbortSignal` for streaming hosts (e.g. Next.js SSE)
-- Wiki docs for the mtgoncurve API contract and SSE streaming progress pattern
-- `RunValidationError` and exported `DeckcodeError` for typed input validation (hosts can map to HTTP 400)
+- Pure TypeScript Monte Carlo on-curve simulator (`run()` API)
+- `runAsync` / `simulationFromConfigAsync` with optional `onProgress`, `batchSize`, and `AbortSignal` for streaming hosts (e.g. Next.js SSE)
 - `RunProgress.phase` (`simulating` | `scoring`) so UIs can show scoring instead of stalling at 100%
+- `RunValidationError` and exported `DeckcodeError` for typed input validation (hosts can map to HTTP 400)
 - Types-only `SimulateStreamEvent` union for Next.js SSE Pattern A
+- Arena decklist parsing with `X=`, `T=`, `M=`, and `M=auto` modifiers
+- TapLand-only enters-tapped delay in auto-tap; Check/Shock immediate
+- London and Never mulligan strategies
+- Expanded land-kind modeling (fast/slow/battle/turn/surveil/bounce/triome/cycling/pain/fetch/canopy/pathway, colorless lands)
+- Flattened on-curve observation report (`cards`, ranked insights, land tallies)
+- Scryfall card-update pipeline writing `data/all_cards.json.gz`
+- Dual ESM/CJS build with TypeScript declarations
+- Vitest suite (unit, auto-tap, deck, integration / Karsten-style smoke)
+- Wiki docs for the mtgoncurve API contract and SSE streaming progress pattern
 
 ### Changed
 
 - Renamed npm package from `@lggarrison/landlord` to `@lggarrison/landlord-ts` (matches the GitHub repo)
 - Renamed GitHub repository from `landord-ts` to `landlord-ts`
-- **Breaking:** `RunProgress` now requires `phase`; update `on_progress` callbacks/typings accordingly
-
-## [0.1.0] - 2026-07-10
-
-### Added
-
-- Initial public release of `@lggarrison/landlord-ts`
-- Pure TypeScript Monte Carlo on-curve simulator (`run()` API matching mtgoncurve.com)
-- Arena decklist parsing with `X=`, `T=`, `M=`, and `M=auto` modifiers
-- TapLand-only enters-tapped delay in auto-tap; Check/Shock immediate
-- London and Never mulligan strategies
-- Scryfall card-update pipeline writing `data/all_cards.json.gz`
-- Dual ESM/CJS build with TypeScript declarations
-- Vitest suite (unit, auto-tap, deck, integration / Karsten-style smoke)
+- **Breaking (pre-publish):** public `RunInput` / `RunOutput` / report fields use camelCase (not snake_case)
+- **Breaking (pre-publish):** `RunProgress` requires `phase`; update `onProgress` callbacks/typings accordingly
 
 [Unreleased]: https://github.com/lggarrison/landlord-ts/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/lggarrison/landlord-ts/releases/tag/v0.1.0

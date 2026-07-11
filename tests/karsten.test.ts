@@ -11,7 +11,7 @@ function karstenCheck(
 ): void {
   const o = cards.find((obs) => obs.name.toLowerCase() === name.toLowerCase());
   expect(o, `No card named: ${name}`).toBeTruthy();
-  const actual = o!.p_mana_given_cmc;
+  const actual = o!.pManaGivenCmc;
   expect(Math.abs(expected - actual), `${name}: expected ${expected}, got ${actual}`).toBeLessThan(
     thresh,
   );
@@ -52,13 +52,13 @@ describe('Karsten tables (seeded, reduced runs)', () => {
     const output = run({
       code: karstenDeck(8, 16, 20),
       runs,
-      on_the_play: true,
-      mulligan_down_to: 5,
-      mulligan_on_lands: [0, 1, 6, 7],
-      acceptable_hand_list: [],
+      onThePlay: true,
+      mulliganDownTo: 5,
+      mulliganOnLands: [0, 1, 6, 7],
+      acceptableHandList: [],
       seed: 42,
     });
-    expect(output.deck_size).toBe(60);
+    expect(output.deckSize).toBe(60);
     const cards = output.cards;
     karstenCheck(cards, 'Appetite for Brains', 0.702);
     karstenCheck(cards, 'Abnormal Endurance', 0.756);
@@ -81,13 +81,13 @@ describe('Karsten tables (seeded, reduced runs)', () => {
     const output = run({
       code: karstenDeck(14, 10, 20),
       runs,
-      on_the_play: true,
-      mulligan_down_to: 5,
-      mulligan_on_lands: [0, 1, 6, 7],
-      acceptable_hand_list: [],
+      onThePlay: true,
+      mulliganDownTo: 5,
+      mulliganOnLands: [0, 1, 6, 7],
+      acceptableHandList: [],
       seed: 42,
     });
-    expect(output.deck_size).toBe(60);
+    expect(output.deckSize).toBe(60);
     const cards = output.cards;
     karstenCheck(cards, 'Appetite for Brains', 0.914);
     karstenCheck(cards, 'Abnormal Endurance', 0.942);
@@ -115,16 +115,16 @@ describe('Karsten tables (seeded, reduced runs)', () => {
 12 Forest
 1 Wastes M={C}`,
       runs: n,
-      on_the_play: false,
-      mulligan_down_to: 7,
-      mulligan_on_lands: [],
-      acceptable_hand_list: [],
+      onThePlay: false,
+      mulliganDownTo: 7,
+      mulliganOnLands: [],
+      acceptableHandList: [],
       seed: 7,
     });
     const card = output.cards[0]!;
-    expect(card.played_on_curve).toBe(n);
-    expect(card.not_enough_lands).toBe(0);
-    expect(card.color_or_timing_fail).toBe(0);
-    expect(card.mana_ok_undrawn).toBe(0);
+    expect(card.playedOnCurve).toBe(n);
+    expect(card.notEnoughLands).toBe(0);
+    expect(card.colorOrTimingFail).toBe(0);
+    expect(card.manaOkUndrawn).toBe(0);
   });
 });
