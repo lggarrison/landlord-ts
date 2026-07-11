@@ -286,7 +286,6 @@ export async function simulationFromConfigAsync(
   const onProgress = options.onProgress;
   const signal = options.signal;
   const total = config.runCount;
-  const deck = deckFlatten(config.deck);
   const playOrder = config.onThePlay ? PlayOrder.First : PlayOrder.Second;
   // Yield only when a host may need to flush progress or observe cancellation.
   const shouldYield = onProgress !== undefined || signal !== undefined;
@@ -304,6 +303,7 @@ export async function simulationFromConfigAsync(
       throw new Error('cards is required when epsilon is set');
     }
     // Match simulationFromConfigAdaptive batching for seeded parity.
+    // Batches call simulationFromConfig, which flattens the deck itself.
     const batchSize = EARLY_STOP_BATCH;
     const cards = options.cards;
     const hands: Hand[] = [];
@@ -336,6 +336,7 @@ export async function simulationFromConfigAsync(
     return { hands, ...stats, onThePlay: config.onThePlay };
   }
 
+  const deck = deckFlatten(config.deck);
   const batchSize = Math.max(1, options.batchSize ?? DEFAULT_ASYNC_BATCH);
   // Continuous RNG so seeded async batches match sequential simulationFromConfig.
   const rng: Rng = config.seed !== undefined ? createMulberry32(config.seed) : createEntropyRng();
