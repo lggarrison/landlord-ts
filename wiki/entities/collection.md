@@ -1,7 +1,7 @@
 ---
 type: entity
 title: Collection
-last_updated: 2026-07-11T00:35:02Z
+last_updated: 2026-07-11T19:11:50Z
 tags: [collection, src]
 related: [entities/card.md, entities/deck.md]
 status: active
@@ -11,7 +11,7 @@ code_refs: [src/collection.ts]
 
 # Collection
 
-Binary-search by name; `otherFacesByName` resolves sibling DFC faces sharing an `oracleId` (used by `M=auto`).
+Cards are sorted by lowercased name with `localeCompare`. `cardFromName` binary-searches with the same `localeCompare` order (not raw code-unit `<`), so names with commas/apostrophes resolve correctly. `otherFacesByName` resolves sibling DFC faces sharing an `oracleId` (used by `M=auto`).
 
 ## See also
 

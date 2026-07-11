@@ -25,7 +25,7 @@
 | [GitHub repo hygiene](concepts/github-repo-hygiene.md)       | github, process           | active | 2026-07-10T22:25:00Z |
 | [Land kinds](concepts/land-kinds.md)                         | simulation, mana, lands   | active | 2026-07-11T00:12:37Z |
 | [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:39:08Z |
-| [landlord-ts API](concepts/landlord-ts-api.md)               | api                       | active | 2026-07-11T03:54:00Z |
+| [landlord-ts API](concepts/landlord-ts-api.md)               | api                       | active | 2026-07-11T19:29:00Z |
 | [London mulligan](concepts/london-mulligan.md)               | mulligan                  | active | 2026-07-10T18:30:00Z |
 | [Mana source roadmap](concepts/mana-source-roadmap.md)       | simulation, mana, roadmap | wip    | 2026-07-11T00:39:08Z |
 | [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation                | active | 2026-07-11T03:54:00Z |

@@ -33,8 +33,15 @@ export {
 } from './card/index.js';
 export type { Card, ManaCost, ManaColorCount } from './card/index.js';
 
-export { deckFromList, decklist, deckFromCards, deckFlatten, DeckcodeError } from './deck.js';
-export type { Deck, DeckCard } from './deck.js';
+export {
+  deckFromList,
+  decklist,
+  parseDecklist,
+  deckFromCards,
+  deckFlatten,
+  DeckcodeError,
+} from './deck.js';
+export type { Deck, DeckCard, ParseDecklistResult } from './deck.js';
 
 export { ALL_CARDS, getAllCards, setAllCards, loadCardsFromGzipBytes } from './data.js';
 export {

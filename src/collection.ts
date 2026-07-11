@@ -18,7 +18,7 @@ export function cardFromName(collection: Collection, name: string): Card | undef
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
     const probe = collection.cards[mid]!.name.toLowerCase();
-    if (probe < nameLower) lo = mid + 1;
+    if (probe.localeCompare(nameLower) < 0) lo = mid + 1;
     else hi = mid;
   }
   const found = collection.cards[lo];
