@@ -46,3 +46,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T02:05:57Z] maintenance | Document observations_report on RunOutput
 
 ## [2026-07-11T02:13:08Z] maintenance | Flatten RunOutput; drop dual observations
+
+## [2026-07-11T02:21:08Z] maintenance | Export insight thresholds; keep ObservationsReport internal

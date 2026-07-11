@@ -1,7 +1,7 @@
 ---
 type: concept
 title: mtgoncurve API
-last_updated: 2026-07-11T02:15:00Z
+last_updated: 2026-07-11T02:25:00Z
 tags: [api]
 related:
   [
@@ -105,8 +105,8 @@ For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
 | `deck_size` / `deck_average_cmc`                   | Deck summary                                                                                                                                                      |
 | `cards[]`                                          | Per non-land: `played_on_curve`, `not_played_on_curve`, `total_simulations`, rates, failure modes (`not_enough_lands`, `color_or_timing_fail`, `mana_ok_undrawn`) |
 | `weakest_on_curve`                                 | All non-lands sorted ascending by `p_cast_on_curve`                                                                                                               |
-| `color_constrained`                                | Cards with `(cmc - mana) / cmc >= 0.15`                                                                                                                           |
-| `draw_dependent`                                   | Cards with `(mana - play) / mana >= 0.15`                                                                                                                         |
+| `color_constrained`                                | Cards with `(cmc - mana) / cmc >= COLOR_CONSTRAINED_THRESHOLD` (exported; default `0.15`)                                                                         |
+| `draw_dependent`                                   | Cards with `(mana - play) / mana >= DRAW_DEPENDENT_THRESHOLD` (exported; default `0.15`)                                                                          |
 | `land_counts`                                      | `LandCount` rows (`name`, `kind`, `copies`, `image_uri`, `mana_cost`, `hash`)                                                                                     |
 | `total_land_counts`                                | `ManaColorCount`                                                                                                                                                  |
 | `basic_land_counts` … `pathway_land_counts`        | Per land-kind mana counts                                                                                                                                         |
@@ -116,6 +116,8 @@ For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
 Land-kind count fields: `basic_`, `tap_`, `check_`, `shock_`, `fast_`, `slow_`, `battle_`, `turn_`, `surveil_`, `bounce_`, `triome_`, `cycling_`, `pain_`, `fetch_`, `canopy_`, `pathway_`, `other_`, `non_land_` (each a `ManaColorCount`).
 
 Failure-mode identity per card: `not_enough_lands + color_or_timing_fail + mana_ok_undrawn + played_on_curve === total_simulations`.
+
+Insight thresholds are exported as `COLOR_CONSTRAINED_THRESHOLD` and `DRAW_DEPENDENT_THRESHOLD` so hosts can document or mirror the cutoffs. The builder that applies them is package-internal; only the flattened `RunOutput` fields are public.
 
 Internal Monte Carlo aggregation still uses `Observations` (`mana` / `cmc` / `play` / …) in `simulation.ts`; those counters are not exposed on `RunOutput`.
 

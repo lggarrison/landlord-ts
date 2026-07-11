@@ -35,9 +35,10 @@ export type {
   CardObservationsReport,
   ColorConstrainedEntry,
   DrawDependentEntry,
-  ObservationsReport,
   WeakestOnCurveEntry,
 } from './observations-report.js';
+
+export { COLOR_CONSTRAINED_THRESHOLD, DRAW_DEPENDENT_THRESHOLD } from './observations-report.js';
 
 export type RunInput = {
   code: string;
@@ -289,8 +290,9 @@ function simulationToOutput(deck: Deck, sim: Simulation): RunOutput {
       copies: c.count,
       hash: c.card.hash,
     }));
-  outputs.land_counts.sort((a, b) => a.name.localeCompare(b.name));
-  outputs.land_counts.sort((a, b) => String(a.kind).localeCompare(String(b.kind)));
+  outputs.land_counts.sort(
+    (a, b) => String(a.kind).localeCompare(String(b.kind)) || a.name.localeCompare(b.name),
+  );
 
   for (const cc of deckIter(deck)) {
     for (let i = 0; i < cc.count; i++) {

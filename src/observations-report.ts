@@ -5,8 +5,10 @@ import type { CardKind } from './card/index.js';
 import type { Observations } from './simulation.js';
 import { pManaGivenCmc, pPlay } from './simulation.js';
 
-const COLOR_CONSTRAINED_THRESHOLD = 0.15;
-const DRAW_DEPENDENT_THRESHOLD = 0.15;
+/** Fraction of CMC opportunities that must fail color/timing to flag `color_constrained`. */
+export const COLOR_CONSTRAINED_THRESHOLD = 0.15;
+/** Fraction of mana hits that must be undrawn to flag `draw_dependent`. */
+export const DRAW_DEPENDENT_THRESHOLD = 0.15;
 
 export type CardObservationsReport = {
   name: string;
@@ -45,6 +47,7 @@ export type DrawDependentEntry = {
   mana_hits: number;
 };
 
+/** Internal builder result; fields are flattened onto `RunOutput` by `run()`. */
 export type ObservationsReport = {
   total_simulations: number;
   avg_opening_hand_size: number;
@@ -115,11 +118,14 @@ function cardReportFromInput(input: CardReportInput): CardObservationsReport {
   };
 }
 
+function compareCardsByCmcThenName(a: CardObservationsReport, b: CardObservationsReport): number {
+  return a.cmc - b.cmc || a.name.localeCompare(b.name);
+}
+
 export function buildObservationsReport(input: BuildObservationsReportInput): ObservationsReport {
   const total = input.total_simulations;
   const cards = input.cards.map(cardReportFromInput);
-  cards.sort((a, b) => a.name.localeCompare(b.name));
-  cards.sort((a, b) => a.cmc - b.cmc);
+  cards.sort(compareCardsByCmcThenName);
 
   const weakest_on_curve: WeakestOnCurveEntry[] = cards
     .map((c) => ({

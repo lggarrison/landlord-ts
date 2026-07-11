@@ -5,14 +5,13 @@ export type {
   RunProgress,
   RunOutput,
   LandCount,
-  ObservationsReport,
   CardObservationsReport,
   ColorConstrainedEntry,
   DrawDependentEntry,
   WeakestOnCurveEntry,
 } from './run.js';
 
-export { buildObservationsReport, emptyObservationsReport } from './observations-report.js';
+export { COLOR_CONSTRAINED_THRESHOLD, DRAW_DEPENDENT_THRESHOLD } from './run.js';
 
 export {
   CardKind,
