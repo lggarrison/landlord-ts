@@ -142,7 +142,7 @@ export function deckFromList(list: string): Deck {
       lookingForDeckLine = false;
       continue;
     }
-    if (trimmedLower === 'commander' || trimmedLower === 'companion') {
+    if (trimmedLower === 'commander' || trimmedLower === 'companion' || trimmedLower === 'about') {
       lookingForDeckLine = true;
       continue;
     }
