@@ -58,3 +58,7 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T03:55:52Z] maintenance | Rename mtgoncurve-api concept to landlord-ts-api
 
 ## [2026-07-11T19:12:20Z] maintenance | deck About skip + cardFromName localeCompare; real deck tests
+
+## [2026-07-11T19:27:18Z] maintenance | add parseDecklist Result + unknownCardName for UI
+
+## [2026-07-11T19:29:22Z] maintenance | collect all unknownCardNames in one parse pass

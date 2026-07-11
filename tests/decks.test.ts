@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_CARDS, run } from '../src/index.js';
+import { ALL_CARDS, parseDecklist, run } from '../src/index.js';
 import { deckFromList } from '../src/deck.js';
 
+/** Verbatim MTG Arena export (includes blank line before Sideboard). */
 const mtgArenaDeck = `
 Deck
 9 Forest (FDN) 291
@@ -34,6 +35,7 @@ Sideboard
 2 Sear (ECL) 154
 `;
 
+/** Verbatim Moxfield export (About header + Sideboard). */
 const moxFieldDeck = `About
 Name Big Red Thor
 
@@ -66,6 +68,7 @@ Sideboard
 2 The Legend of Roku
 `;
 
+/** Verbatim AetherHub export. */
 const aetherHubDeck = `
 Deck
 3 Island
@@ -88,6 +91,70 @@ Deck
 4 Great Hall of the Biblioplex
 1 Improvisation Capstone
 2 Thor, God of Thunder
+`;
+
+const malformedMtgArenaDeck = `
+Deck
+9 My Weird Card That Does Not Exist (FDN) 291
+3 Mountain (FDN) 289
+4 Llanowar Elves (M19) 314
+2 Pelakka Wurm (M19) 192
+2 Darksteel Colossus (FDN) 671
+4 Stomping Ground (EOE) 258
+2 Bushwhack (FDN) 215
+1 Trumpeting Carnosaur (LCI) 171
+2 Ghalta, Stampede Tyrant (LCI) 185
+2 Vaultborn Tyrant (BIG) 20
+4 Overlord of the Hauntwoods (DSK) 194
+4 Esper Origins (FIN) 185
+4 Earthbender Ascension (TLA) 175
+4 Shared Roots (TLA) 196
+4 Multiversal Passage (SPM) 180
+3 Raph & Mikey, Troublemakers (TMT) 167
+4 World War Hulk (MSH) 197
+2 Training Compound (MSH) 275
+
+Sideboard
+1 Vivien Reid (FDN) 234
+1 Soul-Guide Lantern (THB) 237
+3 Pick Your Poison (MKM) 170
+1 Balustrade Wurm (DSK) 168
+2 Ghost Vacuum (DSK) 248
+2 Redirect Lightning (TLA) 151
+2 Hexing Squelcher (ECL) 145
+2 Sear (ECL) 154
+`;
+
+const multipleMalformedMtgArenaDeck = `
+Deck
+9 My Weird Card That Does Not Exist (FDN) 291
+3 My Other Weird Card That Does Not Exist (FDN) 289
+4 Llanowar Elves (M19) 314
+2 Pelakka Wurm (M19) 192
+2 Darksteel Colossus (FDN) 671
+4 Stomping Ground (EOE) 258
+2 Bushwhack (FDN) 215
+1 Trumpeting Carnosaur (LCI) 171
+2 Ghalta, Stampede Tyrant (LCI) 185
+2 Vaultborn Tyrant (BIG) 20
+4 Overlord of the Hauntwoods (DSK) 194
+4 Esper Origins (FIN) 185
+4 Earthbender Ascension (TLA) 175
+4 Shared Roots (TLA) 196
+4 Multiversal Passage (SPM) 180
+3 Raph & Mikey, Troublemakers (TMT) 167
+4 World War Hulk (MSH) 197
+2 Training Compound (MSH) 275
+
+Sideboard
+1 Vivien Reid (FDN) 234
+1 Soul-Guide Lantern (THB) 237
+3 Pick Your Poison (MKM) 170
+1 Balustrade Wurm (DSK) 168
+2 Ghost Vacuum (DSK) 248
+2 Redirect Lightning (TLA) 151
+2 Hexing Squelcher (ECL) 145
+2 Sear (ECL) 154
 `;
 
 const runDefaults = {
@@ -116,6 +183,44 @@ describe('Arena set / collector codes', () => {
     expect(deck.cardCount).toBe(12);
     expect(countOf(deck, 'Forest')).toBe(9);
     expect(countOf(deck, 'Mountain')).toBe(3);
+  });
+});
+
+describe('parseDecklist', () => {
+  it('accepts a valid Arena export', () => {
+    const result = parseDecklist(mtgArenaDeck);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.deck.cardCount).toBe(60);
+  });
+
+  it('reports unknown card name for UI (does not throw)', () => {
+    const result = parseDecklist(malformedMtgArenaDeck);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.message).toContain('My Weird Card That Does Not Exist');
+    expect(result.error.unknownCardName).toBe('My Weird Card That Does Not Exist');
+    expect(result.error.unknownCardNames).toEqual(['My Weird Card That Does Not Exist']);
+  });
+
+  it('reports all unknown card names in one pass', () => {
+    const result = parseDecklist(multipleMalformedMtgArenaDeck);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.unknownCardNames).toEqual([
+      'My Weird Card That Does Not Exist',
+      'My Other Weird Card That Does Not Exist',
+    ]);
+    expect(result.error.unknownCardName).toBe('My Weird Card That Does Not Exist');
+    expect(result.error.message).toContain('My Weird Card That Does Not Exist');
+    expect(result.error.message).toContain('My Other Weird Card That Does Not Exist');
+  });
+
+  it('rejects empty input', () => {
+    const result = parseDecklist('');
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.message).toBe('Empty deckcode');
   });
 });
 

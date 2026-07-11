@@ -1,12 +1,12 @@
 ---
 type: entity
 title: Deck
-last_updated: 2026-07-11T19:11:50Z
+last_updated: 2026-07-11T19:29:00Z
 tags: [deck, src]
 related:
   [entities/collection.md, entities/run.md, concepts/land-mana.md, concepts/landlord-ts-api.md]
 status: active
-summary: Arena/Moxfield decklist parser with sideboard strip, About skip, X=/T=/M=, DFC land-face detection, and DeckcodeError.
+summary: Arena/Moxfield decklist parser with parseDecklist Result, sideboard strip, About skip, and DeckcodeError.
 code_refs: [src/deck.ts]
 ---
 
@@ -24,7 +24,15 @@ Without an explicit `M=`, spell//land DFCs automatically use the land face (same
 
 `M={W}` / `M={C}` / etc. is the workaround when default land mana is wrong (e.g. under-modeled chooser lands) — see [Land mana](../concepts/land-mana.md).
 
-Parse failures throw **`DeckcodeError`** (exported). The [run](run.md) façade wraps those as `RunValidationError` with `cause` set to the `DeckcodeError` — see [landlord-ts API](../concepts/landlord-ts-api.md).
+## APIs
+
+- **`deckFromList` / `decklist`** — throwing parse; failures raise **`DeckcodeError`**.
+- **`parseDecklist`** — non-throwing Result for UI validation before `run()`:
+  - `{ ok: true, deck }` on success (rejects empty maindecks)
+  - `{ ok: false, error }` on failure; `error.message` is human-readable
+  - Unknown cards set **`error.unknownCardNames`** (all unresolved names, set/collector stripped) and **`error.unknownCardName`** (first) so hosts can list or highlight every bad card in one validate pass
+
+The [run](run.md) façade wraps `DeckcodeError` as `RunValidationError` with `cause` set — see [landlord-ts API](../concepts/landlord-ts-api.md).
 
 ## See also
 
