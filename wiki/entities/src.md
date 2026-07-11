@@ -1,11 +1,11 @@
 ---
 type: overview
 title: Src
-last_updated: 2026-07-11T01:20:00Z
+last_updated: 2026-07-11T03:54:00Z
 tags: [src]
 related:
   [
-    concepts/mtgoncurve-api.md,
+    concepts/landlord-ts-api.md,
     concepts/streaming-progress.md,
     concepts/auto-tap.md,
     concepts/land-kinds.md,
@@ -25,7 +25,7 @@ code_refs: [src/index.ts, src/run.ts]
 
 # Src (`src/`)
 
-TypeScript port of the Rust landlord engine. Primary entry: [`run()`](run.md) / [`runAsync()`](run.md) matching the mtgoncurve.com Input/Output contract. Streaming hosts: [Streaming progress](../concepts/streaming-progress.md).
+TypeScript port of the Rust landlord engine. Primary entry: [`run()`](run.md) / [`runAsync()`](run.md) via the [landlord-ts API](../concepts/landlord-ts-api.md). Streaming hosts: [Streaming progress](../concepts/streaming-progress.md).
 
 Board-aware land ETB (Check/Fast/Slow/Battle/Turn + nickname cycles), auto DFC face-detect, worker parallelization, and adaptive trial counts are implemented in this package. See [Land kinds](../concepts/land-kinds.md).
 
@@ -47,7 +47,7 @@ Board-aware land ETB (Check/Fast/Slow/Battle/Turn + nickname cycles), auto DFC f
 ## See also
 
 - [TS port feasibility plan](../sources/ts-port-feasibility.md)
-- [mtgoncurve API](../concepts/mtgoncurve-api.md)
+- [landlord-ts API](../concepts/landlord-ts-api.md)
 - [Streaming progress](../concepts/streaming-progress.md)
 - [Auto-tap](../concepts/auto-tap.md)
 - [Land kinds](../concepts/land-kinds.md)

@@ -28,9 +28,25 @@ export type Deck = {
 };
 
 export class DeckcodeError extends Error {
-  constructor(message: string) {
+  /**
+   * All unresolved card names from this parse (set/collector stripped).
+   * Prefer this for UI lists when multiple cards are missing.
+   */
+  readonly unknownCardNames: string[];
+
+  /** First unknown card name; same as `unknownCardNames[0]` when present. */
+  readonly unknownCardName?: string;
+
+  constructor(
+    message: string,
+    options?: { unknownCardName?: string; unknownCardNames?: string[] },
+  ) {
     super(message);
     this.name = 'DeckcodeError';
+    const names =
+      options?.unknownCardNames ?? (options?.unknownCardName ? [options.unknownCardName] : []);
+    this.unknownCardNames = names;
+    this.unknownCardName = names[0] ?? options?.unknownCardName;
   }
 }
 
@@ -133,6 +149,7 @@ const ARENA_LINE_REGEX =
 export function deckFromList(list: string): Deck {
   const builder: DeckBuilder = new Map();
   let lookingForDeckLine = false;
+  const unknownCardNames: string[] = [];
 
   for (const line of list.trim().split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -142,7 +159,7 @@ export function deckFromList(list: string): Deck {
       lookingForDeckLine = false;
       continue;
     }
-    if (trimmedLower === 'commander' || trimmedLower === 'companion') {
+    if (trimmedLower === 'commander' || trimmedLower === 'companion' || trimmedLower === 'about') {
       lookingForDeckLine = true;
       continue;
     }
@@ -170,7 +187,8 @@ export function deckFromList(list: string): Deck {
 
     const found = ALL_CARDS.cardFromName(leftCardName);
     if (!found) {
-      throw new DeckcodeError(`Cannot find card named "${name}" in collection`);
+      if (!unknownCardNames.includes(name)) unknownCardNames.push(name);
+      continue;
     }
     const card = cloneCard(found);
 
@@ -221,11 +239,39 @@ export function deckFromList(list: string): Deck {
     insertCount(builder, card, amount);
   }
 
+  if (unknownCardNames.length > 0) {
+    const message =
+      unknownCardNames.length === 1
+        ? `Cannot find card named "${unknownCardNames[0]}" in collection`
+        : `Cannot find cards in collection: ${unknownCardNames.map((n) => `"${n}"`).join(', ')}`;
+    throw new DeckcodeError(message, { unknownCardNames });
+  }
+
   return deckBuilderBuild(builder);
 }
 
 export function decklist(list: string): Deck {
   return deckFromList(list);
+}
+
+/**
+ * Non-throwing parse for UI validation (e.g. textarea before `run()`).
+ * On failure, `error.message` is human-readable; unknown cards set
+ * `error.unknownCardNames` (and `error.unknownCardName` for the first).
+ */
+export type ParseDecklistResult = { ok: true; deck: Deck } | { ok: false; error: DeckcodeError };
+
+export function parseDecklist(list: string): ParseDecklistResult {
+  try {
+    const deck = deckFromList(list);
+    if (deckIsEmpty(deck)) {
+      return { ok: false, error: new DeckcodeError('Empty deckcode') };
+    }
+    return { ok: true, deck };
+  } catch (e) {
+    if (e instanceof DeckcodeError) return { ok: false, error: e };
+    return { ok: false, error: new DeckcodeError(String(e)) };
+  }
 }
 
 export function deckManaCounts(deck: Deck): ManaColorCount {

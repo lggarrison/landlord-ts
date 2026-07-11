@@ -1,7 +1,8 @@
 ---
 type: concept
-title: mtgoncurve API
-last_updated: 2026-07-11T03:10:00Z
+title: landlord-ts API
+last_updated: 2026-07-11T19:29:00Z
+aliases: [mtgoncurve API]
 tags: [api]
 related:
   [
@@ -12,11 +13,11 @@ related:
   ]
 sources: [sources/ts-port-feasibility.md]
 status: active
-summary: CamelCase run() / runAsync() Input, flattened RunOutput, RunValidationError, and SSE event types.
+summary: CamelCase run()/runAsync(), parseDecklist Result for UI validation, RunValidationError, and SSE event types.
 code_refs: [src/run.ts, src/index.ts, src/observations-report.ts, src/deck.ts]
 ---
 
-# mtgoncurve API
+# landlord-ts API
 
 Public façade for `@lggarrison/landlord-ts`. `RunInput` / `RunOutput` field names are camelCase. `RunOutput` is a single flattened on-curve report — not a dual raw-counter + report layout.
 
@@ -72,6 +73,21 @@ For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
 ## Validation errors
 
 Invalid decklists / empty decks / unknown `acceptableHandList` names throw **`RunValidationError`** (exported). Bad deckcode wraps the underlying **`DeckcodeError`** (also exported) as `error.cause`. Hosts can map `instanceof RunValidationError` to HTTP 400.
+
+For textarea validation **before** simulating, use **`parseDecklist(code)`** (non-throwing):
+
+```ts
+import { parseDecklist } from '@lggarrison/landlord-ts';
+
+const parsed = parseDecklist(code);
+if (!parsed.ok) {
+  // parsed.error.message — e.g. Cannot find card named "…" / Cannot find cards in collection: …
+  // parsed.error.unknownCardNames — all unresolved names (set/collector stripped)
+  // parsed.error.unknownCardName — first unknown (convenience)
+  return;
+}
+// parsed.deck is ready; then call run({ code, … })
+```
 
 ## `RunInput`
 

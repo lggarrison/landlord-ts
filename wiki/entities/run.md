@@ -1,10 +1,10 @@
 ---
 type: entity
 title: Run
-last_updated: 2026-07-11T03:10:00Z
+last_updated: 2026-07-11T03:54:00Z
 tags: [run, src]
 related:
-  [concepts/mtgoncurve-api.md, concepts/streaming-progress.md, entities/src.md, entities/deck.md]
+  [concepts/landlord-ts-api.md, concepts/streaming-progress.md, entities/src.md, entities/deck.md]
 status: active
 summary: Public run() / runAsync() façade with flattened RunOutput, RunValidationError, and phased progress.
 code_refs: [src/run.ts, src/index.ts, src/observations-report.ts]
@@ -22,7 +22,7 @@ Optional inputs: `startingHandSize`, `epsilon` (early-stop), `parallel` (sync `r
 
 ## See also
 
-- [mtgoncurve API](../concepts/mtgoncurve-api.md)
+- [landlord-ts API](../concepts/landlord-ts-api.md)
 - [Streaming progress](../concepts/streaming-progress.md)
 - [Src](src.md)
 - [Deck](deck.md)

@@ -69,9 +69,11 @@ for (const land of output.landCounts) {
 
 `RunInput` / `RunOutput` use camelCase field names. `RunOutput` is a single flattened on-curve report (`cards`, ranked insights, land tallies).
 
+Validate a textarea decklist before simulating with **`parseDecklist(code)`** (non-throwing Result; unknown cards set `error.unknownCardNames`).
+
 For the full `RunInput` / `RunOutput` contract, `runAsync` (progress callbacks), and Next.js SSE streaming, see the wiki:
 
-- [mtgoncurve API](https://github.com/lggarrison/landlord-ts/blob/develop/wiki/concepts/mtgoncurve-api.md)
+- [landlord-ts API](https://github.com/lggarrison/landlord-ts/blob/develop/wiki/concepts/landlord-ts-api.md)
 - [Streaming progress](https://github.com/lggarrison/landlord-ts/blob/develop/wiki/concepts/streaming-progress.md)
 
 ## Development
