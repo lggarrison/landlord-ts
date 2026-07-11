@@ -1,7 +1,7 @@
 ---
 type: concept
 title: mtgoncurve API
-last_updated: 2026-07-11T01:40:00Z
+last_updated: 2026-07-11T02:10:00Z
 tags: [api]
 related:
   [
@@ -13,7 +13,7 @@ related:
 sources: [sources/ts-port-feasibility.md]
 status: active
 summary: Snake_case run() / runAsync() Input/Output contract compatible with mtgoncurve.com.
-code_refs: [src/run.ts, src/index.ts]
+code_refs: [src/run.ts, src/index.ts, src/observations-report.ts]
 ---
 
 # mtgoncurve API
@@ -98,20 +98,37 @@ For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
 
 ## `RunOutput`
 
-| Field                                       | Notes                                       |
-| ------------------------------------------- | ------------------------------------------- |
-| `card_observations`                         | Non-land cards with per-card `Observations` |
-| `land_counts`                               | Land rows (empty observations)              |
-| `deck_size`                                 |                                             |
-| `accumulated_opening_hand_size`             | Sum across trials                           |
-| `accumulated_opening_hand_land_count`       | Sum across trials                           |
-| `deck_average_cmc`                          | Non-land average CMC                        |
-| `total_land_counts`                         | `ManaColorCount`                            |
-| `basic_land_counts` … `pathway_land_counts` | Per land-kind mana counts                   |
-| `other_land_counts`                         | Other / forced lands                        |
-| `non_land_counts`                           | Non-land mana-cost tallies                  |
+| Field                                       | Notes                                                                 |
+| ------------------------------------------- | --------------------------------------------------------------------- |
+| `card_observations`                         | Non-land cards with per-card `Observations` (mtgoncurve raw counters) |
+| `observations_report`                       | User-facing on-curve report (see below)                               |
+| `land_counts`                               | Land rows (empty observations)                                        |
+| `deck_size`                                 |                                                                       |
+| `accumulated_opening_hand_size`             | Sum across trials                                                     |
+| `accumulated_opening_hand_land_count`       | Sum across trials                                                     |
+| `deck_average_cmc`                          | Non-land average CMC                                                  |
+| `total_land_counts`                         | `ManaColorCount`                                                      |
+| `basic_land_counts` … `pathway_land_counts` | Per land-kind mana counts                                             |
+| `other_land_counts`                         | Other / forced lands                                                  |
+| `non_land_counts`                           | Non-land mana-cost tallies                                            |
 
 Land-kind count fields: `basic_`, `tap_`, `check_`, `shock_`, `fast_`, `slow_`, `battle_`, `turn_`, `surveil_`, `bounce_`, `triome_`, `cycling_`, `pain_`, `fetch_`, `canopy_`, `pathway_`, `other_`, `non_land_` (each a `ManaColorCount`).
+
+### `observations_report`
+
+Independent of `card_observations`. Built for hosts/deck builders:
+
+| Field                                              | Notes                                                                                                                                                             |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `total_simulations`                                | Trial count (may be below `runs` when `epsilon` early-stops)                                                                                                      |
+| `avg_opening_hand_size` / `avg_opening_land_count` | After mulligans                                                                                                                                                   |
+| `deck_size` / `deck_average_cmc`                   | Deck summary                                                                                                                                                      |
+| `cards[]`                                          | Per non-land: `played_on_curve`, `not_played_on_curve`, `total_simulations`, rates, failure modes (`not_enough_lands`, `color_or_timing_fail`, `mana_ok_undrawn`) |
+| `weakest_on_curve`                                 | All non-lands sorted ascending by `p_cast_on_curve`                                                                                                               |
+| `color_constrained`                                | Cards with `(cmc - mana) / cmc >= 0.15`                                                                                                                           |
+| `draw_dependent`                                   | Cards with `(mana - play) / mana >= 0.15`                                                                                                                         |
+
+Failure-mode identity per card: `not_enough_lands + color_or_timing_fail + mana_ok_undrawn + played_on_curve === total_simulations`.
 
 ## See also
 

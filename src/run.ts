@@ -15,6 +15,11 @@ import { ALL_CARDS } from './data.js';
 import { deckFromList, deckIsEmpty, deckIter, DeckcodeError, type Deck } from './deck.js';
 import { asLondonMulligan, londonNever } from './mulligan/index.js';
 import {
+  buildObservationsReport,
+  emptyObservationsReport,
+  type ObservationsReport,
+} from './observations-report.js';
+import {
   newObservations,
   observationsForCardByTurn,
   simulationFromConfig,
@@ -24,6 +29,14 @@ import {
   type Simulation,
   type SimulationConfig,
 } from './simulation.js';
+
+export type { ObservationsReport } from './observations-report.js';
+export type {
+  CardObservationsReport,
+  ColorConstrainedEntry,
+  DrawDependentEntry,
+  WeakestOnCurveEntry,
+} from './observations-report.js';
 
 export type RunInput = {
   code: string;
@@ -80,6 +93,8 @@ export type CardObservation = {
 
 export type RunOutput = {
   card_observations: CardObservation[];
+  /** User-facing on-curve report (success/miss/failure modes); independent of card_observations. */
+  observations_report: ObservationsReport;
   land_counts: CardObservation[];
   deck_size: number;
   accumulated_opening_hand_size: number;
@@ -127,6 +142,7 @@ function toMtgCard(card: Card): MtgOnCurveCard {
 function emptyOutput(): RunOutput {
   return {
     card_observations: [],
+    observations_report: emptyObservationsReport(),
     land_counts: [],
     deck_size: 0,
     accumulated_opening_hand_size: 0,
@@ -218,17 +234,26 @@ function simulationToOutput(deck: Deck, sim: Simulation): RunOutput {
   outputs.accumulated_opening_hand_size = sim.accumulatedOpeningHandSize;
   outputs.accumulated_opening_hand_land_count = sim.accumulatedOpeningHandLandCount;
 
-  outputs.card_observations = deckIter(deck)
+  const nonLandWithObs = deckIter(deck)
     .filter((c) => !isLand(c.card))
     .map((c) => {
-      const o = observationsForCardByTurn(sim, c.card, c.card.turn);
+      const observations = observationsForCardByTurn(sim, c.card, c.card.turn);
+      const mtgCard = toMtgCard(c.card);
+      const cmc = manaCostCmc(c.card.manaCost);
       return {
-        card: toMtgCard(c.card),
-        cmc: manaCostCmc(c.card.manaCost),
+        card: mtgCard,
+        cmc,
         card_count: c.count,
-        observations: o,
+        observations,
       };
     });
+
+  outputs.card_observations = nonLandWithObs.map((row) => ({
+    card: row.card,
+    cmc: row.cmc,
+    card_count: row.card_count,
+    observations: row.observations,
+  }));
   outputs.card_observations.sort((a, b) => a.card.name.localeCompare(b.card.name));
   outputs.card_observations.sort(
     (a, b) => manaCostCmc(a.card.mana_cost) - manaCostCmc(b.card.mana_cost),
@@ -254,6 +279,25 @@ function simulationToOutput(deck: Deck, sim: Simulation): RunOutput {
       ? 0
       : nonLandEntries.reduce((sum, c) => sum + c.count * manaCostCmc(c.card.manaCost), 0) /
         nonLandCount;
+
+  const totalSimulations = sim.hands.length;
+  outputs.observations_report = buildObservationsReport({
+    cards: nonLandWithObs.map((row) => ({
+      name: row.card.name,
+      mana_cost: row.card.mana_cost_string,
+      image_uri: row.card.image_uri,
+      kind: row.card.kind,
+      turn: row.card.turn,
+      copies: row.card_count,
+      cmc: row.cmc,
+      observations: row.observations,
+    })),
+    total_simulations: totalSimulations,
+    accumulated_opening_hand_size: sim.accumulatedOpeningHandSize,
+    accumulated_opening_hand_land_count: sim.accumulatedOpeningHandLandCount,
+    deck_size: deckLen,
+    deck_average_cmc: outputs.deck_average_cmc,
+  });
 
   for (const cc of deckIter(deck)) {
     for (let i = 0; i < cc.count; i++) {

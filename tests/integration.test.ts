@@ -47,6 +47,35 @@ describe('run() façade', () => {
     expect(pManaGivenCmc(elves!.observations)).toBeGreaterThan(0.9);
   });
 
+  it('includes observations_report with success/miss invariants', () => {
+    const runs = 200;
+    const output = run({
+      ...tinyGreen,
+      runs,
+      seed: 42,
+    });
+    const report = output.observations_report;
+    expect(report.total_simulations).toBe(runs);
+    expect(report.deck_size).toBe(7);
+    expect(report.cards.length).toBe(output.card_observations.length);
+    expect(report.weakest_on_curve.length).toBe(report.cards.length);
+
+    for (const card of report.cards) {
+      expect(card.played_on_curve + card.not_played_on_curve).toBe(card.total_simulations);
+      expect(
+        card.not_enough_lands +
+          card.color_or_timing_fail +
+          card.mana_ok_undrawn +
+          card.played_on_curve,
+      ).toBe(card.total_simulations);
+    }
+
+    const elves = report.cards.find((c) => c.name === 'Llanowar Elves');
+    expect(elves).toBeTruthy();
+    expect(elves!.total_simulations).toBe(runs);
+    expect(elves!.p_cast_on_curve).toBe(elves!.played_on_curve / elves!.total_simulations);
+  });
+
   it('rejects runCount <= 0', () => {
     expect(() =>
       run({

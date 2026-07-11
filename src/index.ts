@@ -6,7 +6,14 @@ export type {
   RunOutput,
   CardObservation,
   MtgOnCurveCard,
+  ObservationsReport,
+  CardObservationsReport,
+  ColorConstrainedEntry,
+  DrawDependentEntry,
+  WeakestOnCurveEntry,
 } from './run.js';
+
+export { buildObservationsReport, emptyObservationsReport } from './observations-report.js';
 
 export {
   CardKind,
