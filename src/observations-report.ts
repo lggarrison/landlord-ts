@@ -1,5 +1,5 @@
 /**
- * User-facing observations report — separate from mtgoncurve `card_observations`.
+ * On-curve observations report builders — used to populate flattened RunOutput.
  */
 import type { CardKind } from './card/index.js';
 import type { Observations } from './simulation.js';

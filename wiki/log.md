@@ -44,3 +44,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T01:37:33Z] maintenance | Skip async yield without progress/signal; fix wiki TS examples
 
 ## [2026-07-11T02:05:57Z] maintenance | Document observations_report on RunOutput
+
+## [2026-07-11T02:13:08Z] maintenance | Flatten RunOutput; drop dual observations

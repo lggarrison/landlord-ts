@@ -33,12 +33,13 @@ const output = run({
 console.log({
   deck_size: output.deck_size,
   deck_average_cmc: output.deck_average_cmc,
+  total_simulations: output.total_simulations,
   // Often < 7: London mulligans put cards on the bottom
-  avg_opening_hand_size_after_mulligans: output.observations_report.avg_opening_hand_size,
-  avg_opening_lands_after_mulligans: output.observations_report.avg_opening_land_count,
+  avg_opening_hand_size: output.avg_opening_hand_size,
+  avg_opening_land_count: output.avg_opening_land_count,
 });
 
-for (const row of output.observations_report.cards) {
+for (const row of output.cards) {
   console.log({
     name: row.name,
     mana_cost: row.mana_cost,
@@ -54,17 +55,16 @@ for (const row of output.observations_report.cards) {
   });
 }
 
-// Raw mtgoncurve counters remain on card_observations if you need them.
 for (const land of output.land_counts) {
   console.log({
-    name: land.card.name,
-    kind: land.card.kind,
-    copies: land.card_count,
+    name: land.name,
+    kind: land.kind,
+    copies: land.copies,
   });
 }
 ```
 
-Input/Output field names match the mtgoncurve.com contract (`snake_case`).
+`RunInput` uses snake_case field names (mtgoncurve-inspired). `RunOutput` is a single flattened on-curve report (`cards`, ranked insights, land tallies).
 
 For the full `RunInput` / `RunOutput` contract, `runAsync` (progress callbacks), and Next.js SSE streaming, see the wiki:
 

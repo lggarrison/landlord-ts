@@ -1,5 +1,6 @@
 /**
- * mtgoncurve.com-compatible façade — port of lib/src/mtgoncurve.rs
+ * Public run() / runAsync() façade — Arena decklist → Monte Carlo on-curve report.
+ * Input field names use snake_case (mtgoncurve-inspired).
  */
 import {
   CardKind,
@@ -9,7 +10,6 @@ import {
   newManaColorCount,
   type Card,
   type ManaColorCount,
-  type ManaCost,
 } from './card/index.js';
 import { ALL_CARDS } from './data.js';
 import { deckFromList, deckIsEmpty, deckIter, DeckcodeError, type Deck } from './deck.js';
@@ -17,24 +17,25 @@ import { asLondonMulligan, londonNever } from './mulligan/index.js';
 import {
   buildObservationsReport,
   emptyObservationsReport,
-  type ObservationsReport,
+  type CardObservationsReport,
+  type ColorConstrainedEntry,
+  type DrawDependentEntry,
+  type WeakestOnCurveEntry,
 } from './observations-report.js';
 import {
-  newObservations,
   observationsForCardByTurn,
   simulationFromConfig,
   simulationFromConfigAdaptive,
   simulationFromConfigAsync,
-  type Observations,
   type Simulation,
   type SimulationConfig,
 } from './simulation.js';
 
-export type { ObservationsReport } from './observations-report.js';
 export type {
   CardObservationsReport,
   ColorConstrainedEntry,
   DrawDependentEntry,
+  ObservationsReport,
   WeakestOnCurveEntry,
 } from './observations-report.js';
 
@@ -74,32 +75,26 @@ export type RunAsyncInput = RunInput & {
   signal?: AbortSignal;
 };
 
-export type MtgOnCurveCard = {
+export type LandCount = {
   name: string;
-  mana_cost_string: string;
+  mana_cost: string;
   image_uri: string;
   kind: CardKind;
+  copies: number;
   hash: number;
-  turn: number;
-  mana_cost: ManaCost;
-};
-
-export type CardObservation = {
-  card: MtgOnCurveCard;
-  cmc: number;
-  card_count: number;
-  observations: Observations;
 };
 
 export type RunOutput = {
-  card_observations: CardObservation[];
-  /** User-facing on-curve report (success/miss/failure modes); independent of card_observations. */
-  observations_report: ObservationsReport;
-  land_counts: CardObservation[];
+  total_simulations: number;
+  avg_opening_hand_size: number;
+  avg_opening_land_count: number;
   deck_size: number;
-  accumulated_opening_hand_size: number;
-  accumulated_opening_hand_land_count: number;
   deck_average_cmc: number;
+  cards: CardObservationsReport[];
+  weakest_on_curve: WeakestOnCurveEntry[];
+  color_constrained: ColorConstrainedEntry[];
+  draw_dependent: DrawDependentEntry[];
+  land_counts: LandCount[];
   total_land_counts: ManaColorCount;
   basic_land_counts: ManaColorCount;
   tap_land_counts: ManaColorCount;
@@ -127,27 +122,29 @@ type PreparedRun = {
   nonLandCards: Card[];
 };
 
-function toMtgCard(card: Card): MtgOnCurveCard {
+function emptyLandCounts(): Pick<
+  RunOutput,
+  | 'total_land_counts'
+  | 'basic_land_counts'
+  | 'tap_land_counts'
+  | 'check_land_counts'
+  | 'shock_land_counts'
+  | 'fast_land_counts'
+  | 'slow_land_counts'
+  | 'battle_land_counts'
+  | 'turn_land_counts'
+  | 'surveil_land_counts'
+  | 'bounce_land_counts'
+  | 'triome_land_counts'
+  | 'cycling_land_counts'
+  | 'pain_land_counts'
+  | 'fetch_land_counts'
+  | 'canopy_land_counts'
+  | 'pathway_land_counts'
+  | 'other_land_counts'
+  | 'non_land_counts'
+> {
   return {
-    name: card.name,
-    mana_cost_string: card.manaCostString,
-    image_uri: card.imageUri,
-    kind: card.kind,
-    hash: card.hash,
-    turn: card.turn,
-    mana_cost: { ...card.manaCost },
-  };
-}
-
-function emptyOutput(): RunOutput {
-  return {
-    card_observations: [],
-    observations_report: emptyObservationsReport(),
-    land_counts: [],
-    deck_size: 0,
-    accumulated_opening_hand_size: 0,
-    accumulated_opening_hand_land_count: 0,
-    deck_average_cmc: 0,
     total_land_counts: newManaColorCount(),
     basic_land_counts: newManaColorCount(),
     tap_land_counts: newManaColorCount(),
@@ -167,6 +164,15 @@ function emptyOutput(): RunOutput {
     pathway_land_counts: newManaColorCount(),
     other_land_counts: newManaColorCount(),
     non_land_counts: newManaColorCount(),
+  };
+}
+
+function emptyOutput(): RunOutput {
+  const report = emptyObservationsReport();
+  return {
+    ...report,
+    land_counts: [],
+    ...emptyLandCounts(),
   };
 }
 
@@ -231,73 +237,60 @@ function prepareRun(input: RunInput): PreparedRun {
 
 function simulationToOutput(deck: Deck, sim: Simulation): RunOutput {
   const outputs = emptyOutput();
-  outputs.accumulated_opening_hand_size = sim.accumulatedOpeningHandSize;
-  outputs.accumulated_opening_hand_land_count = sim.accumulatedOpeningHandLandCount;
 
   const nonLandWithObs = deckIter(deck)
     .filter((c) => !isLand(c.card))
-    .map((c) => {
-      const observations = observationsForCardByTurn(sim, c.card, c.card.turn);
-      const mtgCard = toMtgCard(c.card);
-      const cmc = manaCostCmc(c.card.manaCost);
-      return {
-        card: mtgCard,
-        cmc,
-        card_count: c.count,
-        observations,
-      };
-    });
-
-  outputs.card_observations = nonLandWithObs.map((row) => ({
-    card: row.card,
-    cmc: row.cmc,
-    card_count: row.card_count,
-    observations: row.observations,
-  }));
-  outputs.card_observations.sort((a, b) => a.card.name.localeCompare(b.card.name));
-  outputs.card_observations.sort(
-    (a, b) => manaCostCmc(a.card.mana_cost) - manaCostCmc(b.card.mana_cost),
-  );
-
-  outputs.land_counts = deckIter(deck)
-    .filter((c) => isLand(c.card))
     .map((c) => ({
-      card: toMtgCard(c.card),
+      name: c.card.name,
+      mana_cost: c.card.manaCostString,
+      image_uri: c.card.imageUri,
+      kind: c.card.kind,
+      turn: c.card.turn,
+      copies: c.count,
       cmc: manaCostCmc(c.card.manaCost),
-      card_count: c.count,
-      observations: newObservations(),
+      observations: observationsForCardByTurn(sim, c.card, c.card.turn),
     }));
-  outputs.land_counts.sort((a, b) => a.card.name.localeCompare(b.card.name));
-  outputs.land_counts.sort((a, b) => String(a.card.kind).localeCompare(String(b.card.kind)));
 
   const deckLen = deck.cardCount;
-  outputs.deck_size = deckLen;
   const nonLandEntries = deckIter(deck).filter((c) => !isLand(c.card));
   const nonLandCount = nonLandEntries.reduce((n, c) => n + c.count, 0);
-  outputs.deck_average_cmc =
+  const deckAverageCmc =
     nonLandCount === 0
       ? 0
       : nonLandEntries.reduce((sum, c) => sum + c.count * manaCostCmc(c.card.manaCost), 0) /
         nonLandCount;
 
-  const totalSimulations = sim.hands.length;
-  outputs.observations_report = buildObservationsReport({
-    cards: nonLandWithObs.map((row) => ({
-      name: row.card.name,
-      mana_cost: row.card.mana_cost_string,
-      image_uri: row.card.image_uri,
-      kind: row.card.kind,
-      turn: row.card.turn,
-      copies: row.card_count,
-      cmc: row.cmc,
-      observations: row.observations,
-    })),
-    total_simulations: totalSimulations,
+  const report = buildObservationsReport({
+    cards: nonLandWithObs,
+    total_simulations: sim.hands.length,
     accumulated_opening_hand_size: sim.accumulatedOpeningHandSize,
     accumulated_opening_hand_land_count: sim.accumulatedOpeningHandLandCount,
     deck_size: deckLen,
-    deck_average_cmc: outputs.deck_average_cmc,
+    deck_average_cmc: deckAverageCmc,
   });
+
+  outputs.total_simulations = report.total_simulations;
+  outputs.avg_opening_hand_size = report.avg_opening_hand_size;
+  outputs.avg_opening_land_count = report.avg_opening_land_count;
+  outputs.deck_size = report.deck_size;
+  outputs.deck_average_cmc = report.deck_average_cmc;
+  outputs.cards = report.cards;
+  outputs.weakest_on_curve = report.weakest_on_curve;
+  outputs.color_constrained = report.color_constrained;
+  outputs.draw_dependent = report.draw_dependent;
+
+  outputs.land_counts = deckIter(deck)
+    .filter((c) => isLand(c.card))
+    .map((c) => ({
+      name: c.card.name,
+      mana_cost: c.card.manaCostString,
+      image_uri: c.card.imageUri,
+      kind: c.card.kind,
+      copies: c.count,
+      hash: c.card.hash,
+    }));
+  outputs.land_counts.sort((a, b) => a.name.localeCompare(b.name));
+  outputs.land_counts.sort((a, b) => String(a.kind).localeCompare(String(b.kind)));
 
   for (const cc of deckIter(deck)) {
     for (let i = 0; i < cc.count; i++) {
@@ -370,7 +363,7 @@ function simulationToOutput(deck: Deck, sim: Simulation): RunOutput {
 
 /**
  * Run a Monte Carlo simulation for an Arena decklist.
- * Input/Output field names match the mtgoncurve.com contract (snake_case).
+ * Returns a single flattened on-curve report (`cards`, insights, land tallies).
  */
 export function run(input: RunInput): RunOutput {
   const { deck, simConfig, nonLandCards } = prepareRun(input);
