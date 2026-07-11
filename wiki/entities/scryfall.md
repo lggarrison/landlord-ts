@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Scryfall
-last_updated: 2026-07-10T23:31:22Z
-tags: [src, scryfall]
+last_updated: 2026-07-11T00:35:02Z
+tags: [scryfall, src]
 related:
   [concepts/card-pipeline.md, concepts/land-kinds.md, concepts/land-mana.md, entities/data.md]
 status: active

@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Run
-last_updated: 2026-07-10T19:45:00Z
-tags: [src, run]
+last_updated: 2026-07-11T00:35:02Z
+tags: [run, src]
 related: [concepts/mtgoncurve-api.md, entities/src.md]
 status: active
 summary: Public run() façade matching mtgoncurve Input/Output.

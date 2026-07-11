@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Bipartite
-last_updated: 2026-07-10T18:30:00Z
-tags: [src, bipartite]
+last_updated: 2026-07-11T00:35:02Z
+tags: [bipartite, src]
 related: [concepts/auto-tap.md, entities/hand.md]
 status: active
 summary: Maximum bipartite matching for mana pip ↔ land payment.

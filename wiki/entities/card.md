@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Card
-last_updated: 2026-07-10T23:31:22Z
-tags: [src, card]
+last_updated: 2026-07-11T00:35:02Z
+tags: [card, src]
 related:
   [
     entities/src.md,

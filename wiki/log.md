@@ -30,3 +30,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T00:13:26Z] maintenance | Added manaPerTap for Ancient Tomb/Lotus Field; documented Cradle/Nykthos and mana rocks as future work
 
 ## [2026-07-11T00:32:47Z] maintenance | Clarify generic vs true {C} payment and Lotus Field single-color overestimate
+
+## [2026-07-11T00:35:28Z] maintenance | Fix entity scope-tag order (slug first, then src)

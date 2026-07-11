@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Deck
-last_updated: 2026-07-10T23:31:22Z
-tags: [src, deck]
+last_updated: 2026-07-11T00:35:02Z
+tags: [deck, src]
 related: [entities/collection.md, entities/run.md, concepts/land-mana.md]
 status: active
 summary: Arena decklist parser with X=, T=, M=, M=auto, and automatic DFC land-face detection.
