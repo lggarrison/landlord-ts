@@ -9,8 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2026-07-11
 
+### Added
+
+- `parseDecklist()` for non-throwing decklist validation (UI-friendly result type)
+- `DeckcodeError.unknownCardNames` / `unknownCardName` when cards are missing from the collection
+- Deck parse coverage for malformed / multi-unknown Arena lists
+
 ### Changed
 
+- Deck parse collects all unknown card names before throwing (instead of failing on the first)
+- Arena `About` section is skipped like `Commander` / `Companion`
+- Card-name lookup uses `localeCompare` for stable binary search ordering
 - Renamed wiki concept `mtgoncurve-api` → `landlord-ts-api` (and related docs/keywords)
 
 ## [1.0.0] - 2026-07-11
