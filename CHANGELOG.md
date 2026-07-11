@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed wiki concept `mtgoncurve-api` → `landlord-ts-api` (and related docs/keywords)
+
 ## [1.0.0] - 2026-07-11
 
 First stable npm registry publish of `@lggarrison/landlord-ts`.
@@ -26,7 +30,7 @@ First stable npm registry publish of `@lggarrison/landlord-ts`.
 - Scryfall card-update pipeline writing `data/all_cards.json.gz`
 - Dual ESM/CJS build with TypeScript declarations
 - Vitest suite (unit, auto-tap, deck, integration / Karsten-style smoke)
-- Wiki docs for the mtgoncurve API contract and SSE streaming progress pattern
+- Wiki docs for the landlord-ts API contract and SSE streaming progress pattern
 
 ### Changed
 

@@ -1,9 +1,9 @@
 ---
 type: concept
 title: Streaming progress
-last_updated: 2026-07-11T03:10:00Z
+last_updated: 2026-07-11T03:54:00Z
 tags: [api, nextjs]
-related: [concepts/mtgoncurve-api.md, entities/run.md, concepts/monte-carlo-simulation.md]
+related: [concepts/landlord-ts-api.md, entities/run.md, concepts/monte-carlo-simulation.md]
 status: active
 summary: Next.js SSE Pattern A using runAsync onProgress (with phase) and AbortSignal for live trial percent.
 code_refs: [src/run.ts, src/simulation.ts, src/yield-macrotask.ts]
@@ -11,7 +11,7 @@ code_refs: [src/run.ts, src/simulation.ts, src/yield-macrotask.ts]
 
 # Streaming progress
 
-Use [`runAsync`](mtgoncurve-api.md) when a host needs live trial progress (e.g. a Next.js UI). Sync [`run()`](mtgoncurve-api.md) cannot emit mid-run updates.
+Use [`runAsync`](landlord-ts-api.md) when a host needs live trial progress (e.g. a Next.js UI). Sync [`run()`](landlord-ts-api.md) cannot emit mid-run updates.
 
 ## Constraints
 
@@ -113,6 +113,6 @@ while (true) {
 
 ## See also
 
-- [mtgoncurve API](mtgoncurve-api.md)
+- [landlord-ts API](landlord-ts-api.md)
 - [Run](../entities/run.md)
 - [Monte Carlo simulation](monte-carlo-simulation.md)
