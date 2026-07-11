@@ -7,18 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-07-10
+## [1.0.0] - 2026-07-11
+
+First stable npm registry publish of `@lggarrison/landlord-ts`.
 
 ### Added
 
-- Initial public release of `@lggarrison/landlord`
-- Pure TypeScript Monte Carlo on-curve simulator (`run()` API matching mtgoncurve.com)
+- Pure TypeScript Monte Carlo on-curve simulator (`run()` API)
+- `runAsync` / `simulationFromConfigAsync` with optional `onProgress`, `batchSize`, and `AbortSignal` for streaming hosts (e.g. Next.js SSE)
+- `RunProgress.phase` (`simulating` | `scoring`) so UIs can show scoring instead of stalling at 100%
+- `RunValidationError` and exported `DeckcodeError` for typed input validation (hosts can map to HTTP 400)
+- Types-only `SimulateStreamEvent` union for Next.js SSE Pattern A
 - Arena decklist parsing with `X=`, `T=`, `M=`, and `M=auto` modifiers
 - TapLand-only enters-tapped delay in auto-tap; Check/Shock immediate
 - London and Never mulligan strategies
+- Expanded land-kind modeling (fast/slow/battle/turn/surveil/bounce/triome/cycling/pain/fetch/canopy/pathway, colorless lands)
+- Flattened on-curve observation report (`cards`, ranked insights, land tallies)
 - Scryfall card-update pipeline writing `data/all_cards.json.gz`
 - Dual ESM/CJS build with TypeScript declarations
 - Vitest suite (unit, auto-tap, deck, integration / Karsten-style smoke)
+- Wiki docs for the mtgoncurve API contract and SSE streaming progress pattern
 
-[Unreleased]: https://github.com/lggarrison/landord-ts/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/lggarrison/landord-ts/releases/tag/v0.1.0
+### Changed
+
+- Renamed npm package from `@lggarrison/landlord` to `@lggarrison/landlord-ts` (matches the GitHub repo)
+- Renamed GitHub repository from `landord-ts` to `landlord-ts`
+- Public `RunInput` / `RunOutput` / report fields use camelCase
+- `RunProgress` requires `phase`
+
+[Unreleased]: https://github.com/lggarrison/landlord-ts/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/lggarrison/landlord-ts/releases/tag/v1.0.0

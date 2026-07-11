@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Mulligan
-last_updated: 2026-07-10T18:30:00Z
-tags: [src, mulligan]
+last_updated: 2026-07-11T00:35:02Z
+tags: [mulligan, src]
 related: [concepts/london-mulligan.md, entities/simulation.md]
 status: active
 summary: London and Never mulligan strategies.

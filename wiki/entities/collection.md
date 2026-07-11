@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Collection
-last_updated: 2026-07-10T18:30:00Z
-tags: [src, collection]
+last_updated: 2026-07-11T00:35:02Z
+tags: [collection, src]
 related: [entities/card.md, entities/deck.md]
 status: active
 summary: Sorted card library with name lookup and otherFacesByName for DFCs.

@@ -7,6 +7,18 @@ export enum CardKind {
   TapLand = 'TapLand',
   CheckLand = 'CheckLand',
   ShockLand = 'ShockLand',
+  FastLand = 'FastLand',
+  SlowLand = 'SlowLand',
+  BattleLand = 'BattleLand',
+  TurnLand = 'TurnLand',
+  SurveilLand = 'SurveilLand',
+  BounceLand = 'BounceLand',
+  TriomeLand = 'TriomeLand',
+  CyclingLand = 'CyclingLand',
+  PainLand = 'PainLand',
+  FetchLand = 'FetchLand',
+  CanopyLand = 'CanopyLand',
+  PathwayLand = 'PathwayLand',
   OtherLand = 'OtherLand',
   ForcedLand = 'ForcedLand',
   Creature = 'Creature',
@@ -52,6 +64,12 @@ export type Card = {
   rarity: Rarity;
   set: SetCode;
   isFace: boolean;
+  /** Bitmask of basic land types on this card (see BasicLandType). */
+  basicLandTypes: number;
+  /** Bitmask of basic types that unlock this check land; 0 if not a check. */
+  checkTypes: number;
+  /** Mana units produced per tap (default 1); >1 for fixed-quantity lands like Ancient Tomb. */
+  manaPerTap: number;
 };
 
 export function emptyCard(): Card {
@@ -69,6 +87,9 @@ export function emptyCard(): Card {
     rarity: Rarity.Common,
     set: '',
     isFace: false,
+    basicLandTypes: 0,
+    checkTypes: 0,
+    manaPerTap: 1,
   };
 }
 
@@ -77,6 +98,9 @@ export function cloneCard(card: Card): Card {
     ...card,
     manaCost: { ...card.manaCost },
     allManaCosts: card.allManaCosts.map((c) => ({ ...c })),
+    basicLandTypes: card.basicLandTypes ?? 0,
+    checkTypes: card.checkTypes ?? 0,
+    manaPerTap: card.manaPerTap ?? 1,
   };
 }
 
@@ -86,6 +110,18 @@ export function isLandKind(kind: CardKind): boolean {
     kind === CardKind.ShockLand ||
     kind === CardKind.CheckLand ||
     kind === CardKind.TapLand ||
+    kind === CardKind.FastLand ||
+    kind === CardKind.SlowLand ||
+    kind === CardKind.BattleLand ||
+    kind === CardKind.TurnLand ||
+    kind === CardKind.SurveilLand ||
+    kind === CardKind.BounceLand ||
+    kind === CardKind.TriomeLand ||
+    kind === CardKind.CyclingLand ||
+    kind === CardKind.PainLand ||
+    kind === CardKind.FetchLand ||
+    kind === CardKind.CanopyLand ||
+    kind === CardKind.PathwayLand ||
     kind === CardKind.OtherLand ||
     kind === CardKind.ForcedLand
   );

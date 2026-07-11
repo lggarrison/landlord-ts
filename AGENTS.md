@@ -1,6 +1,6 @@
 <!-- llm-wiki-manager -->
 
-# LLM Wiki — landord-ts
+# LLM Wiki — landlord-ts
 
 This project uses an LLM-maintained wiki. **Read [`wiki/AGENTS.md`](wiki/AGENTS.md) first** for agent instructions, operations, and conventions.
 

@@ -1,8 +1,8 @@
 ---
 type: entity
 title: Data
-last_updated: 2026-07-10T18:30:00Z
-tags: [src, data]
+last_updated: 2026-07-11T00:35:02Z
+tags: [data, src]
 related: [concepts/card-pipeline.md, entities/scryfall.md]
 status: active
 summary: Lazy load of gzipped all_cards.json.gz via fflate.

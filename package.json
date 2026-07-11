@@ -1,6 +1,6 @@
 {
-  "name": "@lggarrison/landlord",
-  "version": "0.1.0",
+  "name": "@lggarrison/landlord-ts",
+  "version": "1.0.0",
   "description": "Monte Carlo MTG on-curve simulator (TypeScript port of landlord)",
   "license": "MIT",
   "type": "module",
@@ -15,11 +15,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lggarrison/landord-ts.git"
+    "url": "git+https://github.com/lggarrison/landlord-ts.git"
   },
-  "homepage": "https://github.com/lggarrison/landord-ts#readme",
+  "homepage": "https://github.com/lggarrison/landlord-ts#readme",
   "bugs": {
-    "url": "https://github.com/lggarrison/landord-ts/issues"
+    "url": "https://github.com/lggarrison/landlord-ts/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -52,6 +52,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "card-update": "tsx scripts/card-update.ts",
+    "mine-etb": "tsx scripts/mine-etb.ts",
     "release:check": "npm-run-all format:check lint test build wiki:lint wiki:check",
     "prepare": "node .husky/install.mjs",
     "prepublishOnly": "npm run release:check",
@@ -84,18 +85,18 @@
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@types/node": "^22.15.0",
-    "eslint": "^9.28.0",
+    "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.5",
-    "globals": "^16.2.0",
+    "globals": "^17.7.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.0",
+    "lint-staged": "^17.0.8",
     "llm-wiki-manager": "^1.0.3",
-    "npm-run-all2": "^8.0.4",
+    "npm-run-all2": "^9.0.2",
     "prettier": "^3.5.3",
     "tsup": "^8.5.0",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0",
     "typescript-eslint": "^8.33.0",
-    "vitest": "^3.2.0"
+    "vitest": "^4.1.10"
   }
 }

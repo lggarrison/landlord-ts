@@ -1,4 +1,4 @@
-# @lggarrison/landlord
+# @lggarrison/landlord-ts
 
 Pure TypeScript Monte Carlo simulator for Magic: The Gathering on-curve probabilities. Port of the Rust [landlord](https://github.com/mtgoncurve/landlord) engine used by [mtgoncurve.com](https://mtgoncurve.com).
 
@@ -9,30 +9,70 @@ Pure TypeScript Monte Carlo simulator for Magic: The Gathering on-curve probabil
 ## Install
 
 ```bash
-npm install @lggarrison/landlord
+npm install @lggarrison/landlord-ts
 ```
 
 ## Usage
 
 ```ts
-import { run } from '@lggarrison/landlord';
+import { run } from '@lggarrison/landlord-ts';
 
-const output = run({
+const runs = 10_000;
+
+const input = {
   code: `
 1 Llanowar Elves
 1 Forest
   `,
-  runs: 10000,
-  on_the_play: true,
-  mulligan_down_to: 5,
-  mulligan_on_lands: [0, 1, 6, 7],
-  acceptable_hand_list: [],
+  runs,
+  onThePlay: true,
+  mulliganDownTo: 5,
+  mulliganOnLands: [0, 1, 6, 7],
+  acceptableHandList: [],
+};
+
+const output = run(input);
+
+console.log({
+  deckSize: output.deckSize,
+  deckAverageCmc: output.deckAverageCmc,
+  totalSimulations: output.totalSimulations,
+  // Often < 7: London mulligans put cards on the bottom
+  avgOpeningHandSize: output.avgOpeningHandSize,
+  avgOpeningLandCount: output.avgOpeningLandCount,
 });
 
-console.log(output.card_observations);
+for (const row of output.cards) {
+  console.log({
+    name: row.name,
+    manaCost: row.manaCost,
+    copies: row.copies,
+    playedOnCurve: row.playedOnCurve,
+    notPlayedOnCurve: row.notPlayedOnCurve,
+    totalSimulations: row.totalSimulations,
+    pCastOnCurve: row.pCastOnCurve,
+    pManaGivenCmc: row.pManaGivenCmc,
+    notEnoughLands: row.notEnoughLands,
+    colorOrTimingFail: row.colorOrTimingFail,
+    manaOkUndrawn: row.manaOkUndrawn,
+  });
+}
+
+for (const land of output.landCounts) {
+  console.log({
+    name: land.name,
+    kind: land.kind,
+    copies: land.copies,
+  });
+}
 ```
 
-Input/Output field names match the mtgoncurve.com contract (`snake_case`).
+`RunInput` / `RunOutput` use camelCase field names. `RunOutput` is a single flattened on-curve report (`cards`, ranked insights, land tallies).
+
+For the full `RunInput` / `RunOutput` contract, `runAsync` (progress callbacks), and Next.js SSE streaming, see the wiki:
+
+- [mtgoncurve API](https://github.com/lggarrison/landlord-ts/blob/develop/wiki/concepts/mtgoncurve-api.md)
+- [Streaming progress](https://github.com/lggarrison/landlord-ts/blob/develop/wiki/concepts/streaming-progress.md)
 
 ## Development
 

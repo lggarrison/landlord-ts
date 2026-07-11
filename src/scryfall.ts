@@ -5,12 +5,16 @@
  */
 import {
   CardKind,
+  basicLandTypeCount,
+  basicLandTypesFromTypeLine,
+  checkTypesFromOracleText,
   emptyManaCost,
   hashCardName,
   manaCostCmc,
   manaCostFromRgbuwc,
   manaCostsFromStr,
   ManaColor,
+  normalizeOracleForEtb,
   parseRarity,
   type Card,
   type ManaCost,
@@ -106,22 +110,121 @@ export const SPECIAL_LANDS: ReadonlyMap<string, ManaCost> = new Map([
   ['Riverglide Pathway', manaCostFromRgbuwc(0, 0, 0, 1, 0, 0)],
   ['Lavaglide Pathway', manaCostFromRgbuwc(1, 0, 0, 0, 0, 0)],
   ['Kor Haven', manaCostFromRgbuwc(0, 0, 0, 0, 0, 1)],
+  // Chooser / tribal lands: "Add one mana of any color. Spend this mana only to cast
+  // [a spell of a chosen/specific type]..." — modeled as rainbow, assuming the player
+  // always chooses a type/restriction that matches the goal spell (same approximation as Command Tower).
+  ['Cavern of Souls', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Secluded Courtyard', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Unclaimed Territory', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Ancient Ziggurat', manaCostFromRgbuwc(1, 1, 1, 1, 1, 0)],
+  ['Pillar of the Paruns', manaCostFromRgbuwc(1, 1, 1, 1, 1, 0)],
+  ['Abundant Countryside', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Ally Encampment', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['A-Base Camp', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Avengers Tower', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Base Camp', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Brotherhood Headquarters', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Bucolic Ranch', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Castle Doom', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Corrupted Crossroads', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Echoing Cavern', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Eclipsed Realms', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Gallifrey Council Chamber', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Great Hall of the Biblioplex', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Haven of the Spirit Dragon', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Jasmine Dragon Tea Shop', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Maelstrom of the Spirit Dragon', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Mech Hangar', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Plaza of Heroes', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Power Depot', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Primal Beyond', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Sliver Hive', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['The Seedcore', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Turtle Lair', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Villainous Hideout', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Voldaren Estate', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['White Lotus Hideout', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Second City', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Secret Base', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Tarkir Omenpath', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  ['Underdome', manaCostFromRgbuwc(1, 1, 1, 1, 1, 1)],
+  // Lotus Field: "Add three mana of any one color." Modeled as WUBRG + manaPerTap=3,
+  // which overestimates multicolor costs (matcher can spend the 3 units as different colors).
+  ['Lotus Field', manaCostFromRgbuwc(1, 1, 1, 1, 1, 0)],
 ]);
 
 /**
- * CheckLand and ShockLand matched before TapLand because their oracle
- * text also contains the generic "enters tapped" substring.
+ * Lands with a fixed (board-state-independent) mana-per-tap greater than 1.
+ * Lotus Field pairs with the SPECIAL_LANDS rainbow override above; see that comment
+ * for the single-color-vs-multicolor overestimate.
  */
-export function landKindFromOracleText(oracleText: string, typeLine: string): CardKind {
-  const isShock = oracleText.includes('you may pay 2 life. If you don');
-  const isCheck = oracleText.includes('enters tapped unless you control a');
-  const isTap = oracleText.includes('enters tapped');
+export const MULTI_MANA_LANDS: ReadonlyMap<string, number> = new Map([
+  ['Ancient Tomb', 2],
+  ['Lotus Field', 3],
+]);
+
+/**
+ * Classify land ETB / nickname cycle from oracle text.
+ * Order matters: conditional ETB matchers before bare TapLand; specialty untapped before Other.
+ */
+export function landKindFromOracleText(oracleText: string, typeLine: string, name = ''): CardKind {
+  const text = normalizeOracleForEtb(oracleText);
+  const isShock = text.includes('you may pay 2 life') && text.includes('enters tapped');
+  const isCheck = text.includes('enters tapped unless you control a');
+  const isFast = text.includes('two or fewer other lands');
+  const isSlow = text.includes('two or more other lands');
+  const isBattle = text.includes('two or more basic lands');
+  const isTurn = text.includes('first, second, or third turn');
+  const isBounce = text.includes('enters tapped') && text.includes('return a land you control');
+  const isSurveil = text.includes('enters tapped') && text.includes('surveil');
+  const isTriome = text.includes('enters tapped') && basicLandTypeCount(typeLine) >= 3;
+  const isCycling = text.includes('enters tapped') && text.includes('cycling');
+  const isTap = text.includes('enters tapped');
+  const isFetch =
+    text.includes('search your library') &&
+    (text.includes('sacrifice') || text.includes('sac ')) &&
+    (text.includes('basic land') ||
+      text.includes('plains') ||
+      text.includes('island') ||
+      text.includes('swamp') ||
+      text.includes('mountain') ||
+      text.includes('forest'));
+  const isCanopy =
+    text.includes('draw a card') &&
+    (text.includes('sacrifice this land') || text.includes('sacrifice ~'));
+  const isPain =
+    text.includes('deals 1 damage to you') && !text.includes('enters tapped') && !isCanopy;
+  const isPathway = name.toLowerCase().includes('pathway');
   const isBasic = typeLine.includes('Basic Land');
+
   if (isShock) return CardKind.ShockLand;
   if (isCheck) return CardKind.CheckLand;
+  if (isFast) return CardKind.FastLand;
+  if (isSlow) return CardKind.SlowLand;
+  if (isBattle) return CardKind.BattleLand;
+  if (isTurn) return CardKind.TurnLand;
+  if (isBounce) return CardKind.BounceLand;
+  if (isSurveil) return CardKind.SurveilLand;
+  if (isTriome) return CardKind.TriomeLand;
+  if (isCycling) return CardKind.CyclingLand;
   if (isTap) return CardKind.TapLand;
+  if (isFetch) return CardKind.FetchLand;
+  if (isCanopy) return CardKind.CanopyLand;
+  if (isPain) return CardKind.PainLand;
+  if (isPathway) return CardKind.PathwayLand;
   if (isBasic) return CardKind.BasicLand;
   return CardKind.OtherLand;
+}
+
+/** Extract the ETB clause after "enters tapped" for mining / diagnostics. */
+export function etbClauseFromOracle(oracleText: string): string | null {
+  const text = normalizeOracleForEtb(oracleText);
+  const idx = text.indexOf('enters tapped');
+  if (idx === -1) return null;
+  let clause = text.slice(idx);
+  const end = clause.search(/[.\n]/);
+  if (end !== -1) clause = clause.slice(0, end + 1);
+  return clause.trim();
 }
 
 function colorLetter(color: ManaColor): string {
@@ -175,6 +278,9 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
   let kind: CardKind;
   let manaCost: ManaCost;
   let allManaCosts: ManaCost[];
+  let basicLandTypes = 0;
+  let checkTypes = 0;
+  let manaPerTap = 1;
 
   if (isLand) {
     const special = SPECIAL_LANDS.get(name);
@@ -188,8 +294,11 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
         isColor01(colorIdentity, oracleText, ManaColor.White),
         isColor01(colorIdentity, oracleText, ManaColor.Colorless),
       );
-    kind = landKindFromOracleText(oracleText, typeLine);
+    kind = landKindFromOracleText(oracleText, typeLine, name);
     allManaCosts = [manaCost];
+    basicLandTypes = basicLandTypesFromTypeLine(typeLine);
+    checkTypes = kind === CardKind.CheckLand ? checkTypesFromOracleText(oracleText) : 0;
+    manaPerTap = MULTI_MANA_LANDS.get(name) ?? 1;
   } else {
     kind = CardKind.Unknown;
     allManaCosts = manaCostsFromStr(manaCostStr);
@@ -214,6 +323,9 @@ export function scryfallCardToCard(raw: ScryfallCard): Card {
     rarity: parseRarity(raw.rarity ?? ''),
     set,
     isFace: raw.object === 'card_face',
+    basicLandTypes,
+    checkTypes,
+    manaPerTap,
   };
 }
 

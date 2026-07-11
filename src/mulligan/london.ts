@@ -125,10 +125,18 @@ export function londonSimulateHand(
     return handFromOpeningAndDraws(
       shuffledDeck.slice(0, openingHandSize),
       shuffledDeck.slice(openingHandSize),
+      startingHandSize,
     );
   }
 
-  throw new Error('unreachable: london mulligan failed to keep a hand');
+  // Defensive fallback: keep a full opening hand from a fresh shuffle.
+  const shuffledIndices = partialShuffle(indexRange.slice(), rng, cardsToDraw);
+  const shuffledDeck = shuffledIndices.map((i) => deck[i]!);
+  return handFromOpeningAndDraws(
+    shuffledDeck.slice(0, startingHandSize),
+    shuffledDeck.slice(startingHandSize),
+    startingHandSize,
+  );
 }
 
 export function asLondonMulligan(london: London): Mulligan {

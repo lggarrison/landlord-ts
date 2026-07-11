@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { pManaGivenCmc, run, type CardObservation } from '../src/index.js';
+import { run, type CardObservationsReport } from '../src/index.js';
 
 const THRESH = 0.025; // slightly wider than Rust's 0.015 — we use 25k runs vs 100k
 
 function karstenCheck(
-  observations: CardObservation[],
+  cards: CardObservationsReport[],
   name: string,
   expected: number,
   thresh = THRESH,
 ): void {
-  const o = observations.find((obs) => obs.card.name.toLowerCase() === name.toLowerCase());
+  const o = cards.find((obs) => obs.name.toLowerCase() === name.toLowerCase());
   expect(o, `No card named: ${name}`).toBeTruthy();
-  const actual = pManaGivenCmc(o!.observations);
+  const actual = o!.pManaGivenCmc;
   expect(Math.abs(expected - actual), `${name}: expected ${expected}, got ${actual}`).toBeLessThan(
     thresh,
   );
@@ -52,77 +52,79 @@ describe('Karsten tables (seeded, reduced runs)', () => {
     const output = run({
       code: karstenDeck(8, 16, 20),
       runs,
-      on_the_play: true,
-      mulligan_down_to: 5,
-      mulligan_on_lands: [0, 1, 6, 7],
-      acceptable_hand_list: [],
+      onThePlay: true,
+      mulliganDownTo: 5,
+      mulliganOnLands: [0, 1, 6, 7],
+      acceptableHandList: [],
       seed: 42,
     });
-    expect(output.deck_size).toBe(60);
-    const obs = output.card_observations;
-    karstenCheck(obs, 'Appetite for Brains', 0.702);
-    karstenCheck(obs, 'Abnormal Endurance', 0.756);
-    karstenCheck(obs, 'Bloodghast', 0.322);
-    karstenCheck(obs, 'Ammit Eternal', 0.822);
-    karstenCheck(obs, 'Blood Operative', 0.415);
-    karstenCheck(obs, 'Doomsday', 0.111);
-    karstenCheck(obs, 'Ancient Craving', 0.881);
-    karstenCheck(obs, 'Akuta, Born of Ash', 0.525);
-    karstenCheck(obs, 'Grave Pact', 0.177);
-    karstenCheck(obs, 'Anointed Deacon', 0.924);
-    karstenCheck(obs, 'Aku Djinn', 0.635);
-    karstenCheck(obs, 'Hellfire', 0.265);
-    karstenCheck(obs, 'Acid-Spewer Dragon', 0.953);
-    karstenCheck(obs, 'Bogstomper', 0.733);
-    karstenCheck(obs, 'Cosmic Horror', 0.368);
+    expect(output.deckSize).toBe(60);
+    const cards = output.cards;
+    karstenCheck(cards, 'Appetite for Brains', 0.702);
+    karstenCheck(cards, 'Abnormal Endurance', 0.756);
+    karstenCheck(cards, 'Bloodghast', 0.322);
+    karstenCheck(cards, 'Ammit Eternal', 0.822);
+    karstenCheck(cards, 'Blood Operative', 0.415);
+    karstenCheck(cards, 'Doomsday', 0.111);
+    karstenCheck(cards, 'Ancient Craving', 0.881);
+    karstenCheck(cards, 'Akuta, Born of Ash', 0.525);
+    karstenCheck(cards, 'Grave Pact', 0.177);
+    karstenCheck(cards, 'Anointed Deacon', 0.924);
+    karstenCheck(cards, 'Aku Djinn', 0.635);
+    karstenCheck(cards, 'Hellfire', 0.265);
+    karstenCheck(cards, 'Acid-Spewer Dragon', 0.953);
+    karstenCheck(cards, 'Bogstomper', 0.733);
+    karstenCheck(cards, 'Cosmic Horror', 0.368);
   }, 120_000);
 
   it('60 cards / 24 lands / 14 black sources', () => {
     const output = run({
       code: karstenDeck(14, 10, 20),
       runs,
-      on_the_play: true,
-      mulligan_down_to: 5,
-      mulligan_on_lands: [0, 1, 6, 7],
-      acceptable_hand_list: [],
+      onThePlay: true,
+      mulliganDownTo: 5,
+      mulliganOnLands: [0, 1, 6, 7],
+      acceptableHandList: [],
       seed: 42,
     });
-    expect(output.deck_size).toBe(60);
-    const obs = output.card_observations;
-    karstenCheck(obs, 'Appetite for Brains', 0.914);
-    karstenCheck(obs, 'Abnormal Endurance', 0.942);
-    karstenCheck(obs, 'Bloodghast', 0.68);
-    karstenCheck(obs, 'Ammit Eternal', 0.973);
-    karstenCheck(obs, 'Blood Operative', 0.798);
-    karstenCheck(obs, 'Doomsday', 0.44);
-    karstenCheck(obs, 'Ancient Craving', 0.989);
-    karstenCheck(obs, 'Akuta, Born of Ash', 0.892);
-    karstenCheck(obs, 'Grave Pact', 0.609);
-    karstenCheck(obs, 'Anointed Deacon', 0.996);
-    karstenCheck(obs, 'Aku Djinn', 0.951);
-    karstenCheck(obs, 'Hellfire', 0.761);
-    karstenCheck(obs, 'Acid-Spewer Dragon', 0.999);
-    karstenCheck(obs, 'Bogstomper', 0.981);
-    karstenCheck(obs, 'Cosmic Horror', 0.875);
+    expect(output.deckSize).toBe(60);
+    const cards = output.cards;
+    karstenCheck(cards, 'Appetite for Brains', 0.914);
+    karstenCheck(cards, 'Abnormal Endurance', 0.942);
+    karstenCheck(cards, 'Bloodghast', 0.68);
+    karstenCheck(cards, 'Ammit Eternal', 0.973);
+    karstenCheck(cards, 'Blood Operative', 0.798);
+    karstenCheck(cards, 'Doomsday', 0.44);
+    karstenCheck(cards, 'Ancient Craving', 0.989);
+    karstenCheck(cards, 'Akuta, Born of Ash', 0.892);
+    karstenCheck(cards, 'Grave Pact', 0.609);
+    karstenCheck(cards, 'Anointed Deacon', 0.996);
+    karstenCheck(cards, 'Aku Djinn', 0.951);
+    karstenCheck(cards, 'Hellfire', 0.761);
+    karstenCheck(cards, 'Acid-Spewer Dragon', 0.999);
+    karstenCheck(cards, 'Bogstomper', 0.981);
+    karstenCheck(cards, 'Cosmic Horror', 0.875);
   }, 120_000);
 
   it('Hydroid Krasis X=23 always pays with enough lands', () => {
     const n = 1000;
     const output = run({
+      // ForcedLand filler (not TapLand) so board-aware ETB delay cannot strand the 25th source
       code: `1 Hydroid Krasis X=23
 12 Island
 12 Forest
-1 Memorial to Folly`,
+1 Wastes M={C}`,
       runs: n,
-      on_the_play: false,
-      mulligan_down_to: 7,
-      mulligan_on_lands: [],
-      acceptable_hand_list: [],
+      onThePlay: false,
+      mulliganDownTo: 7,
+      mulliganOnLands: [],
+      acceptableHandList: [],
       seed: 7,
     });
-    const obs = output.card_observations[0]!;
-    expect(obs.observations.mana).toBe(n);
-    expect(obs.observations.cmc).toBe(n);
-    expect(obs.observations.play).toBe(n);
+    const card = output.cards[0]!;
+    expect(card.playedOnCurve).toBe(n);
+    expect(card.notEnoughLands).toBe(0);
+    expect(card.colorOrTimingFail).toBe(0);
+    expect(card.manaOkUndrawn).toBe(0);
   });
 });

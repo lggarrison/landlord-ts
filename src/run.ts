@@ -1,5 +1,6 @@
 /**
- * mtgoncurve.com-compatible façade — port of lib/src/mtgoncurve.rs
+ * Public run() / runAsync() façade — Arena decklist → Monte Carlo on-curve report.
+ * Public field names use camelCase.
  */
 import {
   CardKind,
@@ -9,207 +10,419 @@ import {
   newManaColorCount,
   type Card,
   type ManaColorCount,
-  type ManaCost,
 } from './card/index.js';
 import { ALL_CARDS } from './data.js';
-import { deckFromList, deckIsEmpty, deckIter, DeckcodeError } from './deck.js';
+import { deckFromList, deckIsEmpty, deckIter, DeckcodeError, type Deck } from './deck.js';
 import { asLondonMulligan, londonNever } from './mulligan/index.js';
 import {
-  newObservations,
+  buildObservationsReport,
+  emptyObservationsReport,
+  type CardObservationsReport,
+  type ColorConstrainedEntry,
+  type DrawDependentEntry,
+  type WeakestOnCurveEntry,
+} from './observations-report.js';
+import {
   observationsForCardByTurn,
   simulationFromConfig,
-  type Observations,
+  simulationFromConfigAdaptive,
+  simulationFromConfigAsync,
+  type Simulation,
+  type SimulationConfig,
 } from './simulation.js';
+import { yieldMacrotask } from './yield-macrotask.js';
+
+export type {
+  CardObservationsReport,
+  ColorConstrainedEntry,
+  DrawDependentEntry,
+  WeakestOnCurveEntry,
+} from './observations-report.js';
+
+export { COLOR_CONSTRAINED_THRESHOLD, DRAW_DEPENDENT_THRESHOLD } from './observations-report.js';
+
+/** Thrown for invalid `RunInput` (bad deckcode, empty deck, bad acceptable hands). */
+export class RunValidationError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'RunValidationError';
+  }
+}
 
 export type RunInput = {
   code: string;
   runs: number;
-  on_the_play: boolean;
-  mulligan_down_to: number;
-  mulligan_on_lands: number[];
-  acceptable_hand_list: string[][];
+  onThePlay: boolean;
+  mulliganDownTo: number;
+  mulliganOnLands: number[];
+  acceptableHandList: string[][];
   /** Optional RNG seed for reproducible runs. */
   seed?: number;
+  /** Optional starting hand size (default 7). */
+  startingHandSize?: number;
+  /**
+   * Optional early-stop half-width on aggregate pManaGivenCmc.
+   * When set, `runs` is treated as a maximum.
+   */
+  epsilon?: number;
+  /** Shard trials across worker threads (default: auto when runs >= 2000). */
+  parallel?: boolean;
 };
 
-export type MtgOnCurveCard = {
+export type RunProgressPhase = 'simulating' | 'scoring';
+
+export type RunProgress = {
+  completed: number;
+  total: number;
+  /** `simulating` during hand batches; `scoring` once before report build. */
+  phase: RunProgressPhase;
+};
+
+export type RunAsyncInput = RunInput & {
+  onProgress?: (progress: RunProgress) => void;
+  /**
+   * Trials per progress tick when `epsilon` is unset (default 500).
+   * Ignored when `epsilon` is set (uses the same 1000-trial batches as sync adaptive).
+   */
+  batchSize?: number;
+  /** When aborted, stops between batches (throws `AbortError`). */
+  signal?: AbortSignal;
+};
+
+export type LandCount = {
   name: string;
-  mana_cost_string: string;
-  image_uri: string;
+  manaCost: string;
+  imageUri: string;
   kind: CardKind;
+  copies: number;
   hash: number;
-  turn: number;
-  mana_cost: ManaCost;
-};
-
-export type CardObservation = {
-  card: MtgOnCurveCard;
-  cmc: number;
-  card_count: number;
-  observations: Observations;
 };
 
 export type RunOutput = {
-  card_observations: CardObservation[];
-  land_counts: CardObservation[];
-  deck_size: number;
-  accumulated_opening_hand_size: number;
-  accumulated_opening_hand_land_count: number;
-  deck_average_cmc: number;
-  total_land_counts: ManaColorCount;
-  basic_land_counts: ManaColorCount;
-  tap_land_counts: ManaColorCount;
-  check_land_counts: ManaColorCount;
-  shock_land_counts: ManaColorCount;
-  other_land_counts: ManaColorCount;
-  non_land_counts: ManaColorCount;
+  totalSimulations: number;
+  avgOpeningHandSize: number;
+  avgOpeningLandCount: number;
+  deckSize: number;
+  deckAverageCmc: number;
+  cards: CardObservationsReport[];
+  weakestOnCurve: WeakestOnCurveEntry[];
+  colorConstrained: ColorConstrainedEntry[];
+  drawDependent: DrawDependentEntry[];
+  landCounts: LandCount[];
+  totalLandCounts: ManaColorCount;
+  basicLandCounts: ManaColorCount;
+  tapLandCounts: ManaColorCount;
+  checkLandCounts: ManaColorCount;
+  shockLandCounts: ManaColorCount;
+  fastLandCounts: ManaColorCount;
+  slowLandCounts: ManaColorCount;
+  battleLandCounts: ManaColorCount;
+  turnLandCounts: ManaColorCount;
+  surveilLandCounts: ManaColorCount;
+  bounceLandCounts: ManaColorCount;
+  triomeLandCounts: ManaColorCount;
+  cyclingLandCounts: ManaColorCount;
+  painLandCounts: ManaColorCount;
+  fetchLandCounts: ManaColorCount;
+  canopyLandCounts: ManaColorCount;
+  pathwayLandCounts: ManaColorCount;
+  otherLandCounts: ManaColorCount;
+  nonLandCounts: ManaColorCount;
 };
 
-function toMtgCard(card: Card): MtgOnCurveCard {
+/** SSE `data:` payload shapes for wiki Pattern A hosts (types only). */
+export type SimulateProgressEvent = { type: 'progress' } & RunProgress;
+export type SimulateDoneEvent = { type: 'done'; result: RunOutput };
+export type SimulateErrorEvent = { type: 'error'; message: string };
+export type SimulateStreamEvent = SimulateProgressEvent | SimulateDoneEvent | SimulateErrorEvent;
+
+type PreparedRun = {
+  deck: Deck;
+  simConfig: SimulationConfig;
+  nonLandCards: Card[];
+};
+
+function emptyLandCounts(): Pick<
+  RunOutput,
+  | 'totalLandCounts'
+  | 'basicLandCounts'
+  | 'tapLandCounts'
+  | 'checkLandCounts'
+  | 'shockLandCounts'
+  | 'fastLandCounts'
+  | 'slowLandCounts'
+  | 'battleLandCounts'
+  | 'turnLandCounts'
+  | 'surveilLandCounts'
+  | 'bounceLandCounts'
+  | 'triomeLandCounts'
+  | 'cyclingLandCounts'
+  | 'painLandCounts'
+  | 'fetchLandCounts'
+  | 'canopyLandCounts'
+  | 'pathwayLandCounts'
+  | 'otherLandCounts'
+  | 'nonLandCounts'
+> {
   return {
-    name: card.name,
-    mana_cost_string: card.manaCostString,
-    image_uri: card.imageUri,
-    kind: card.kind,
-    hash: card.hash,
-    turn: card.turn,
-    mana_cost: { ...card.manaCost },
+    totalLandCounts: newManaColorCount(),
+    basicLandCounts: newManaColorCount(),
+    tapLandCounts: newManaColorCount(),
+    checkLandCounts: newManaColorCount(),
+    shockLandCounts: newManaColorCount(),
+    fastLandCounts: newManaColorCount(),
+    slowLandCounts: newManaColorCount(),
+    battleLandCounts: newManaColorCount(),
+    turnLandCounts: newManaColorCount(),
+    surveilLandCounts: newManaColorCount(),
+    bounceLandCounts: newManaColorCount(),
+    triomeLandCounts: newManaColorCount(),
+    cyclingLandCounts: newManaColorCount(),
+    painLandCounts: newManaColorCount(),
+    fetchLandCounts: newManaColorCount(),
+    canopyLandCounts: newManaColorCount(),
+    pathwayLandCounts: newManaColorCount(),
+    otherLandCounts: newManaColorCount(),
+    nonLandCounts: newManaColorCount(),
   };
 }
 
 function emptyOutput(): RunOutput {
+  const report = emptyObservationsReport();
   return {
-    card_observations: [],
-    land_counts: [],
-    deck_size: 0,
-    accumulated_opening_hand_size: 0,
-    accumulated_opening_hand_land_count: 0,
-    deck_average_cmc: 0,
-    total_land_counts: newManaColorCount(),
-    basic_land_counts: newManaColorCount(),
-    tap_land_counts: newManaColorCount(),
-    check_land_counts: newManaColorCount(),
-    shock_land_counts: newManaColorCount(),
-    other_land_counts: newManaColorCount(),
-    non_land_counts: newManaColorCount(),
+    ...report,
+    landCounts: [],
+    ...emptyLandCounts(),
   };
 }
 
-/**
- * Run a Monte Carlo simulation for an Arena decklist.
- * Input/Output field names match the mtgoncurve.com contract (snake_case).
- */
-export function run(input: RunInput): RunOutput {
+function prepareRun(input: RunInput): PreparedRun {
   let deck;
   try {
     deck = deckFromList(input.code);
   } catch (e) {
     const msg = e instanceof DeckcodeError ? e.message : String(e);
-    throw new Error(`Bad deckcode: ${msg}`);
+    throw new RunValidationError(`Bad deckcode: ${msg}`, { cause: e });
   }
   if (deckIsEmpty(deck)) {
-    throw new Error('Empty deckcode');
+    throw new RunValidationError('Empty deckcode');
   }
 
   const highestTurn = deckIter(deck).reduce((max, c) => Math.max(max, c.card.turn), 0);
+  const startingHandSize = input.startingHandSize ?? 7;
 
   const london = londonNever();
-  london.mulliganDownTo = input.mulligan_down_to;
-  london.mulliganOnLands = new Set(input.mulligan_on_lands);
+  london.startingHandSize = startingHandSize;
+  london.mulliganDownTo = input.mulliganDownTo;
+  london.mulliganOnLands = new Set(input.mulliganOnLands);
 
-  for (let i = 0; i < input.acceptable_hand_list.length; i++) {
-    const acceptableHand = input.acceptable_hand_list[i]!;
+  const acceptableHashes: number[][] = [];
+  for (let i = 0; i < input.acceptableHandList.length; i++) {
+    const acceptableHand = input.acceptableHandList[i]!;
     const keepCards = new Set<number>();
     for (const cardName of acceptableHand) {
       const card = ALL_CARDS.cardFromName(cardName);
       if (!card) {
-        throw new Error(`Bad card name in acceptable_hand_list row ${i}: ${cardName}`);
+        throw new RunValidationError(`Bad card name in acceptableHandList row ${i}: ${cardName}`);
       }
       keepCards.add(card.hash);
     }
     if (keepCards.size > 0) {
       london.acceptableHandList.push(keepCards);
+      acceptableHashes.push([...keepCards]);
     }
   }
 
-  const sim = simulationFromConfig({
+  const simConfig: SimulationConfig = {
     runCount: input.runs,
     drawCount: highestTurn,
     mulligan: asLondonMulligan(london),
     deck,
-    onThePlay: input.on_the_play,
+    onThePlay: input.onThePlay,
     seed: input.seed,
-  });
+    epsilon: input.epsilon,
+    parallel: input.parallel,
+    startingHandSize,
+    mulliganDownTo: input.mulliganDownTo,
+    mulliganOnLands: input.mulliganOnLands,
+    acceptableHandList: acceptableHashes,
+  };
 
-  const outputs = emptyOutput();
-  outputs.accumulated_opening_hand_size = sim.accumulatedOpeningHandSize;
-  outputs.accumulated_opening_hand_land_count = sim.accumulatedOpeningHandLandCount;
-
-  outputs.card_observations = deckIter(deck)
+  const nonLandCards = deckIter(deck)
     .filter((c) => !isLand(c.card))
-    .map((c) => {
-      const o = observationsForCardByTurn(sim, c.card, c.card.turn);
-      return {
-        card: toMtgCard(c.card),
-        cmc: manaCostCmc(c.card.manaCost),
-        card_count: c.count,
-        observations: o,
-      };
-    });
-  outputs.card_observations.sort((a, b) => a.card.name.localeCompare(b.card.name));
-  outputs.card_observations.sort(
-    (a, b) => manaCostCmc(a.card.mana_cost) - manaCostCmc(b.card.mana_cost),
-  );
+    .map((c) => c.card);
 
-  outputs.land_counts = deckIter(deck)
-    .filter((c) => isLand(c.card))
+  return { deck, simConfig, nonLandCards };
+}
+
+function simulationToOutput(deck: Deck, sim: Simulation): RunOutput {
+  const outputs = emptyOutput();
+
+  const nonLandWithObs = deckIter(deck)
+    .filter((c) => !isLand(c.card))
     .map((c) => ({
-      card: toMtgCard(c.card),
+      name: c.card.name,
+      manaCost: c.card.manaCostString,
+      imageUri: c.card.imageUri,
+      kind: c.card.kind,
+      turn: c.card.turn,
+      copies: c.count,
       cmc: manaCostCmc(c.card.manaCost),
-      card_count: c.count,
-      observations: newObservations(),
+      observations: observationsForCardByTurn(sim, c.card, c.card.turn),
     }));
-  outputs.land_counts.sort((a, b) => a.card.name.localeCompare(b.card.name));
-  outputs.land_counts.sort((a, b) => String(a.card.kind).localeCompare(String(b.card.kind)));
 
   const deckLen = deck.cardCount;
-  outputs.deck_size = deckLen;
   const nonLandEntries = deckIter(deck).filter((c) => !isLand(c.card));
   const nonLandCount = nonLandEntries.reduce((n, c) => n + c.count, 0);
-  outputs.deck_average_cmc =
+  const deckAverageCmc =
     nonLandCount === 0
       ? 0
       : nonLandEntries.reduce((sum, c) => sum + c.count * manaCostCmc(c.card.manaCost), 0) /
         nonLandCount;
 
+  const report = buildObservationsReport({
+    cards: nonLandWithObs,
+    totalSimulations: sim.hands.length,
+    accumulatedOpeningHandSize: sim.accumulatedOpeningHandSize,
+    accumulatedOpeningHandLandCount: sim.accumulatedOpeningHandLandCount,
+    deckSize: deckLen,
+    deckAverageCmc,
+  });
+
+  outputs.totalSimulations = report.totalSimulations;
+  outputs.avgOpeningHandSize = report.avgOpeningHandSize;
+  outputs.avgOpeningLandCount = report.avgOpeningLandCount;
+  outputs.deckSize = report.deckSize;
+  outputs.deckAverageCmc = report.deckAverageCmc;
+  outputs.cards = report.cards;
+  outputs.weakestOnCurve = report.weakestOnCurve;
+  outputs.colorConstrained = report.colorConstrained;
+  outputs.drawDependent = report.drawDependent;
+
+  outputs.landCounts = deckIter(deck)
+    .filter((c) => isLand(c.card))
+    .map((c) => ({
+      name: c.card.name,
+      manaCost: c.card.manaCostString,
+      imageUri: c.card.imageUri,
+      kind: c.card.kind,
+      copies: c.count,
+      hash: c.card.hash,
+    }));
+  outputs.landCounts.sort(
+    (a, b) => String(a.kind).localeCompare(String(b.kind)) || a.name.localeCompare(b.name),
+  );
+
   for (const cc of deckIter(deck)) {
     for (let i = 0; i < cc.count; i++) {
       const card = cc.card;
       if (isLand(card)) {
-        countManaColor(outputs.total_land_counts, card.manaCost);
+        countManaColor(outputs.totalLandCounts, card.manaCost);
       }
       switch (card.kind) {
         case CardKind.BasicLand:
-          countManaColor(outputs.basic_land_counts, card.manaCost);
+          countManaColor(outputs.basicLandCounts, card.manaCost);
           break;
         case CardKind.CheckLand:
-          countManaColor(outputs.check_land_counts, card.manaCost);
+          countManaColor(outputs.checkLandCounts, card.manaCost);
           break;
         case CardKind.TapLand:
-          countManaColor(outputs.tap_land_counts, card.manaCost);
+          countManaColor(outputs.tapLandCounts, card.manaCost);
           break;
         case CardKind.ShockLand:
-          countManaColor(outputs.shock_land_counts, card.manaCost);
+          countManaColor(outputs.shockLandCounts, card.manaCost);
+          break;
+        case CardKind.FastLand:
+          countManaColor(outputs.fastLandCounts, card.manaCost);
+          break;
+        case CardKind.SlowLand:
+          countManaColor(outputs.slowLandCounts, card.manaCost);
+          break;
+        case CardKind.BattleLand:
+          countManaColor(outputs.battleLandCounts, card.manaCost);
+          break;
+        case CardKind.TurnLand:
+          countManaColor(outputs.turnLandCounts, card.manaCost);
+          break;
+        case CardKind.SurveilLand:
+          countManaColor(outputs.surveilLandCounts, card.manaCost);
+          break;
+        case CardKind.BounceLand:
+          countManaColor(outputs.bounceLandCounts, card.manaCost);
+          break;
+        case CardKind.TriomeLand:
+          countManaColor(outputs.triomeLandCounts, card.manaCost);
+          break;
+        case CardKind.CyclingLand:
+          countManaColor(outputs.cyclingLandCounts, card.manaCost);
+          break;
+        case CardKind.PainLand:
+          countManaColor(outputs.painLandCounts, card.manaCost);
+          break;
+        case CardKind.FetchLand:
+          countManaColor(outputs.fetchLandCounts, card.manaCost);
+          break;
+        case CardKind.CanopyLand:
+          countManaColor(outputs.canopyLandCounts, card.manaCost);
+          break;
+        case CardKind.PathwayLand:
+          countManaColor(outputs.pathwayLandCounts, card.manaCost);
           break;
         case CardKind.OtherLand:
-          countManaColor(outputs.other_land_counts, card.manaCost);
+        case CardKind.ForcedLand:
+          countManaColor(outputs.otherLandCounts, card.manaCost);
           break;
         default:
-          countManaColor(outputs.non_land_counts, card.manaCost);
+          countManaColor(outputs.nonLandCounts, card.manaCost);
           break;
       }
     }
   }
 
   return outputs;
+}
+
+/**
+ * Run a Monte Carlo simulation for an Arena decklist.
+ * Returns a single flattened on-curve report (`cards`, insights, land tallies).
+ */
+export function run(input: RunInput): RunOutput {
+  const { deck, simConfig, nonLandCards } = prepareRun(input);
+  const sim =
+    input.epsilon !== undefined
+      ? simulationFromConfigAdaptive(simConfig, nonLandCards)
+      : simulationFromConfig(simConfig);
+  return simulationToOutput(deck, sim);
+}
+
+/**
+ * Async Monte Carlo run with optional progress callbacks for streaming hosts (e.g. SSE).
+ * Always sequential batches (`parallel` ignored) so the event loop can flush between ticks.
+ * Emits `phase: 'simulating'` after each hand batch, then `phase: 'scoring'` before report build.
+ */
+export async function runAsync(input: RunAsyncInput): Promise<RunOutput> {
+  const { deck, simConfig, nonLandCards } = prepareRun(input);
+  const onProgress = input.onProgress;
+  const signal = input.signal;
+  const sim = await simulationFromConfigAsync(simConfig, {
+    batchSize: input.batchSize,
+    onProgress: onProgress ? (p) => onProgress({ ...p, phase: 'simulating' }) : undefined,
+    cards: nonLandCards,
+    signal,
+  });
+
+  signal?.throwIfAborted();
+  if (onProgress) {
+    onProgress({
+      completed: sim.hands.length,
+      total: simConfig.runCount,
+      phase: 'scoring',
+    });
+  }
+  // Yield when a host may flush progress or observe cancellation before report build.
+  if (onProgress !== undefined || signal !== undefined) {
+    await yieldMacrotask();
+    signal?.throwIfAborted();
+  }
+  return simulationToOutput(deck, sim);
 }

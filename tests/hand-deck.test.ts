@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  BasicLandType,
   CardKind,
   emptyCard,
   hashCardName,
@@ -13,7 +14,6 @@ import { deckFromList } from '../src/deck.js';
 import { handFromOpeningAndDraws, playCmcAutoTap, drawCmcAutoTap } from '../src/hand.js';
 
 afterEach(() => {
-  // Clear injected test DB so other files reload from disk
   setAllCards(null);
 });
 
@@ -25,6 +25,8 @@ function makeCard(partial: Partial<Card> & { name: string }): Card {
     turn: Math.max(1, manaCost.r + manaCost.g + manaCost.b + manaCost.u + manaCost.w + manaCost.c),
     manaCost,
     allManaCosts: partial.allManaCosts ?? [manaCost],
+    basicLandTypes: partial.basicLandTypes ?? 0,
+    checkTypes: partial.checkTypes ?? 0,
     ...partial,
   };
 }
@@ -56,8 +58,8 @@ describe('collection otherFacesByName', () => {
   });
 });
 
-describe('deck M=auto', () => {
-  it('resolves DFC land face', () => {
+describe('deck M=auto and auto face-detect', () => {
+  it('resolves DFC land face with M=auto', () => {
     const spell = makeCard({
       name: 'Bala Ged Recovery',
       oracleId: 'oracle-1',
@@ -70,6 +72,7 @@ describe('deck M=auto', () => {
       oracleId: 'oracle-1',
       kind: CardKind.OtherLand,
       manaCost: manaCostFromRgbuwc(0, 0, 1, 0, 0, 0),
+      manaCostString: '{B}',
       turn: 1,
     });
     setAllCards(asCollectionApi(collectionFromCards([spell, land])));
@@ -77,7 +80,31 @@ describe('deck M=auto', () => {
     expect(deck.cards).toHaveLength(1);
     expect(deck.cards[0]!.card.kind).toBe(CardKind.ForcedLand);
     expect(deck.cards[0]!.card.manaCost.b).toBe(1);
+    expect(deck.cards[0]!.card.manaCostString).toBe('{B}');
     expect(isLand(deck.cards[0]!.card)).toBe(true);
+  });
+
+  it('auto-detects land face without M=auto', () => {
+    const spell = makeCard({
+      name: 'Bala Ged Recovery',
+      oracleId: 'oracle-1',
+      kind: CardKind.Sorcery,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 2),
+      manaCostString: '{2}{G}',
+    });
+    const land = makeCard({
+      name: 'Bala Ged Sanctuary',
+      oracleId: 'oracle-1',
+      kind: CardKind.OtherLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 1, 0, 0, 0),
+      manaCostString: '{B}',
+      turn: 1,
+    });
+    setAllCards(asCollectionApi(collectionFromCards([spell, land])));
+    const deck = deckFromList('1 Bala Ged Recovery');
+    expect(deck.cards[0]!.card.kind).toBe(CardKind.ForcedLand);
+    expect(deck.cards[0]!.card.manaCost.b).toBe(1);
+    expect(deck.cards[0]!.card.manaCostString).toBe('{B}');
   });
 });
 
@@ -111,19 +138,16 @@ describe('auto-tap TapLand delay', () => {
       name: 'Island',
       kind: CardKind.BasicLand,
       manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island,
     });
     const spell = makeCard({
       name: 'Negate',
       kind: CardKind.Instant,
-      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
-      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 1, 0, 0)],
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 1),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 1, 0, 1)],
       manaCostString: '{1}{U}',
       turn: 2,
     });
-    // Need 2 pips: {1}{U} — use colorless+U. Fix cost:
-    spell.manaCost = manaCostFromRgbuwc(0, 0, 0, 1, 0, 1);
-    spell.allManaCosts = [spell.manaCost];
-    spell.turn = 2;
 
     const hand = handFromOpeningAndDraws([tapLand, island, spell], []);
     const result = playCmcAutoTap(hand, spell);
@@ -136,6 +160,7 @@ describe('auto-tap TapLand delay', () => {
       name: 'Island',
       kind: CardKind.BasicLand,
       manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island,
     });
     const spell = makeCard({
       name: 'Opt',
@@ -147,5 +172,340 @@ describe('auto-tap TapLand delay', () => {
     const hand = handFromOpeningAndDraws([island, spell], []);
     expect(playCmcAutoTap(hand, spell).paid).toBe(true);
     expect(drawCmcAutoTap(hand, spell).paid).toBe(true);
+  });
+});
+
+describe('auto-tap board-aware lands', () => {
+  const blueSpell = () =>
+    makeCard({
+      name: 'Opt',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 1, 0, 0)],
+      turn: 1,
+    });
+
+  it('Check alone is tapped on turn 1', () => {
+    const check = makeCard({
+      name: 'Glacial Fortress',
+      kind: CardKind.CheckLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 1, 0),
+      basicLandTypes: BasicLandType.Plains | BasicLandType.Island,
+      checkTypes: BasicLandType.Plains | BasicLandType.Island,
+    });
+    const spell = blueSpell();
+    const hand = handFromOpeningAndDraws([check, spell], []);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(false);
+  });
+
+  it('Check with matching basic before it is untapped on turn 1', () => {
+    const island = makeCard({
+      name: 'Island',
+      kind: CardKind.BasicLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island,
+    });
+    const check = makeCard({
+      name: 'Glacial Fortress',
+      kind: CardKind.CheckLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 1, 0),
+      basicLandTypes: BasicLandType.Plains | BasicLandType.Island,
+      checkTypes: BasicLandType.Plains | BasicLandType.Island,
+    });
+    const spell = blueSpell();
+    // FIFO: Island playTurn 1, Check playTurn 2 — on T1 only Island is always-available;
+    // Check isn't played yet. Use turn-2 spell to exercise unlocked check.
+    spell.turn = 2;
+    spell.manaCost = manaCostFromRgbuwc(0, 0, 0, 1, 0, 1);
+    spell.allManaCosts = [spell.manaCost];
+    const hand = handFromOpeningAndDraws([island, check, spell], []);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+  });
+
+  it('Shock dual unlocks Check', () => {
+    const shock = makeCard({
+      name: 'Hallowed Fountain',
+      kind: CardKind.ShockLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 1, 0),
+      basicLandTypes: BasicLandType.Plains | BasicLandType.Island,
+    });
+    const check = makeCard({
+      name: 'Glacial Fortress',
+      kind: CardKind.CheckLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 1, 0),
+      checkTypes: BasicLandType.Plains | BasicLandType.Island,
+    });
+    const spell = makeCard({
+      name: 'Negate',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 1),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 1, 0, 1)],
+      turn: 2,
+    });
+    const hand = handFromOpeningAndDraws([shock, check, spell], []);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+  });
+
+  it('Fast as 4th land is tapped on its play turn', () => {
+    const lands = [1, 2, 3].map((n) =>
+      makeCard({
+        name: `Island${n}`,
+        kind: CardKind.BasicLand,
+        manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+        basicLandTypes: BasicLandType.Island,
+      }),
+    );
+    const fast = makeCard({
+      name: 'Darkslick Shores',
+      kind: CardKind.FastLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 1, 1, 0, 0),
+    });
+    const spell = makeCard({
+      name: 'Doom Blade',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 1, 0, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 1, 0, 0, 0)],
+      turn: 4,
+    });
+    // Only the fast produces B; on turn 4 it is 4th land → tapped → available T5
+    const hand = handFromOpeningAndDraws([...lands, fast, spell], []);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(false);
+    spell.turn = 5;
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+  });
+
+  it('Slow as 3rd land is untapped', () => {
+    const island1 = makeCard({
+      name: 'Island1',
+      kind: CardKind.BasicLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island,
+    });
+    const island2 = makeCard({
+      name: 'Island2',
+      kind: CardKind.BasicLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island,
+    });
+    const slow = makeCard({
+      name: 'Deserted Beach',
+      kind: CardKind.SlowLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 1, 0),
+    });
+    const spell = makeCard({
+      name: 'Peace',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 1, 0),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 0, 1, 0)],
+      turn: 3,
+    });
+    const hand = handFromOpeningAndDraws([island1, island2, slow, spell], []);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+  });
+
+  it('BattleLand needs 2 basics, not just 2 lands', () => {
+    const islandA = makeCard({
+      name: 'Steam Vents',
+      kind: CardKind.ShockLand,
+      manaCost: manaCostFromRgbuwc(1, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island | BasicLandType.Mountain,
+    });
+    const islandB = makeCard({
+      name: 'Breeding Pool',
+      kind: CardKind.ShockLand,
+      manaCost: manaCostFromRgbuwc(0, 1, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Forest | BasicLandType.Island,
+    });
+    const battle = makeCard({
+      name: 'Prairie Stream',
+      kind: CardKind.BattleLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 1, 0),
+      basicLandTypes: BasicLandType.Island | BasicLandType.Plains,
+    });
+    const spell = makeCard({
+      name: 'Peace',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 1, 0),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 0, 1, 0)],
+      turn: 3,
+    });
+    // Two shocks are not Basic and produce no W → battle tapped on T3 → cannot pay W
+    const hand = handFromOpeningAndDraws([islandA, islandB, battle, spell], []);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(false);
+
+    const island1 = makeCard({
+      name: 'Island',
+      kind: CardKind.BasicLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island,
+    });
+    const plains = makeCard({
+      name: 'Plains',
+      kind: CardKind.BasicLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 1, 0),
+      basicLandTypes: BasicLandType.Plains,
+    });
+    const unlocked = handFromOpeningAndDraws([island1, plains, battle, spell], []);
+    expect(playCmcAutoTap(unlocked, spell).paid).toBe(true);
+  });
+
+  it('TurnLand untapped on turn 3 with empty board; tapped on turn 4', () => {
+    const town = makeCard({
+      name: 'Starting Town',
+      kind: CardKind.TurnLand,
+      manaCost: manaCostFromRgbuwc(1, 1, 1, 1, 1, 1),
+    });
+    const spell = makeCard({
+      name: 'Bolt',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(1, 0, 0, 0, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(1, 0, 0, 0, 0, 0)],
+      turn: 1,
+    });
+    const hand = handFromOpeningAndDraws([town, spell], []);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+    spell.turn = 3;
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+    // On turn 4 the town is still the first land (playTurn 1) so still untapped.
+    // Model a late play: put three basics first so town is playTurn 4.
+    const basics = [1, 2, 3].map((n) =>
+      makeCard({
+        name: `Wastes${n}`,
+        kind: CardKind.BasicLand,
+        manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+      }),
+    );
+    const late = makeCard({
+      name: 'Late Town',
+      kind: CardKind.TurnLand,
+      manaCost: manaCostFromRgbuwc(1, 0, 0, 0, 0, 0),
+    });
+    const red = makeCard({
+      name: 'Shock',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(1, 0, 0, 0, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(1, 0, 0, 0, 0, 0)],
+      turn: 4,
+    });
+    const lateHand = handFromOpeningAndDraws([...basics, late, red], []);
+    expect(playCmcAutoTap(lateHand, red).paid).toBe(false);
+    red.turn = 5;
+    expect(playCmcAutoTap(lateHand, red).paid).toBe(true);
+  });
+
+  it('TapLand drawn on the play is not available the turn it is drawn', () => {
+    const filler = makeCard({
+      name: 'Opt',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+    });
+    const tap = makeCard({
+      name: 'Guildgate',
+      kind: CardKind.TapLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+    });
+    const spell = makeCard({
+      name: 'Negate',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 1, 0, 0)],
+      turn: 2,
+    });
+    // Opening has no lands; first draw (turn 2 OTP) is the TapLand → playTurn 2 → available T3
+    const hand = handFromOpeningAndDraws([filler, spell], [tap]);
+    expect(playCmcAutoTap(hand, spell).paid).toBe(false);
+    spell.turn = 3;
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+  });
+
+  it('TurnLand drawn on turn 4 enters tapped', () => {
+    const fillers = [1, 2, 3].map((n) =>
+      makeCard({
+        name: `Spell${n}`,
+        kind: CardKind.Instant,
+        manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+      }),
+    );
+    const town = makeCard({
+      name: 'Starting Town',
+      kind: CardKind.TurnLand,
+      manaCost: manaCostFromRgbuwc(1, 0, 0, 0, 0, 0),
+    });
+    const spell = makeCard({
+      name: 'Bolt',
+      kind: CardKind.Instant,
+      manaCost: manaCostFromRgbuwc(1, 0, 0, 0, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(1, 0, 0, 0, 0, 0)],
+      turn: 4,
+    });
+    // OTP draws: T2, T3, T4 — town is third draw → playTurn 4 → tapped
+    const hand = handFromOpeningAndDraws(
+      [...fillers, spell],
+      [
+        makeCard({
+          name: 'D1',
+          kind: CardKind.Instant,
+          manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+        }),
+        makeCard({
+          name: 'D2',
+          kind: CardKind.Instant,
+          manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+        }),
+        town,
+      ],
+    );
+    expect(playCmcAutoTap(hand, spell).paid).toBe(false);
+    spell.turn = 5;
+    expect(playCmcAutoTap(hand, spell).paid).toBe(true);
+  });
+
+  it('Ancient Tomb manaPerTap=2 pays two generic pips from one land', () => {
+    const tomb = makeCard({
+      name: 'Ancient Tomb',
+      kind: CardKind.OtherLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 1),
+      manaPerTap: 2,
+    });
+    const spell = makeCard({
+      name: 'Two Generic',
+      kind: CardKind.Sorcery,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 0, 0, 2),
+      allManaCosts: [manaCostFromRgbuwc(0, 0, 0, 0, 0, 2)],
+      manaCostString: '{2}',
+      turn: 1,
+    });
+    const hand = handFromOpeningAndDraws([tomb, spell], []);
+    const result = playCmcAutoTap(hand, spell);
+    expect(result.cmc).toBe(true);
+    expect(result.paid).toBe(true);
+  });
+
+  it('Lotus Field manaPerTap=3 pays three colored pips after TapLand ETB delay', () => {
+    const lotus = makeCard({
+      name: 'Lotus Field',
+      kind: CardKind.TapLand,
+      manaCost: manaCostFromRgbuwc(1, 1, 1, 1, 1, 0),
+      manaPerTap: 3,
+    });
+    const island = makeCard({
+      name: 'Island',
+      kind: CardKind.BasicLand,
+      manaCost: manaCostFromRgbuwc(0, 0, 0, 1, 0, 0),
+      basicLandTypes: BasicLandType.Island,
+    });
+    const spell = makeCard({
+      name: 'Three Green',
+      kind: CardKind.Sorcery,
+      manaCost: manaCostFromRgbuwc(0, 3, 0, 0, 0, 0),
+      allManaCosts: [manaCostFromRgbuwc(0, 3, 0, 0, 0, 0)],
+      manaCostString: '{G}{G}{G}',
+      turn: 2,
+    });
+    // Opening: lotus + island + spell. Lotus plays turn 1 (tapped), available turn 2.
+    const hand = handFromOpeningAndDraws([lotus, island, spell], []);
+    const result = playCmcAutoTap(hand, spell);
+    expect(result.cmc).toBe(true);
+    expect(result.paid).toBe(true);
   });
 });

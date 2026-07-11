@@ -1,6 +1,6 @@
 ## Introduction
 
-Thanks for contributing to landord-ts / `@lggarrison/landlord`!
+Thanks for contributing to `@lggarrison/landlord-ts`!
 
 Open PRs against **`develop`** (the default integration branch). Releases are cut from **`main`** via PR `develop` → `main`. Fill in the sections that apply and delete the rest, including the Introduction section.
 
@@ -25,7 +25,7 @@ flowchart LR
   decklist[Arena decklist] --> deck[Deck.parse]
   deck --> sim[Simulation]
   sim --> runApi["run()"]
-  runApi --> obs[card_observations]
+  runApi --> cards[cards and insights]
 ```
 
 Delete this section if a diagram does not add clarity.

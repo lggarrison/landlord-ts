@@ -1,8 +1,36 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_CARDS, pManaGivenCmc, run } from '../src/index.js';
+import {
+  ALL_CARDS,
+  DeckcodeError,
+  pManaGivenCmc,
+  run,
+  runAsync,
+  RunValidationError,
+  type RunProgress,
+} from '../src/index.js';
 import { deckFromList } from '../src/deck.js';
 import { asNeverMulligan } from '../src/mulligan/index.js';
-import { observationsForCard, simulationFromConfig } from '../src/simulation.js';
+import {
+  observationsForCard,
+  simulationFromConfig,
+  simulationFromConfigAdaptive,
+  simulationFromConfigAsync,
+} from '../src/simulation.js';
+
+const tinyGreen = {
+  code: `
+1 Llanowar Elves
+6 Forest
+`,
+  onThePlay: true,
+  mulliganDownTo: 7,
+  mulliganOnLands: [] as number[],
+  acceptableHandList: [] as string[][],
+};
+
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === 'AbortError';
+}
 
 describe('card database', () => {
   it('loads Forest and Opt', () => {
@@ -15,23 +43,389 @@ describe('card database', () => {
 describe('run() façade', () => {
   it('simulates a tiny green deck', () => {
     const output = run({
-      code: `
-1 Llanowar Elves
-6 Forest
-`,
+      ...tinyGreen,
       runs: 200,
-      on_the_play: true,
-      mulligan_down_to: 7,
-      mulligan_on_lands: [],
-      acceptable_hand_list: [],
       seed: 42,
     });
-    expect(output.deck_size).toBe(7);
-    expect(output.card_observations.length).toBeGreaterThan(0);
-    const elves = output.card_observations.find((o) => o.card.name === 'Llanowar Elves');
+    expect(output.deckSize).toBe(7);
+    expect(output.totalSimulations).toBe(200);
+    expect(output.cards.length).toBeGreaterThan(0);
+    const elves = output.cards.find((o) => o.name === 'Llanowar Elves');
     expect(elves).toBeTruthy();
-    expect(elves!.observations.totalRuns).toBe(200);
-    expect(pManaGivenCmc(elves!.observations)).toBeGreaterThan(0.9);
+    expect(elves!.totalSimulations).toBe(200);
+    expect(elves!.pManaGivenCmc).toBeGreaterThan(0.9);
+  });
+
+  it('includes per-card success/miss invariants', () => {
+    const runs = 200;
+    const output = run({
+      ...tinyGreen,
+      runs,
+      seed: 42,
+    });
+    expect(output.totalSimulations).toBe(runs);
+    expect(output.deckSize).toBe(7);
+    expect(output.weakestOnCurve.length).toBe(output.cards.length);
+
+    for (const card of output.cards) {
+      expect(card.playedOnCurve + card.notPlayedOnCurve).toBe(card.totalSimulations);
+      expect(
+        card.notEnoughLands + card.colorOrTimingFail + card.manaOkUndrawn + card.playedOnCurve,
+      ).toBe(card.totalSimulations);
+    }
+
+    const elves = output.cards.find((c) => c.name === 'Llanowar Elves');
+    expect(elves).toBeTruthy();
+    expect(elves!.totalSimulations).toBe(runs);
+    expect(elves!.pCastOnCurve).toBe(elves!.playedOnCurve / elves!.totalSimulations);
+  });
+
+  it('rejects runCount <= 0', () => {
+    expect(() =>
+      run({
+        ...tinyGreen,
+        runs: 0,
+        seed: 1,
+      }),
+    ).toThrow('runCount must be > 0');
+  });
+});
+
+describe('runAsync() façade', () => {
+  it('matches seeded run() with parallel off', async () => {
+    const input = {
+      ...tinyGreen,
+      runs: 200,
+      seed: 42,
+      parallel: false as const,
+    };
+    const syncOut = run(input);
+    const asyncOut = await runAsync({ ...input, batchSize: 50 });
+    expect(asyncOut).toEqual(syncOut);
+  });
+
+  it('matches seeded run() without onProgress', async () => {
+    const input = {
+      ...tinyGreen,
+      runs: 120,
+      seed: 11,
+      parallel: false as const,
+    };
+    const syncOut = run(input);
+    const asyncOut = await runAsync({ ...input, batchSize: 40 });
+    expect(asyncOut).toEqual(syncOut);
+  });
+
+  it('matches seeded run() when epsilon early-stops', async () => {
+    const input = {
+      ...tinyGreen,
+      runs: 5000,
+      seed: 99,
+      parallel: false as const,
+      epsilon: 0.05,
+    };
+    const syncOut = run(input);
+    const ticks: RunProgress[] = [];
+    const asyncOut = await runAsync({
+      ...input,
+      batchSize: 50, // ignored under epsilon; must still match sync adaptive
+      onProgress: (p) => ticks.push({ ...p }),
+    });
+    expect(asyncOut).toEqual(syncOut);
+    const elves = asyncOut.cards.find((o) => o.name === 'Llanowar Elves');
+    expect(elves).toBeTruthy();
+    expect(elves!.totalSimulations).toBeLessThan(input.runs);
+    const simTicks = ticks.filter((t) => t.phase === 'simulating');
+    expect(simTicks.at(-1)!.completed).toBe(elves!.totalSimulations);
+    expect(simTicks.at(-1)!.completed).toBeLessThan(simTicks.at(-1)!.total);
+    expect(ticks.at(-1)).toMatchObject({
+      phase: 'scoring',
+      completed: elves!.totalSimulations,
+      total: input.runs,
+    });
+  });
+
+  it('reports monotonic onProgress up to total runs', async () => {
+    const ticks: RunProgress[] = [];
+    const runs = 120;
+    const output = await runAsync({
+      ...tinyGreen,
+      runs,
+      seed: 7,
+      batchSize: 40,
+      onProgress: (p) => ticks.push({ ...p }),
+    });
+    const simTicks = ticks.filter((t) => t.phase === 'simulating');
+    expect(simTicks.length).toBeGreaterThan(0);
+    expect(simTicks[0]!.total).toBe(runs);
+    for (let i = 1; i < simTicks.length; i++) {
+      expect(simTicks[i]!.completed).toBeGreaterThan(simTicks[i - 1]!.completed);
+      expect(simTicks[i]!.total).toBe(runs);
+    }
+    expect(simTicks.at(-1)!.completed).toBe(runs);
+    expect(ticks.at(-1)).toEqual({ completed: runs, total: runs, phase: 'scoring' });
+    const elves = output.cards.find((o) => o.name === 'Llanowar Elves');
+    expect(elves!.totalSimulations).toBe(runs);
+  });
+
+  it('emits one progress tick per batchSize chunk then a scoring tick', async () => {
+    const ticks: RunProgress[] = [];
+    await runAsync({
+      ...tinyGreen,
+      runs: 100,
+      seed: 5,
+      batchSize: 40,
+      onProgress: (p) => ticks.push({ ...p }),
+    });
+    expect(ticks.map((t) => [t.phase, t.completed])).toEqual([
+      ['simulating', 40],
+      ['simulating', 80],
+      ['simulating', 100],
+      ['scoring', 100],
+    ]);
+    expect(ticks.every((t) => t.total === 100)).toBe(true);
+  });
+
+  it('rejects when onProgress throws', async () => {
+    await expect(
+      runAsync({
+        ...tinyGreen,
+        runs: 80,
+        seed: 1,
+        batchSize: 20,
+        onProgress: () => {
+          throw new Error('progress boom');
+        },
+      }),
+    ).rejects.toThrow('progress boom');
+  });
+
+  it('rejects when signal is already aborted', async () => {
+    const ac = new AbortController();
+    ac.abort();
+    const ticks: RunProgress[] = [];
+    await expect(
+      runAsync({
+        ...tinyGreen,
+        runs: 80,
+        seed: 2,
+        batchSize: 20,
+        signal: ac.signal,
+        onProgress: (p) => ticks.push({ ...p }),
+      }),
+    ).rejects.toSatisfy(isAbortError);
+    expect(ticks).toEqual([]);
+  });
+
+  it('rejects when signal is aborted between batches', async () => {
+    const ac = new AbortController();
+    await expect(
+      runAsync({
+        ...tinyGreen,
+        runs: 200,
+        seed: 3,
+        batchSize: 40,
+        signal: ac.signal,
+        onProgress: () => {
+          ac.abort();
+        },
+      }),
+    ).rejects.toSatisfy(isAbortError);
+  });
+
+  it('honors signal-only abort before report build (no onProgress)', async () => {
+    const ac = new AbortController();
+    const pending = runAsync({
+      ...tinyGreen,
+      runs: 40,
+      seed: 9,
+      batchSize: 40,
+      signal: ac.signal,
+    });
+    setTimeout(() => ac.abort(), 0);
+    await expect(pending).rejects.toSatisfy(isAbortError);
+  });
+
+  it('rejects when signal is already aborted without onProgress', async () => {
+    const ac = new AbortController();
+    ac.abort();
+    await expect(
+      runAsync({
+        ...tinyGreen,
+        runs: 40,
+        seed: 10,
+        batchSize: 40,
+        signal: ac.signal,
+      }),
+    ).rejects.toSatisfy(isAbortError);
+  });
+
+  it('rejects when signal aborts after the progress yield', async () => {
+    const ac = new AbortController();
+    let ticks = 0;
+    await expect(
+      runAsync({
+        ...tinyGreen,
+        runs: 120,
+        seed: 4,
+        batchSize: 40,
+        signal: ac.signal,
+        onProgress: () => {
+          ticks += 1;
+          if (ticks === 1) {
+            setTimeout(() => ac.abort(), 0);
+          }
+        },
+      }),
+    ).rejects.toSatisfy(isAbortError);
+    expect(ticks).toBeGreaterThanOrEqual(1);
+  });
+
+  it('rejects runCount <= 0', async () => {
+    await expect(
+      runAsync({
+        ...tinyGreen,
+        runs: 0,
+        seed: 1,
+      }),
+    ).rejects.toThrow('runCount must be > 0');
+  });
+
+  it('rejects the same invalid inputs as run()', async () => {
+    const badDeck = { ...tinyGreen, code: 'not a decklist!!!', runs: 10, seed: 1 };
+    const emptyDeck = { ...tinyGreen, code: '', runs: 10, seed: 1 };
+    const badHand = {
+      ...tinyGreen,
+      runs: 10,
+      seed: 1,
+      acceptableHandList: [['Not A Real Card Name XYZ']],
+    };
+
+    expect(() => run(badDeck)).toThrow(RunValidationError);
+    expect(() => run(badDeck)).toThrow(/Bad deckcode/);
+    try {
+      run(badDeck);
+    } catch (e) {
+      expect(e).toBeInstanceOf(RunValidationError);
+      expect((e as RunValidationError).cause).toBeInstanceOf(DeckcodeError);
+    }
+    await expect(runAsync(badDeck)).rejects.toBeInstanceOf(RunValidationError);
+    await expect(runAsync(badDeck)).rejects.toThrow(/Bad deckcode/);
+
+    expect(() => run(emptyDeck)).toThrow(RunValidationError);
+    expect(() => run(emptyDeck)).toThrow('Empty deckcode');
+    await expect(runAsync(emptyDeck)).rejects.toThrow('Empty deckcode');
+
+    expect(() => run(badHand)).toThrow(RunValidationError);
+    expect(() => run(badHand)).toThrow(/Bad card name in acceptableHandList/);
+    await expect(runAsync(badHand)).rejects.toThrow(/Bad card name in acceptableHandList/);
+  });
+});
+
+describe('simulationFromConfigAsync', () => {
+  const baseDeck = deckFromList(`
+1 Llanowar Elves
+6 Forest
+`);
+  const nonLand = [ALL_CARDS.cardFromName('Llanowar Elves')!];
+
+  it('rejects runCount <= 0', async () => {
+    await expect(
+      simulationFromConfigAsync({
+        runCount: 0,
+        drawCount: 1,
+        deck: baseDeck,
+        mulligan: asNeverMulligan(),
+        onThePlay: true,
+        seed: 1,
+      }),
+    ).rejects.toThrow('runCount must be > 0');
+    expect(() =>
+      simulationFromConfig({
+        runCount: -1,
+        drawCount: 1,
+        deck: baseDeck,
+        mulligan: asNeverMulligan(),
+        onThePlay: true,
+        seed: 1,
+      }),
+    ).toThrow('runCount must be > 0');
+  });
+
+  it('matches seeded sequential simulationFromConfig', async () => {
+    const config = {
+      runCount: 80,
+      drawCount: 1,
+      deck: baseDeck,
+      mulligan: asNeverMulligan(),
+      onThePlay: true,
+      seed: 21,
+      parallel: false as const,
+    };
+    const sync = simulationFromConfig(config);
+    const asyncSim = await simulationFromConfigAsync(config, { batchSize: 25 });
+    expect(asyncSim).toEqual(sync);
+  });
+
+  it('matches seeded adaptive epsilon early-stop', async () => {
+    const config = {
+      runCount: 5000,
+      drawCount: 1,
+      deck: baseDeck,
+      mulligan: asNeverMulligan(),
+      onThePlay: true,
+      seed: 33,
+      epsilon: 0.05,
+      parallel: false as const,
+    };
+    const sync = simulationFromConfigAdaptive(config, nonLand);
+    const ticks: { completed: number; total: number }[] = [];
+    const asyncSim = await simulationFromConfigAsync(config, {
+      batchSize: 50,
+      cards: nonLand,
+      onProgress: (p) => ticks.push({ ...p }),
+    });
+    expect(asyncSim).toEqual(sync);
+    expect(asyncSim.hands.length).toBeLessThan(config.runCount);
+    expect(ticks.at(-1)!.completed).toBe(asyncSim.hands.length);
+  });
+
+  it('rejects when epsilon is set without cards', async () => {
+    await expect(
+      simulationFromConfigAsync({
+        runCount: 100,
+        drawCount: 1,
+        deck: baseDeck,
+        mulligan: asNeverMulligan(),
+        onThePlay: true,
+        seed: 9,
+        epsilon: 0.05,
+      }),
+    ).rejects.toThrow('cards is required when epsilon is set');
+  });
+
+  it('rejects when signal is already aborted', async () => {
+    const ac = new AbortController();
+    ac.abort();
+    const ticks: { completed: number }[] = [];
+    await expect(
+      simulationFromConfigAsync(
+        {
+          runCount: 60,
+          drawCount: 1,
+          deck: baseDeck,
+          mulligan: asNeverMulligan(),
+          onThePlay: true,
+          seed: 8,
+        },
+        {
+          batchSize: 20,
+          signal: ac.signal,
+          onProgress: (p) => ticks.push({ completed: p.completed }),
+        },
+      ),
+    ).rejects.toSatisfy(isAbortError);
+    expect(ticks).toEqual([]);
   });
 });
 

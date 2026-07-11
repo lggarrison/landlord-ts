@@ -8,26 +8,32 @@
 
 | Title                     | Status | Updated              |
 | ------------------------- | ------ | -------------------- |
-| [Raw Sources](raw/raw.md) | active | 2026-07-10T17:34:39Z |
+| [Raw Sources](raw/raw.md) | active | 2026-07-10T22:55:00Z |
 
 ## Entities
 
 | Title                  | Scope tag | Status | Updated              |
 | ---------------------- | --------- | ------ | -------------------- |
-| [Src](entities/src.md) | src       | active | 2026-07-10T18:30:00Z |
+| [Src](entities/src.md) | src       | active | 2026-07-11T01:20:00Z |
 
 ## Concepts
 
-| Title                                                        | Tags             | Status | Updated              |
-| ------------------------------------------------------------ | ---------------- | ------ | -------------------- |
-| [Auto-tap](concepts/auto-tap.md)                             | simulation, mana | active | 2026-07-10T18:30:00Z |
-| [Card pipeline](concepts/card-pipeline.md)                   | data, scryfall   | active | 2026-07-10T18:30:00Z |
-| [London mulligan](concepts/london-mulligan.md)               | mulligan         | active | 2026-07-10T18:30:00Z |
-| [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation       | active | 2026-07-10T18:30:00Z |
-| [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api              | active | 2026-07-10T18:30:00Z |
+| Title                                                        | Tags                      | Status | Updated              |
+| ------------------------------------------------------------ | ------------------------- | ------ | -------------------- |
+| [Auto-tap](concepts/auto-tap.md)                             | simulation, mana          | active | 2026-07-11T00:32:26Z |
+| [Card pipeline](concepts/card-pipeline.md)                   | data, scryfall            | active | 2026-07-10T22:50:00Z |
+| [GitHub repo hygiene](concepts/github-repo-hygiene.md)       | github, process           | active | 2026-07-10T22:25:00Z |
+| [Land kinds](concepts/land-kinds.md)                         | simulation, mana, lands   | active | 2026-07-11T00:12:37Z |
+| [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:39:08Z |
+| [London mulligan](concepts/london-mulligan.md)               | mulligan                  | active | 2026-07-10T18:30:00Z |
+| [Mana source roadmap](concepts/mana-source-roadmap.md)       | simulation, mana, roadmap | wip    | 2026-07-11T00:39:08Z |
+| [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation                | active | 2026-07-11T01:20:00Z |
+| [mtgoncurve API](concepts/mtgoncurve-api.md)                 | api                       | active | 2026-07-11T03:10:00Z |
+| [Streaming progress](concepts/streaming-progress.md)         | api, nextjs               | active | 2026-07-11T03:10:00Z |
 
 ## Sources
 
-| Title                                                      | Status | Ingested             |
-| ---------------------------------------------------------- | ------ | -------------------- |
-| [TS port feasibility plan](sources/ts-port-feasibility.md) | active | 2026-07-10T18:00:00Z |
+| Title                                                                                   | Status | Ingested             |
+| --------------------------------------------------------------------------------------- | ------ | -------------------- |
+| [Magic Comprehensive Rules (2026-06-19)](sources/magic-comprehensive-rules-20260619.md) | active | 2026-07-10T23:48:00Z |
+| [TS port feasibility plan](sources/ts-port-feasibility.md)                              | active | 2026-07-10T18:00:00Z |
