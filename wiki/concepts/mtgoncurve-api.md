@@ -1,7 +1,7 @@
 ---
 type: concept
 title: mtgoncurve API
-last_updated: 2026-07-11T02:40:13Z
+last_updated: 2026-07-11T02:47:32Z
 tags: [api]
 related:
   [
@@ -62,7 +62,7 @@ const output = await runAsync({
 
 - `on_progress` — optional; called after each hand batch with `phase: 'simulating'`, then once with `phase: 'scoring'` before report build. Errors thrown here abort the run.
 - `batch_size` — trials per tick when `epsilon` is unset (default `500`). When `epsilon` is set, batches match sync adaptive (1000) so seeded results match `run()`.
-- `signal` — optional `AbortSignal`; aborted between batches (and after the scoring tick yield) with `AbortError`.
+- `signal` — optional `AbortSignal`; aborted between batches and before report build (even without `on_progress`) with `AbortError`.
 - With `epsilon`, `total` is the max (`runs`); early-stop may finish with `completed < total`.
 - Seeded runs match seeded `run({ ..., parallel: false })` (including `epsilon` early-stop).
 - Lower-level `simulationFromConfigAsync` requires `options.cards` when `epsilon` is set (throws otherwise). `runAsync` always supplies non-land cards.

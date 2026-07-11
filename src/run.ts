@@ -410,13 +410,17 @@ export async function runAsync(input: RunAsyncInput): Promise<RunOutput> {
     cards: nonLandCards,
     signal,
   });
+
+  signal?.throwIfAborted();
   if (onProgress) {
-    signal?.throwIfAborted();
     onProgress({
       completed: sim.hands.length,
       total: simConfig.runCount,
       phase: 'scoring',
     });
+  }
+  // Yield when a host may flush progress or observe cancellation before report build.
+  if (onProgress !== undefined || signal !== undefined) {
     await yieldMacrotask();
     signal?.throwIfAborted();
   }

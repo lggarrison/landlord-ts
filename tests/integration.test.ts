@@ -236,6 +236,33 @@ describe('runAsync() façade', () => {
     ).rejects.toSatisfy(isAbortError);
   });
 
+  it('honors signal-only abort before report build (no on_progress)', async () => {
+    const ac = new AbortController();
+    const pending = runAsync({
+      ...tinyGreen,
+      runs: 40,
+      seed: 9,
+      batch_size: 40,
+      signal: ac.signal,
+    });
+    setTimeout(() => ac.abort(), 0);
+    await expect(pending).rejects.toSatisfy(isAbortError);
+  });
+
+  it('rejects when signal is already aborted without on_progress', async () => {
+    const ac = new AbortController();
+    ac.abort();
+    await expect(
+      runAsync({
+        ...tinyGreen,
+        runs: 40,
+        seed: 10,
+        batch_size: 40,
+        signal: ac.signal,
+      }),
+    ).rejects.toSatisfy(isAbortError);
+  });
+
   it('rejects when signal aborts after the progress yield', async () => {
     const ac = new AbortController();
     let ticks = 0;

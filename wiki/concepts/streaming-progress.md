@@ -1,7 +1,7 @@
 ---
 type: concept
 title: Streaming progress
-last_updated: 2026-07-11T02:40:13Z
+last_updated: 2026-07-11T02:47:32Z
 tags: [api, nextjs]
 related: [concepts/mtgoncurve-api.md, entities/run.md, concepts/monte-carlo-simulation.md]
 status: active
@@ -18,7 +18,7 @@ Use [`runAsync`](mtgoncurve-api.md) when a host needs live trial progress (e.g. 
 - Call from a **Node.js** runtime (`export const runtime = 'nodejs'`). Do not use the Edge runtime — parallel workers and card data assume Node.
 - `runAsync` always generates hands in **sequential batches** so each `on_progress` tick can flush to a stream.
 - Progress is `{ completed, total, phase }` trial counts, not wall-clock time. `phase` is `'simulating'` during hand batches and `'scoring'` once before report build (so the UI does not stall at 100% with no `done` yet).
-- Pass `signal` (e.g. `req.signal`) so a disconnected client aborts between batches.
+- Pass `signal` (e.g. `req.signal`) so a disconnected client aborts between batches and before report build (even without `on_progress`).
 - When `epsilon` is set, batch size matches sync adaptive (1000); `batch_size` only applies without `epsilon`.
 - Exported `SimulateStreamEvent` types match the SSE payloads below (types only — no Next.js dependency).
 - **Breaking:** `RunProgress` requires `phase` — update existing `on_progress` typings accordingly.
