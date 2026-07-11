@@ -18,7 +18,8 @@ npm install @lggarrison/landlord-ts
 import { run } from '@lggarrison/landlord-ts';
 
 const runs = 10_000;
-const output = run({
+
+const input = {
   code: `
 1 Llanowar Elves
 1 Forest
@@ -28,7 +29,9 @@ const output = run({
   mulligan_down_to: 5,
   mulligan_on_lands: [0, 1, 6, 7],
   acceptable_hand_list: [],
-});
+};
+
+const output = run(input);
 
 console.log({
   deck_size: output.deck_size,

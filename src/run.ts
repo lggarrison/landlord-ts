@@ -40,6 +40,14 @@ export type {
 
 export { COLOR_CONSTRAINED_THRESHOLD, DRAW_DEPENDENT_THRESHOLD } from './observations-report.js';
 
+/** Thrown for invalid `RunInput` (bad deckcode, empty deck, bad acceptable hands). */
+export class RunValidationError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'RunValidationError';
+  }
+}
+
 export type RunInput = {
   code: string;
   runs: number;
@@ -60,9 +68,13 @@ export type RunInput = {
   parallel?: boolean;
 };
 
+export type RunProgressPhase = 'simulating' | 'scoring';
+
 export type RunProgress = {
   completed: number;
   total: number;
+  /** `simulating` during hand batches; `scoring` once before report build. */
+  phase: RunProgressPhase;
 };
 
 export type RunAsyncInput = RunInput & {
@@ -116,6 +128,12 @@ export type RunOutput = {
   other_land_counts: ManaColorCount;
   non_land_counts: ManaColorCount;
 };
+
+/** SSE `data:` payload shapes for wiki Pattern A hosts (types only). */
+export type SimulateProgressEvent = { type: 'progress' } & RunProgress;
+export type SimulateDoneEvent = { type: 'done'; result: RunOutput };
+export type SimulateErrorEvent = { type: 'error'; message: string };
+export type SimulateStreamEvent = SimulateProgressEvent | SimulateDoneEvent | SimulateErrorEvent;
 
 type PreparedRun = {
   deck: Deck;
@@ -183,10 +201,10 @@ function prepareRun(input: RunInput): PreparedRun {
     deck = deckFromList(input.code);
   } catch (e) {
     const msg = e instanceof DeckcodeError ? e.message : String(e);
-    throw new Error(`Bad deckcode: ${msg}`);
+    throw new RunValidationError(`Bad deckcode: ${msg}`, { cause: e });
   }
   if (deckIsEmpty(deck)) {
-    throw new Error('Empty deckcode');
+    throw new RunValidationError('Empty deckcode');
   }
 
   const highestTurn = deckIter(deck).reduce((max, c) => Math.max(max, c.card.turn), 0);
@@ -204,7 +222,7 @@ function prepareRun(input: RunInput): PreparedRun {
     for (const cardName of acceptableHand) {
       const card = ALL_CARDS.cardFromName(cardName);
       if (!card) {
-        throw new Error(`Bad card name in acceptable_hand_list row ${i}: ${cardName}`);
+        throw new RunValidationError(`Bad card name in acceptable_hand_list row ${i}: ${cardName}`);
       }
       keepCards.add(card.hash);
     }
@@ -376,17 +394,36 @@ export function run(input: RunInput): RunOutput {
   return simulationToOutput(deck, sim);
 }
 
+function yieldMacrotask(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+}
+
 /**
  * Async Monte Carlo run with optional progress callbacks for streaming hosts (e.g. SSE).
  * Always sequential batches (`parallel` ignored) so the event loop can flush between ticks.
+ * Emits `phase: 'simulating'` after each hand batch, then `phase: 'scoring'` before report build.
  */
 export async function runAsync(input: RunAsyncInput): Promise<RunOutput> {
   const { deck, simConfig, nonLandCards } = prepareRun(input);
+  const onProgress = input.on_progress;
+  const signal = input.signal;
   const sim = await simulationFromConfigAsync(simConfig, {
     batchSize: input.batch_size,
-    onProgress: input.on_progress,
+    onProgress: onProgress ? (p) => onProgress({ ...p, phase: 'simulating' }) : undefined,
     cards: nonLandCards,
-    signal: input.signal,
+    signal,
   });
+  if (onProgress) {
+    signal?.throwIfAborted();
+    onProgress({
+      completed: sim.hands.length,
+      total: simConfig.runCount,
+      phase: 'scoring',
+    });
+    await yieldMacrotask();
+    signal?.throwIfAborted();
+  }
   return simulationToOutput(deck, sim);
 }

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_CARDS, pManaGivenCmc, run, runAsync, type RunProgress } from '../src/index.js';
+import {
+  ALL_CARDS,
+  DeckcodeError,
+  pManaGivenCmc,
+  run,
+  runAsync,
+  RunValidationError,
+  type RunProgress,
+} from '../src/index.js';
 import { deckFromList } from '../src/deck.js';
 import { asNeverMulligan } from '../src/mulligan/index.js';
 import {
@@ -130,8 +138,14 @@ describe('runAsync() façade', () => {
     const elves = asyncOut.cards.find((o) => o.name === 'Llanowar Elves');
     expect(elves).toBeTruthy();
     expect(elves!.total_simulations).toBeLessThan(input.runs);
-    expect(ticks.at(-1)!.completed).toBe(elves!.total_simulations);
-    expect(ticks.at(-1)!.completed).toBeLessThan(ticks.at(-1)!.total);
+    const simTicks = ticks.filter((t) => t.phase === 'simulating');
+    expect(simTicks.at(-1)!.completed).toBe(elves!.total_simulations);
+    expect(simTicks.at(-1)!.completed).toBeLessThan(simTicks.at(-1)!.total);
+    expect(ticks.at(-1)).toMatchObject({
+      phase: 'scoring',
+      completed: elves!.total_simulations,
+      total: input.runs,
+    });
   });
 
   it('reports monotonic on_progress up to total runs', async () => {
@@ -144,18 +158,20 @@ describe('runAsync() façade', () => {
       batch_size: 40,
       on_progress: (p) => ticks.push({ ...p }),
     });
-    expect(ticks.length).toBeGreaterThan(0);
-    expect(ticks[0]!.total).toBe(runs);
-    for (let i = 1; i < ticks.length; i++) {
-      expect(ticks[i]!.completed).toBeGreaterThan(ticks[i - 1]!.completed);
-      expect(ticks[i]!.total).toBe(runs);
+    const simTicks = ticks.filter((t) => t.phase === 'simulating');
+    expect(simTicks.length).toBeGreaterThan(0);
+    expect(simTicks[0]!.total).toBe(runs);
+    for (let i = 1; i < simTicks.length; i++) {
+      expect(simTicks[i]!.completed).toBeGreaterThan(simTicks[i - 1]!.completed);
+      expect(simTicks[i]!.total).toBe(runs);
     }
-    expect(ticks.at(-1)!.completed).toBe(runs);
+    expect(simTicks.at(-1)!.completed).toBe(runs);
+    expect(ticks.at(-1)).toEqual({ completed: runs, total: runs, phase: 'scoring' });
     const elves = output.cards.find((o) => o.name === 'Llanowar Elves');
     expect(elves!.total_simulations).toBe(runs);
   });
 
-  it('emits one progress tick per batch_size chunk', async () => {
+  it('emits one progress tick per batch_size chunk then a scoring tick', async () => {
     const ticks: RunProgress[] = [];
     await runAsync({
       ...tinyGreen,
@@ -164,7 +180,12 @@ describe('runAsync() façade', () => {
       batch_size: 40,
       on_progress: (p) => ticks.push({ ...p }),
     });
-    expect(ticks.map((t) => t.completed)).toEqual([40, 80, 100]);
+    expect(ticks.map((t) => [t.phase, t.completed])).toEqual([
+      ['simulating', 40],
+      ['simulating', 80],
+      ['simulating', 100],
+      ['scoring', 100],
+    ]);
     expect(ticks.every((t) => t.total === 100)).toBe(true);
   });
 
@@ -256,12 +277,22 @@ describe('runAsync() façade', () => {
       acceptable_hand_list: [['Not A Real Card Name XYZ']],
     };
 
+    expect(() => run(badDeck)).toThrow(RunValidationError);
     expect(() => run(badDeck)).toThrow(/Bad deckcode/);
+    try {
+      run(badDeck);
+    } catch (e) {
+      expect(e).toBeInstanceOf(RunValidationError);
+      expect((e as RunValidationError).cause).toBeInstanceOf(DeckcodeError);
+    }
+    await expect(runAsync(badDeck)).rejects.toBeInstanceOf(RunValidationError);
     await expect(runAsync(badDeck)).rejects.toThrow(/Bad deckcode/);
 
+    expect(() => run(emptyDeck)).toThrow(RunValidationError);
     expect(() => run(emptyDeck)).toThrow('Empty deckcode');
     await expect(runAsync(emptyDeck)).rejects.toThrow('Empty deckcode');
 
+    expect(() => run(badHand)).toThrow(RunValidationError);
     expect(() => run(badHand)).toThrow(/Bad card name in acceptable_hand_list/);
     await expect(runAsync(badHand)).rejects.toThrow(/Bad card name in acceptable_hand_list/);
   });

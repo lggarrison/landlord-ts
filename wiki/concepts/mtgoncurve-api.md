@@ -1,7 +1,7 @@
 ---
 type: concept
 title: mtgoncurve API
-last_updated: 2026-07-11T02:25:00Z
+last_updated: 2026-07-11T02:34:10Z
 tags: [api]
 related:
   [
@@ -12,8 +12,8 @@ related:
   ]
 sources: [sources/ts-port-feasibility.md]
 status: active
-summary: Snake_case run() / runAsync() Input and flattened on-curve RunOutput.
-code_refs: [src/run.ts, src/index.ts, src/observations-report.ts]
+summary: Snake_case run() / runAsync() Input, flattened RunOutput, RunValidationError, and SSE event types.
+code_refs: [src/run.ts, src/index.ts, src/observations-report.ts, src/deck.ts]
 ---
 
 # mtgoncurve API
@@ -54,20 +54,24 @@ const output = await runAsync({
   // Optional:
   // batch_size: 500, // ignored when epsilon is set
   // signal, // AbortSignal — stops between batches
-  on_progress: ({ completed, total }) => {
+  on_progress: ({ completed, total, phase }) => {
     /* e.g. write an SSE event */
   },
 });
 ```
 
-- `on_progress` — optional; called after each batch with `{ completed, total }`. Errors thrown here abort the run.
+- `on_progress` — optional; called after each hand batch with `phase: 'simulating'`, then once with `phase: 'scoring'` before report build. Errors thrown here abort the run.
 - `batch_size` — trials per tick when `epsilon` is unset (default `500`). When `epsilon` is set, batches match sync adaptive (1000) so seeded results match `run()`.
-- `signal` — optional `AbortSignal`; aborted between batches with `AbortError`.
+- `signal` — optional `AbortSignal`; aborted between batches (and after the scoring tick yield) with `AbortError`.
 - With `epsilon`, `total` is the max (`runs`); early-stop may finish with `completed < total`.
 - Seeded runs match seeded `run({ ..., parallel: false })` (including `epsilon` early-stop).
 - Lower-level `simulationFromConfigAsync` requires `options.cards` when `epsilon` is set (throws otherwise). `runAsync` always supplies non-land cards.
 
 For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
+
+## Validation errors
+
+Invalid decklists / empty decks / unknown `acceptable_hand_list` names throw **`RunValidationError`** (exported). Bad deckcode wraps the underlying **`DeckcodeError`** (also exported) as `error.cause`. Hosts can map `instanceof RunValidationError` to HTTP 400.
 
 ## `RunInput`
 
@@ -94,7 +98,18 @@ For Next.js SSE wiring, see [Streaming progress](streaming-progress.md).
 | `batch_size?`  | `number`                   | Default 500; ignored when `epsilon` is set |
 | `signal?`      | `AbortSignal`              | Cancel between batches                     |
 
-`RunProgress` is `{ completed: number; total: number }`.
+`RunProgress` is `{ completed: number; total: number; phase: 'simulating' | 'scoring' }`.
+
+## `SimulateStreamEvent`
+
+Types-only SSE contract for Pattern A hosts (no Next.js dependency):
+
+| Variant                 | Shape                                 |
+| ----------------------- | ------------------------------------- |
+| `SimulateProgressEvent` | `{ type: 'progress' } & RunProgress`  |
+| `SimulateDoneEvent`     | `{ type: 'done'; result: RunOutput }` |
+| `SimulateErrorEvent`    | `{ type: 'error'; message: string }`  |
+| `SimulateStreamEvent`   | Union of the three                    |
 
 ## `RunOutput`
 
