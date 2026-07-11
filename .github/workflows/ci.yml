@@ -8,6 +8,9 @@ on:
 
 jobs:
   verify:
+    # Name order must match main branch protection required checks:
+    # "CI / verify (22, ubuntu-latest)" etc.
+    name: verify (${{ matrix.node }}, ${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
