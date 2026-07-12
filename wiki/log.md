@@ -62,3 +62,5 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-11T19:27:18Z] maintenance | add parseDecklist Result + unknownCardName for UI
 
 ## [2026-07-11T19:29:22Z] maintenance | collect all unknownCardNames in one parse pass
+
+## [2026-07-12T19:36:39Z] maintenance | Rename npm package to unscoped landlord-ts (1.0.2)

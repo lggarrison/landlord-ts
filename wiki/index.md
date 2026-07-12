@@ -14,7 +14,7 @@
 
 | Title                  | Scope tag | Status | Updated              |
 | ---------------------- | --------- | ------ | -------------------- |
-| [Src](entities/src.md) | src       | active | 2026-07-11T03:54:00Z |
+| [Src](entities/src.md) | src       | active | 2026-07-12T19:35:00Z |
 
 ## Concepts
 
@@ -25,15 +25,15 @@
 | [GitHub repo hygiene](concepts/github-repo-hygiene.md)       | github, process           | active | 2026-07-10T22:25:00Z |
 | [Land kinds](concepts/land-kinds.md)                         | simulation, mana, lands   | active | 2026-07-11T00:12:37Z |
 | [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:39:08Z |
-| [landlord-ts API](concepts/landlord-ts-api.md)               | api                       | active | 2026-07-11T19:29:00Z |
+| [landlord-ts API](concepts/landlord-ts-api.md)               | api                       | active | 2026-07-12T19:35:00Z |
 | [London mulligan](concepts/london-mulligan.md)               | mulligan                  | active | 2026-07-10T18:30:00Z |
 | [Mana source roadmap](concepts/mana-source-roadmap.md)       | simulation, mana, roadmap | wip    | 2026-07-11T00:39:08Z |
 | [Monte Carlo simulation](concepts/monte-carlo-simulation.md) | simulation                | active | 2026-07-11T03:54:00Z |
-| [Streaming progress](concepts/streaming-progress.md)         | api, nextjs               | active | 2026-07-11T03:54:00Z |
+| [Streaming progress](concepts/streaming-progress.md)         | api, nextjs               | active | 2026-07-12T19:35:00Z |
 
 ## Sources
 
 | Title                                                                                   | Status | Ingested             |
 | --------------------------------------------------------------------------------------- | ------ | -------------------- |
 | [Magic Comprehensive Rules (2026-06-19)](sources/magic-comprehensive-rules-20260619.md) | active | 2026-07-10T23:48:00Z |
-| [TS port feasibility plan](sources/ts-port-feasibility.md)                              | active | 2026-07-11T03:54:00Z |
+| [TS port feasibility plan](sources/ts-port-feasibility.md)                              | active | 2026-07-12T19:35:00Z |
