@@ -1,7 +1,7 @@
 ---
 type: overview
 title: Src
-last_updated: 2026-07-11T03:54:00Z
+last_updated: 2026-07-12T19:35:00Z
 tags: [src]
 related:
   [
@@ -19,7 +19,7 @@ related:
   ]
 sources: [sources/ts-port-feasibility.md]
 status: active
-summary: Package overview for `@lggarrison/landlord-ts` — Monte Carlo on-curve simulator under `src/`.
+summary: Package overview for `landlord-ts` — Monte Carlo on-curve simulator under `src/`.
 code_refs: [src/index.ts, src/run.ts]
 ---
 

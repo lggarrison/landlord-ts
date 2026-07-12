@@ -1,7 +1,7 @@
 ---
 type: concept
 title: Streaming progress
-last_updated: 2026-07-11T03:54:00Z
+last_updated: 2026-07-12T19:35:00Z
 tags: [api, nextjs]
 related: [concepts/landlord-ts-api.md, entities/run.md, concepts/monte-carlo-simulation.md]
 status: active
@@ -30,7 +30,7 @@ Route Handler opens a `ReadableStream`, runs `runAsync`, and writes SSE events. 
 ```ts
 // app/api/simulate/route.ts
 import { NextRequest } from 'next/server';
-import { runAsync, RunValidationError, type SimulateStreamEvent } from '@lggarrison/landlord-ts';
+import { runAsync, RunValidationError, type SimulateStreamEvent } from 'landlord-ts';
 
 export const runtime = 'nodejs';
 

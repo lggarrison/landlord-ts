@@ -1,4 +1,4 @@
-# @lggarrison/landlord-ts
+# landlord-ts
 
 Pure TypeScript Monte Carlo simulator for Magic: The Gathering on-curve probabilities. Port of the Rust [landlord](https://github.com/mtgoncurve/landlord) engine used by [mtgoncurve.com](https://mtgoncurve.com).
 
@@ -9,13 +9,13 @@ Pure TypeScript Monte Carlo simulator for Magic: The Gathering on-curve probabil
 ## Install
 
 ```bash
-npm install @lggarrison/landlord-ts
+npm install landlord-ts
 ```
 
 ## Usage
 
 ```ts
-import { run } from '@lggarrison/landlord-ts';
+import { run } from 'landlord-ts';
 
 const runs = 10_000;
 

@@ -1,7 +1,7 @@
 ---
 type: source
 title: 'TS port feasibility plan'
-last_updated: 2026-07-11T03:54:00Z
+last_updated: 2026-07-12T19:35:00Z
 tags: [design, port]
 related: [entities/src.md, concepts/landlord-ts-api.md]
 status: active
@@ -10,7 +10,7 @@ summary: Summary of the pure-TypeScript landlord port decisions (no WASM, gzippe
 
 # TS port feasibility plan
 
-Ingested from the Cursor feasibility plan for porting Rust landlord to `@lggarrison/landlord-ts`.
+Ingested from the Cursor feasibility plan for porting Rust landlord to `landlord-ts`.
 
 ## Key decisions
 

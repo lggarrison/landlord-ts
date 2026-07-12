@@ -1,7 +1,7 @@
 ---
 type: concept
 title: landlord-ts API
-last_updated: 2026-07-11T19:29:00Z
+last_updated: 2026-07-12T19:35:00Z
 aliases: [mtgoncurve API]
 tags: [api]
 related:
@@ -19,14 +19,14 @@ code_refs: [src/run.ts, src/index.ts, src/observations-report.ts, src/deck.ts]
 
 # landlord-ts API
 
-Public façade for `@lggarrison/landlord-ts`. `RunInput` / `RunOutput` field names are camelCase. `RunOutput` is a single flattened on-curve report — not a dual raw-counter + report layout.
+Public façade for `landlord-ts`. `RunInput` / `RunOutput` field names are camelCase. `RunOutput` is a single flattened on-curve report — not a dual raw-counter + report layout.
 
 ## `run(input)`
 
 Synchronous Monte Carlo simulation. Returns a full `RunOutput` when finished.
 
 ```ts
-import { run } from '@lggarrison/landlord-ts';
+import { run } from 'landlord-ts';
 
 const output = run({
   code,
@@ -48,7 +48,7 @@ const output = run({
 Async variant for streaming hosts. Same deck/mulligan/`RunOutput` shaping as `run()`, but hand generation is always **sequential batches** (`parallel` is ignored) so the event loop can flush between ticks.
 
 ```ts
-import { runAsync } from '@lggarrison/landlord-ts';
+import { runAsync } from 'landlord-ts';
 
 const output = await runAsync({
   ...runInput,
@@ -77,7 +77,7 @@ Invalid decklists / empty decks / unknown `acceptableHandList` names throw **`Ru
 For textarea validation **before** simulating, use **`parseDecklist(code)`** (non-throwing):
 
 ```ts
-import { parseDecklist } from '@lggarrison/landlord-ts';
+import { parseDecklist } from 'landlord-ts';
 
 const parsed = parseDecklist(code);
 if (!parsed.ok) {
