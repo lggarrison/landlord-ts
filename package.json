@@ -1,6 +1,6 @@
 {
   "name": "landlord-ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Monte Carlo MTG on-curve simulator (TypeScript port of landlord)",
   "license": "MIT",
   "type": "module",

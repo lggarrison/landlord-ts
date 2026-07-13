@@ -1,7 +1,7 @@
 ---
 type: concept
 title: landlord-ts API
-last_updated: 2026-07-12T19:35:00Z
+last_updated: 2026-07-13T00:06:00Z
 aliases: [mtgoncurve API]
 tags: [api]
 related:
@@ -138,13 +138,17 @@ Types-only SSE contract for Pattern A hosts (no Next.js dependency):
 | `weakestOnCurve`                             | All non-lands sorted ascending by `pCastOnCurve`                                                                                                     |
 | `colorConstrained`                           | Cards with `(cmc - mana) / cmc >= COLOR_CONSTRAINED_THRESHOLD` (exported; default `0.15`)                                                            |
 | `drawDependent`                              | Cards with `(mana - play) / mana >= DRAW_DEPENDENT_THRESHOLD` (exported; default `0.15`)                                                             |
-| `landCounts`                                 | `LandCount` rows (`name`, `kind`, `copies`, `imageUri`, `manaCost`, `hash`)                                                                          |
+| `landCounts`                                 | `LandCount` rows (`name`, `kind`, `copies`, `imageUri`, `manaCost`, `producedMana`, `hash`)                                                          |
 | `totalLandCounts`                            | `ManaColorCount`                                                                                                                                     |
 | `basicLandCounts` … `pathwayLandCounts`      | Per land-kind mana counts                                                                                                                            |
 | `otherLandCounts`                            | Other / forced lands                                                                                                                                 |
 | `nonLandCounts`                              | Non-land mana-cost tallies                                                                                                                           |
 
 Land-kind count fields: `basicLandCounts`, `tapLandCounts`, `checkLandCounts`, `shockLandCounts`, `fastLandCounts`, `slowLandCounts`, `battleLandCounts`, `turnLandCounts`, `surveilLandCounts`, `bounceLandCounts`, `triomeLandCounts`, `cyclingLandCounts`, `painLandCounts`, `fetchLandCounts`, `canopyLandCounts`, `pathwayLandCounts`, `otherLandCounts`, `nonLandCounts` (each a `ManaColorCount`).
+
+### `LandCount` / `ProducedMana`
+
+Each `landCounts[]` row includes `producedMana`: `{ w, u, b, r, g, c }` with **0/1 flags** per color the land can produce when tapped. Dual lands (e.g. Hallowed Fountain) have multiple flags set; the simulator’s auto-tap matcher still assigns **one color per tap**. `manaCost` on land rows remains the Scryfall casting-cost string (usually empty); use `producedMana` for mana-source UI pips.
 
 Failure-mode identity per card: `notEnoughLands + colorOrTimingFail + manaOkUndrawn + playedOnCurve === totalSimulations`.
 

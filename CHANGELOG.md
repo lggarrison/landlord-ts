@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-07-12
+
+### Added
+
+- `LandCount.producedMana` — structured mana production (`w`/`u`/`b`/`r`/`g`/`c` 0/1 flags) for mana-source UI; same model the simulator uses for auto-tap
+
 ## [1.0.2] - 2026-07-12
 
 ### Changed
@@ -56,7 +62,8 @@ First stable npm registry publish of `@lggarrison/landlord-ts`.
 - Public `RunInput` / `RunOutput` / report fields use camelCase
 - `RunProgress` requires `phase`
 
-[Unreleased]: https://github.com/lggarrison/landlord-ts/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/lggarrison/landlord-ts/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/lggarrison/landlord-ts/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/lggarrison/landlord-ts/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/lggarrison/landlord-ts/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/lggarrison/landlord-ts/releases/tag/v1.0.0

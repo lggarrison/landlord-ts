@@ -63,6 +63,7 @@ for (const land of output.landCounts) {
     name: land.name,
     kind: land.kind,
     copies: land.copies,
+    producedMana: land.producedMana,
   });
 }
 ```

@@ -91,6 +91,48 @@ describe('run() façade', () => {
   });
 });
 
+describe('landCounts producedMana', () => {
+  const landDeck = {
+    code: `
+4 Forest
+2 Steam Vents
+2 Hallowed Fountain
+`,
+    runs: 10,
+    onThePlay: true,
+    mulliganDownTo: 7,
+    mulliganOnLands: [] as number[],
+    acceptableHandList: [] as string[][],
+    seed: 1,
+  };
+
+  it('exposes structured mana production per land row', () => {
+    const output = run(landDeck);
+    const forest = output.landCounts.find((l) => l.name === 'Forest');
+    const vents = output.landCounts.find((l) => l.name === 'Steam Vents');
+    const fountain = output.landCounts.find((l) => l.name === 'Hallowed Fountain');
+
+    expect(forest).toBeTruthy();
+    expect(forest!.manaCost).toBe('');
+    expect(forest!.producedMana).toEqual({ w: 0, u: 0, b: 0, r: 0, g: 1, c: 0 });
+
+    expect(vents).toBeTruthy();
+    expect(vents!.producedMana).toEqual({ w: 0, u: 1, b: 0, r: 1, g: 0, c: 0 });
+
+    expect(fountain).toBeTruthy();
+    expect(fountain!.producedMana).toEqual({ w: 1, u: 1, b: 0, r: 0, g: 0, c: 0 });
+  });
+
+  it('keeps totalLandCounts aggregates unchanged', () => {
+    const output = run(landDeck);
+    expect(output.totalLandCounts.total).toBe(8);
+    expect(output.totalLandCounts.g).toBe(4);
+    expect(output.totalLandCounts.u).toBe(4);
+    expect(output.totalLandCounts.r).toBe(2);
+    expect(output.totalLandCounts.w).toBe(2);
+  });
+});
+
 describe('runAsync() façade', () => {
   it('matches seeded run() with parallel off', async () => {
     const input = {
