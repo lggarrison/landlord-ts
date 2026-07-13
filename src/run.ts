@@ -10,6 +10,7 @@ import {
   newManaColorCount,
   type Card,
   type ManaColorCount,
+  type ManaCost,
 } from './card/index.js';
 import { ALL_CARDS } from './data.js';
 import { deckFromList, deckIsEmpty, deckIter, DeckcodeError, type Deck } from './deck.js';
@@ -89,9 +90,18 @@ export type RunAsyncInput = RunInput & {
   signal?: AbortSignal;
 };
 
+export type ProducedMana = Pick<ManaCost, 'w' | 'u' | 'b' | 'r' | 'g' | 'c'>;
+
+function producedManaFrom(cost: ManaCost): ProducedMana {
+  return { w: cost.w, u: cost.u, b: cost.b, r: cost.r, g: cost.g, c: cost.c };
+}
+
 export type LandCount = {
   name: string;
+  /** Casting cost string (empty for most lands). Prefer `producedMana` for mana-source UI. */
   manaCost: string;
+  /** Colors this land can produce when tapped (0/1 flags per color). */
+  producedMana: ProducedMana;
   imageUri: string;
   kind: CardKind;
   copies: number;
@@ -304,6 +314,7 @@ function simulationToOutput(deck: Deck, sim: Simulation): RunOutput {
     .map((c) => ({
       name: c.card.name,
       manaCost: c.card.manaCostString,
+      producedMana: producedManaFrom(c.card.manaCost),
       imageUri: c.card.imageUri,
       kind: c.card.kind,
       copies: c.count,

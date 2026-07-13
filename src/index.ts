@@ -6,6 +6,7 @@ export type {
   RunProgressPhase,
   RunOutput,
   LandCount,
+  ProducedMana,
   CardObservationsReport,
   ColorConstrainedEntry,
   DrawDependentEntry,
