@@ -11,7 +11,9 @@ const ACCEPT = 'application/json;q=0.9,*/*;q=0.8';
 
 type BulkEntry = {
   type: string;
+  /** @deprecated Removed by Scryfall after 2026-07-20; prefer jsonl_download_uri. */
   download_uri?: string;
+  jsonl_download_uri?: string;
 };
 
 async function fetchOracleDownloadUri(): Promise<string> {
@@ -20,8 +22,13 @@ async function fetchOracleDownloadUri(): Promise<string> {
   });
   if (!res.ok) throw new Error(`Scryfall bulk-data failed: ${res.status}`);
   const body = (await res.json()) as { data: BulkEntry[] };
-  const uri = body.data.find((d) => d.type === 'oracle_cards')?.download_uri;
-  if (!uri) throw new Error('Could not find oracle_cards download URI');
+  const oracle = body.data.find((d) => d.type === 'oracle_cards');
+  const uri = oracle?.jsonl_download_uri ?? oracle?.download_uri;
+  if (!uri) {
+    throw new Error(
+      'Could not find oracle_cards jsonl_download_uri (or download_uri) in Scryfall bulk-data',
+    );
+  }
   return uri;
 }
 

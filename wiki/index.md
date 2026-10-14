@@ -21,7 +21,7 @@
 | Title                                                        | Tags                      | Status | Updated              |
 | ------------------------------------------------------------ | ------------------------- | ------ | -------------------- |
 | [Auto-tap](concepts/auto-tap.md)                             | simulation, mana          | active | 2026-07-11T00:32:26Z |
-| [Card pipeline](concepts/card-pipeline.md)                   | data, scryfall            | active | 2026-07-10T22:50:00Z |
+| [Card pipeline](concepts/card-pipeline.md)                   | data, scryfall            | active | 2026-10-14T20:25:00Z |
 | [GitHub repo hygiene](concepts/github-repo-hygiene.md)       | github, process           | active | 2026-07-10T22:25:00Z |
 | [Land kinds](concepts/land-kinds.md)                         | simulation, mana, lands   | active | 2026-07-11T00:12:37Z |
 | [Land mana](concepts/land-mana.md)                           | simulation, mana, lands   | active | 2026-07-11T00:39:08Z |
