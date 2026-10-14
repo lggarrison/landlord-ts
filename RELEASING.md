@@ -1,6 +1,6 @@
 # Releasing `landlord-ts`
 
-Day-to-day work happens on **`develop`**; releases are cut from **`main`**. Releases are **automated** by [`.github/workflows/release.yml`](.github/workflows/release.yml): when you push a `vX.Y.Z` tag whose commit is on `main`, the workflow runs `release:check`, publishes to the **npm registry** (Trusted Publishing / OIDC), creates a **GitHub Release**, and merges `main` back into `develop`.
+Day-to-day work happens on **`develop`**; releases are cut from **`main`**. Releases are **automated** by [`.github/workflows/release.yml`](.github/workflows/release.yml): when a `vX.Y.Z` tag on `main` is released, the workflow runs `release:check`, publishes to the **npm registry** (Trusted Publishing / OIDC), creates a **GitHub Release**, and merges `main` back into `develop`.
 
 ## Quick reference
 
@@ -9,9 +9,20 @@ Day-to-day work happens on **`develop`**; releases are cut from **`main`**. Rele
 | npm    | https://www.npmjs.com/package/landlord-ts |
 | GitHub | https://github.com/lggarrison/landlord-ts |
 
-### Cutting a release
+### Card-data / quick release (GitHub Actions)
 
-On `develop`, bump the version and push. Open a PR into `main` (CI must pass; use a **merge commit**, not squash). After the PR merges, push the tag:
+Use this path to ship a refreshed `data/all_cards.json.gz` (or any pending `develop` work) to npm:
+
+1. Ensure the latest card fix / card-update PR is merged into **`develop`** (or leave **Refresh cards** enabled below).
+2. Actions → **Prepare release** → Run workflow (`bump`: usually `patch`; `refresh_cards`: `true` to run `card-update` on the runner).
+3. Merge the opened **`release/vX.Y.Z` → `main`** PR with **Create a merge commit** (not squash).
+4. **Tag release** creates `vX.Y.Z` and starts **Release**, which publishes to npm and syncs `main` → `develop`.
+
+Workflows: [`.github/workflows/prepare-release.yml`](.github/workflows/prepare-release.yml), [`.github/workflows/tag-release.yml`](.github/workflows/tag-release.yml), [`.github/workflows/release.yml`](.github/workflows/release.yml).
+
+### Cutting a release (manual)
+
+On `develop`, bump the version and push. Open a PR into `main` (CI must pass; use a **merge commit**, not squash). After the PR merges, either push the tag yourself or rely on **Tag release** (it tags when `package.json` has no matching `v*` tag):
 
 ```bash
 git checkout develop && git pull
@@ -20,7 +31,7 @@ npm version patch -m "Release %s"   # or minor / major
 git push origin develop
 # open PR develop → main, merge with "Create a merge commit"
 git checkout main && git pull
-git push origin v0.1.1   # replace with the version you just bumped to
+git push origin v0.1.1   # optional if Tag release is enabled
 ```
 
 CI handles npm publish, the GitHub Release, and syncing `main` into `develop`.
