@@ -61,7 +61,7 @@ jobs:
           const bullet = refresh
             ? '- Refreshed `data/all_cards.json.gz` from Scryfall oracle bulk data'
             : `- Release ${version}`;
-          const inserted = `## [Unreleased]\n\n\n## [${version}] - ${date}\n\n### Changed\n\n${bullet}\n\n`;
+          const inserted = `## [Unreleased]\n\n## [${version}] - ${date}\n\n### Changed\n\n${bullet}\n\n`;
           const path = 'CHANGELOG.md';
           const text = fs.readFileSync(path, 'utf8');
           if (!text.includes('## [Unreleased]')) {
@@ -70,6 +70,9 @@ jobs:
           const next = text.replace(/## \[Unreleased\]\s*\n*/, inserted);
           fs.writeFileSync(path, next);
           EOF
+
+      - name: Format CHANGELOG
+        run: npx prettier --write CHANGELOG.md
 
       - name: Build PR body
         id: body
