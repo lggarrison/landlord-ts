@@ -1,9 +1,9 @@
 ---
 type: concept
 title: GitHub repo hygiene
-last_updated: 2026-07-10T22:25:00Z
+last_updated: 2026-10-14T20:40:00Z
 tags: [github, process]
-related: [entities/src.md]
+related: [entities/src.md, concepts/card-pipeline.md]
 status: active
 summary: Branch model — feature PRs into develop; main only for releases.
 code_refs:
@@ -13,6 +13,8 @@ code_refs:
     .github/workflows/ci.yml,
     .github/workflows/release.yml,
     .github/workflows/card-update.yml,
+    .github/workflows/prepare-release.yml,
+    .github/workflows/tag-release.yml,
   ]
 ---
 
@@ -45,15 +47,17 @@ flowchart LR
 3. Merge when CI is green.
 4. Delete the feature branch after merge.
 
-Automated card refreshes (`.github/workflows/card-update.yml`) open PRs into `develop` on a `chore/card-update` branch.
+Automated card refreshes (`.github/workflows/card-update.yml`) open PRs into `develop` on a `chore/card-update` branch. To publish that data on npm, use **Prepare release** (see [Card pipeline](card-pipeline.md) and `RELEASING.md`).
 
 ## Releases
 
-Follow `RELEASING.md`:
+Follow `RELEASING.md`. Quick path:
 
-1. Prepare version/changelog on `develop`.
-2. Open **`develop` → `main`** release PR; merge with a **merge commit** (not squash).
-3. Tag `vX.Y.Z` on `main`; release workflow publishes and syncs `main` back into `develop`.
+1. Actions → **Prepare release** (optional Scryfall refresh + version/changelog bump on a `release/vX.Y.Z` branch from `develop`).
+2. Merge **`release/vX.Y.Z` → `main`** with a **merge commit** (not squash).
+3. **Tag release** creates `vX.Y.Z` and dispatches **Release** (npm publish + sync `main` → `develop`).
+
+Manual path: bump on `develop`, PR into `main`, tag (or rely on Tag release).
 
 Do not land feature work directly on `main`.
 
@@ -67,5 +71,6 @@ Do not land feature work directly on `main`.
 ## See also
 
 - [Src](../entities/src.md)
+- [Card pipeline](card-pipeline.md)
 
 Human docs (repo root): `CONTRIBUTING.md`, `RELEASING.md`.
