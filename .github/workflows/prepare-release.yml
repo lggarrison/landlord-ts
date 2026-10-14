@@ -1,0 +1,104 @@
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Semver bump
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+      refresh_cards:
+        description: Run card-update before bumping (include latest Scryfall data)
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Refresh card data
+        if: inputs.refresh_cards
+        run: npm run card-update
+
+      - name: Bump version
+        id: bump
+        run: |
+          npm version "${{ inputs.bump }}" --no-git-tag-version
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update CHANGELOG
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+          REFRESH_CARDS: ${{ inputs.refresh_cards }}
+        run: |
+          node <<'EOF'
+          const fs = require('node:fs');
+          const version = process.env.VERSION;
+          const refresh = process.env.REFRESH_CARDS === 'true';
+          const date = new Date().toISOString().slice(0, 10);
+          const bullet = refresh
+            ? '- Refreshed `data/all_cards.json.gz` from Scryfall oracle bulk data'
+            : `- Release ${version}`;
+          const inserted = `## [Unreleased]\n\n\n## [${version}] - ${date}\n\n### Changed\n\n${bullet}\n\n`;
+          const path = 'CHANGELOG.md';
+          const text = fs.readFileSync(path, 'utf8');
+          if (!text.includes('## [Unreleased]')) {
+            throw new Error('CHANGELOG.md missing ## [Unreleased] heading');
+          }
+          const next = text.replace(/## \[Unreleased\]\s*\n*/, inserted);
+          fs.writeFileSync(path, next);
+          EOF
+
+      - name: Build PR body
+        id: body
+        env:
+          TAG: ${{ steps.bump.outputs.tag }}
+          REFRESH_CARDS: ${{ inputs.refresh_cards }}
+        run: |
+          {
+            echo "text<<EOF"
+            echo "Ships current \`develop\` (plus this version bump) to **\`main\`**."
+            echo ""
+            if [ "$REFRESH_CARDS" = "true" ]; then
+              echo "- Includes refreshed \`data/all_cards.json.gz\` from Scryfall."
+            else
+              echo "- Card data was not refreshed (\`refresh_cards=false\`)."
+            fi
+            echo ""
+            echo "**Merge with \"Create a merge commit\"** (not squash or rebase)."
+            echo ""
+            echo "After merge, the Tag release workflow creates \`$TAG\` and the Release workflow publishes to npm."
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create release pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: 'Release ${{ steps.bump.outputs.version }}'
+          title: 'Release ${{ steps.bump.outputs.tag }}'
+          body: ${{ steps.body.outputs.text }}
+          base: main
+          branch: release/${{ steps.bump.outputs.tag }}
+          delete-branch: true

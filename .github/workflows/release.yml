@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  # Invoked by tag-release.yml after creating a tag with GITHUB_TOKEN
+  # (token-created tag pushes do not start workflows on their own).
+  workflow_dispatch:
 
 permissions:
   contents: write
