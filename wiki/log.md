@@ -66,3 +66,7 @@ Wiki scaffolded by llm-wiki-manager.
 ## [2026-07-12T19:36:39Z] maintenance | Rename npm package to unscoped landlord-ts (1.0.2)
 
 ## [2026-07-13T00:07:12Z] maintenance | LandCount.producedMana for mana-source UI (v1.0.3)
+
+## [2026-10-14T20:26:28Z] maintenance | Scryfall bulk URI: use jsonl_download_uri after download_uri retirement
+
+## [2026-10-14T20:40:23Z] maintenance | Prepare-release and tag-release workflows for shipping card data to npm

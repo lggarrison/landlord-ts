@@ -26,7 +26,7 @@ jobs:
       - run: npm run card-update
 
       - name: Create pull request if data changed
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: 'chore: refresh Scryfall card database'
           title: 'chore: refresh Scryfall card database'
